@@ -5,13 +5,14 @@ import { shortDateDe } from '../logic/date.ts';
 import { balances, fillLevel, formatEuro, isValidSplit, JARS, parseEuro, splitCents } from '../logic/money.ts';
 import type { Jar, MoneyEntry } from '../logic/types.ts';
 import { useStore } from '../state/store';
-import { ask, Bar, Button, Card, Chip, Field, H2, Icon, JarPicture, P, PlaceholderNote, Screen, Sheet, tell } from '../ui/kit';
+import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, JarPicture, P, PlaceholderNote, Screen, Sheet, tell, useLayout } from '../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../ui/theme';
 
 type Mode = null | 'allowance' | 'spend' | 'share' | 'move' | 'goal' | 'split';
 
 export default function Money() {
   const store = useStore();
+  const { tablet } = useLayout();
   const { state } = store;
   const m = state.money;
   const b = balances(m.entries);
@@ -74,7 +75,7 @@ export default function Money() {
         <View style={s.jars}>
           {JARS.map((j) => (
             <View key={j} style={s.jar}>
-              <JarPicture color={JAR_COLOR[j]} level={fillLevel(j, m.entries, goal?.cents ?? null)} />
+              <JarPicture size={tablet ? 140 : 84} color={JAR_COLOR[j]} level={fillLevel(j, m.entries, goal?.cents ?? null)} />
               <Text style={[s.jarName, { color: JAR_COLOR[j] }]}>{JAR_NAME[j]}</Text>
               <Text style={s.jarVal}>{formatEuro(b[j])}</Text>
             </View>
@@ -84,13 +85,15 @@ export default function Money() {
       </Card>
 
       <Button title="Taschengeld eintragen" icon="plus" onPress={() => open('allowance')} />
-      <View style={{ flexDirection: 'row', gap: 10 }}>
-        <View style={{ flex: 1 }}><Button title="Ausgeben" kind="ghost" onPress={() => open('spend')} /></View>
-        <View style={{ flex: 1 }}><Button title="Teilen" kind="ghost" onPress={() => open('share')} /></View>
-      </View>
-      <Button title="Umbuchen" kind="ghost" icon="swap-horizontal" onPress={() => open('move')} />
+      <Grid cols={tablet ? 3 : 2} gap={10}>
+        <Button title="Ausgeben" kind="ghost" onPress={() => open('spend')} />
+        <Button title="Teilen" kind="ghost" onPress={() => open('share')} />
+        {tablet ? <Button title="Umbuchen" kind="ghost" icon="swap-horizontal" onPress={() => open('move')} /> : null}
+      </Grid>
+      {!tablet ? <Button title="Umbuchen" kind="ghost" icon="swap-horizontal" onPress={() => open('move')} /> : null}
 
-      <Card onPress={() => open('goal')} label="Sparziel bearbeiten">
+      <Grid cols={tablet ? 2 : 1}>
+      <Card onPress={() => open('goal')} label="Sparziel bearbeiten" style={{ flex: 1 }}>
         <H2>Mein Sparziel</H2>
         {goal ? (
           <>
@@ -103,11 +106,12 @@ export default function Money() {
         )}
       </Card>
 
-      <Card onPress={() => open('split')} label="Aufteilung ändern">
+      <Card onPress={() => open('split')} label="Aufteilung ändern" style={{ flex: 1 }}>
         <H2>Aufteilung</H2>
         <P>Sparen {m.split.save} % · Ausgeben {m.split.spend} % · Teilen {m.split.share} %</P>
         <P dim>Legt die Aufteilung gemeinsam mit euren Eltern fest. Antippen zum Ändern.</P>
       </Card>
+      </Grid>
 
       <H2>Verlauf</H2>
       {m.entries.length === 0 ? <P dim>Noch keine Einträge.</P> : null}

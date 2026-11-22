@@ -12,7 +12,7 @@ export default function Adventure() {
   return (
     <Screen title="Abenteuer" sub="Lyra, Kael und euer Wolf">
       <Card style={{ alignItems: 'center' }}>
-        <Icon name="paw" size={72} color={C.gold} />
+        <Icon name="paw" size={96} color={C.gold} />
         <H2>{w.stage.name}</H2>
         <PlaceholderNote text="Platzhalter – Bilder von Lyra, Kael und dem Wolf folgen" />
         <P>Aktive Tage: {w.activeDays}</P>

@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import React from 'react';
-import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View, type TextInputProps, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import { C, F, S } from './theme';
@@ -11,18 +11,40 @@ export function Icon({ name, size = 24, color = C.text }: { name: string; size?:
   return <MaterialCommunityIcons name={name as IconName} size={size} color={color} />;
 }
 
+/** Tablet ab 700 px Breite (iPad hochkant 744–1024, quer 1024–1366). */
+export function useLayout() {
+  const { width, height } = useWindowDimensions();
+  const tablet = Math.min(width, height) >= 600 && width >= 700;
+  return { width, height, tablet, landscape: width > height, maxW: tablet ? Math.min(1040, width - 48) : 640 };
+}
+
+/** Raster mit gleich breiten Spalten (Breite wird gemessen, damit es überall gleich aussieht). */
+export function Grid({ cols, gap = 12, children }: { cols: number; gap?: number; children: React.ReactNode }) {
+  const [w, setW] = useState(0);
+  const items = React.Children.toArray(children);
+  const cw = w ? (w - gap * (cols - 1)) / cols : 0;
+  return (
+    <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={{ flexDirection: 'row', flexWrap: 'wrap', gap }}>
+      {items.map((c, i) => (
+        <View key={i} style={cols === 1 || !cw ? { width: '100%' } : { width: cw }}>{c}</View>
+      ))}
+    </View>
+  );
+}
+
 export function Screen({ title, sub, children, right }: { title: string; sub?: string; children: React.ReactNode; right?: React.ReactNode }) {
+  const { maxW, tablet } = useLayout();
   return (
     <SafeAreaView style={st.safe} edges={['top']}>
       <ScrollView contentContainerStyle={st.scroll} keyboardShouldPersistTaps="handled">
-        <View style={st.head}>
+        <View style={[st.head, { maxWidth: maxW }, tablet && { paddingTop: 28 }]}>
           <View style={{ flex: 1 }}>
             <Text style={st.title} accessibilityRole="header">{title}</Text>
             {sub ? <Text style={st.sub}>{sub}</Text> : null}
           </View>
           {right}
         </View>
-        <View style={st.body}>{children}</View>
+        <View style={[st.body, { maxWidth: maxW }]}>{children}</View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -167,8 +189,8 @@ export function PlaceholderNote({ text = 'Bild folgt' }: { text?: string }) {
 export const st = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   scroll: { paddingBottom: 40, alignItems: 'center' },
-  head: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: S.pad, paddingTop: 18, paddingBottom: 6, width: '100%', maxWidth: 640 },
-  body: { paddingHorizontal: S.pad, gap: 14, width: '100%', maxWidth: 640 },
+  head: { flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: S.pad, paddingTop: 18, paddingBottom: 6, width: '100%' },
+  body: { paddingHorizontal: S.pad, gap: 14, width: '100%' },
   title: { fontFamily: F.title, fontSize: 26, color: C.gold, letterSpacing: 0.5 },
   sub: { fontFamily: F.text, fontSize: 16, color: C.dim, marginTop: 4 },
   card: { backgroundColor: C.card, borderRadius: S.radius, padding: S.pad, borderWidth: 1, borderColor: C.goldDim, gap: 10 },

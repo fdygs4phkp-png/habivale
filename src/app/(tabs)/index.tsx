@@ -8,7 +8,7 @@ import { levelInfo, totalXp, xpToday } from '../../logic/progress.ts';
 import { FREE_HABIT_LIMIT } from '../../logic/types.ts';
 import { useStore } from '../../state/store';
 import { APP_VERSION } from '../../version';
-import { Bar, Button, Card, Chip, Field, H2, Icon, P, Ring, Screen } from '../../ui/kit';
+import { Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, Ring, Screen, useLayout } from '../../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../../ui/theme';
 
 function mentorLine(due: number, done: number): string {
@@ -22,6 +22,7 @@ export default function Today() {
   const { ready, state, today, toggle, setName } = useStore();
   const [which, setWhich] = useState<'today' | 'yesterday'>('today');
   const [nameDraft, setNameDraft] = useState('');
+  const { tablet } = useLayout();
   if (!ready) return <View style={{ flex: 1, backgroundColor: C.bg }} />;
 
   const day = which === 'today' ? today : addDays(today, -1);
@@ -44,7 +45,8 @@ export default function Today() {
         </Card>
       ) : null}
 
-      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+      <Grid cols={tablet ? 2 : 1}>
+      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flex: 1 }}>
         <Ring value={due.length ? doneN / due.length : 0} label={due.length ? `${doneN}/${due.length}` : '–'} />
         <View style={{ flex: 1, gap: 6 }}>
           <P style={{ fontFamily: F.bold }}>{which === 'today' ? '+' + xpToday(state.habits, state.done, today) + ' XP heute' : 'Gestern nachtragen'}</P>
@@ -53,16 +55,18 @@ export default function Today() {
         </View>
       </Card>
 
-      <View style={s.mentor}>
+      <View style={[s.mentor, tablet && { minHeight: 126 }]}>
         <Icon name="wizard-hat" size={30} color={C.mint} />
         <Text style={s.mentorText}>{mentorLine(due.length, doneN)}</Text>
       </View>
+      </Grid>
 
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <Chip title="Heute" on={which === 'today'} onPress={() => setWhich('today')} />
         <Chip title="Gestern" on={which === 'yesterday'} onPress={() => setWhich('yesterday')} />
       </View>
 
+      <Grid cols={tablet ? 2 : 1}>
       {due.map((h) => {
         const yes = isDone(state.done, h.id, day);
         const streak = currentStreak(h, state.done, today);
@@ -81,6 +85,7 @@ export default function Today() {
           </View>
         );
       })}
+      </Grid>
 
       {state.habits.length === 0 ? <P dim>Noch keine Gewohnheiten. Leg deine erste an – zum Beispiel „Lesen“ oder „Zähne putzen“.</P> : null}
 

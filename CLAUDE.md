@@ -18,6 +18,9 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - Beträge in Cent. Kein echtes Geld, nie mit Spielwährung vermischt.
 - Farben/Schriften: `src/ui/theme.ts` (Kontraste gemessen), Bausteine `src/ui/kit.tsx`. Schriften lokal in `assets/fonts/` (Cinzel,
   Atkinson Hyperlegible, OFL-Lizenzen dabei). Rückfragen über `ask()`/`tell()` – `Alert` funktioniert im Browser nicht.
+- **Tablet zuerst mitdenken** (die meisten Kinder haben ein Tablet): `useLayout()` in `src/ui/kit.tsx` (Tablet ab 700 px Breite und
+  kürzere Seite ≥ 600), `Grid` für Spalten (Heute 2, Sammlung 3–4, Gläser groß). Hoch- und Querformat erlaubt (`orientation: default`).
+  Immer auch in 820×1180 und 1180×820 testen.
 - Bilder sind noch Platzhalter (roter Hinweis `PlaceholderNote`).
 - Bei jeder Änderung `src/version.ts` erhöhen.
 
