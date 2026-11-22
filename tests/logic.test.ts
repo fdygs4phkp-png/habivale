@@ -4,7 +4,8 @@ import { addDays, dayKey, weekday } from '../src/logic/date.ts';
 import { currentStreak, longestStreak, successRate, toggleDone, isDue, activeDays } from '../src/logic/habits.ts';
 import { totalXp, xpToday, levelInfo, wolfStage, xpForLevel } from '../src/logic/progress.ts';
 import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT } from '../src/logic/money.ts';
-import type { Habit, MoneyEntry } from '../src/logic/types.ts';
+import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
+import { weekStart, weekSummary, goalProgress, looksLikeBackup, entryHasContent, emptyEntry } from '../src/logic/journal.ts';
 
 let n = 0;
 const ok = (name: string, f: () => void) => { f(); n++; console.log('✓', name); };
@@ -95,6 +96,32 @@ ok('Euro lesen und schreiben', () => {
   assert.equal(parseEuro('0'), null);
   assert.equal(parseEuro('abc'), null);
   assert.equal(formatEuro(205), '2,05 €');
+});
+
+ok('Woche beginnt am Montag', () => {
+  assert.equal(weekStart('2026-11-22'), '2026-11-16'); // Sonntag → Montag davor
+  assert.equal(weekStart('2026-11-16'), '2026-11-16');
+  assert.equal(weekStart('2026-11-18'), '2026-11-16');
+});
+
+ok('Wochenrückblick zählt nur bis heute', () => {
+  const s = { habits: [h('a')], done: toggleDone(toggleDone({}, 'a', '2026-11-16'), 'a', '2026-11-17'), journal: { '2026-11-17': { ...emptyEntry('2026-11-17'), mood: 4 } }, goals: [] } as unknown as AppState;
+  const w = weekSummary(s, '2026-11-16', '2026-11-18');
+  assert.equal(w.due, 3);
+  assert.equal(w.done, 2);
+  assert.equal(w.activeDays, 2);
+  assert.equal(w.moodAvg, 4);
+  assert.equal(w.journalDays, 1);
+});
+
+ok('Tagebuch leer/gefüllt, Ziel-Fortschritt, Backup erkennen', () => {
+  assert.equal(entryHasContent(emptyEntry(T)), false);
+  assert.equal(entryHasContent({ ...emptyEntry(T), win: ' ' }), false);
+  assert.equal(entryHasContent({ ...emptyEntry(T), thanks: 'Oma' }), true);
+  const g = { id: 'g', title: 'x', area: 'school', why: '', steps: [{ id: '1', text: 'a', done: true }, { id: '2', text: 'b', done: false }], due: null, reachedAt: null, createdAt: 0, mt: 0 } as const;
+  assert.equal(goalProgress({ ...g, steps: [...g.steps] }), 0.5);
+  assert.equal(looksLikeBackup({ app: 'habivale', state: { habits: [], done: {} } }), true);
+  assert.equal(looksLikeBackup({ app: 'ewolfe', state: { habits: [], done: {} } }), false);
 });
 
 console.log(n + ' Prüfungen bestanden');

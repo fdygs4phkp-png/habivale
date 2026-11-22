@@ -4,11 +4,11 @@ import { TROPHY_IMG } from '../../ui/images';
 import { shortDateDe, dayKey } from '../../logic/date.ts';
 import { TROPHIES } from '../../logic/trophies.ts';
 import { useStore } from '../../state/store';
-import { ask, Button, Grid, Icon, P, Screen, useLayout } from '../../ui/kit';
+import { Grid, Icon, P, Screen, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 
 export default function Collection() {
-  const { state, resetAll } = useStore();
+  const { state } = useStore();
   const { tablet, width } = useLayout();
   const got = TROPHIES.filter((t) => state.firsts['t:' + t.id] !== undefined).length;
   return (
@@ -32,7 +32,6 @@ export default function Collection() {
         })}
       </Grid>
       <P dim>Die Trophäen-Bilder sind vorerst aus der Lebensrad-App geliehen. Eigene Habivale-Trophäen, Kleidung und Gegenstände kommen später.</P>
-      <Button title="Alle Testdaten löschen" kind="danger" icon="trash-can-outline" onPress={async () => (await ask('Alles löschen?', 'Alle Gewohnheiten, Haken, Gläser und Trophäen auf diesem Gerät werden gelöscht.', 'Alles löschen')) && resetAll()} />
     </Screen>
   );
 }

@@ -37,7 +37,15 @@ export default function Today() {
   const b = balances(state.money.entries);
 
   return (
-    <Screen title={state.profileName ? 'Hallo, ' + state.profileName + '!' : 'Heute'} sub={longDateDe(today)}>
+    <Screen
+      title={state.profileName ? 'Hallo, ' + state.profileName + '!' : 'Heute'}
+      sub={longDateDe(today)}
+      right={
+        <Pressable onPress={() => router.push('/einstellungen')} accessibilityRole="button" accessibilityLabel="Einstellungen" style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="cog-outline" size={28} color={C.gold} />
+        </Pressable>
+      }
+    >
       {!state.profileName ? (
         <Card>
           <H2>Willkommen in Habivale</H2>

@@ -26,13 +26,22 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   (A Mystery World: Trophäen, Sticker, Tagebuch-Cover), bis eigene kommen. Hauptbild Jungwolf fehlt (Prompt 4.4) – solange das Welpenbild. Fehlendes: roter Hinweis `PlaceholderNote`.
 - Bei jeder Änderung `src/version.ts` erhöhen.
 
+## Phase 3 (Stand 0.4.0)
+- Tagebuch-Reiter (`src/app/(tabs)/tagebuch.tsx`): **Mein Tag** (Stimmung 1–5, „Mein Tag“ automatisch aus den Haken, vier Fragen + freier Text, je Tag
+  `state.journal[tag]`), **Ziele** (`state.goals`: Bereich aus `LIFE_AREAS`, Warum, kleine Schritte, erreicht/wieder aktiv), **Meine Woche** (Mo–So,
+  `weekSummary`, „besonders stolz“ in `state.weeks[montag]`). Logik in `src/logic/journal.ts`.
+- Premium nur als Test-Schalter (`state.premium`, Einstellungen); ohne Premium zeigt das Tagebuch eine ruhige Vorschau.
+- Einstellungen (`src/app/einstellungen.tsx`, Zahnrad oben rechts auf Heute): Name, Premium-Test, Backup als JSON (Web: Datei; Gerät: Teilen), Einspielen (nur Web), alles löschen.
+- Root-Layout zeichnet erst nach dem Start (`mounted`), sonst React-Fehler 418 beim Neuladen einer Unterseite (statische Seite ≠ echte).
+- Noch offen in Phase 3: Konto + verschlüsselter Abgleich (neues Supabase-Projekt), Familienkonto mit Kinderprofilen, Altersstufen, erweitertes Taschengeld.
+
 ## Befehle
 - `npm test` – Logik prüfen · `npx tsc --noEmit` – Typen prüfen
 - `npm run web` – Entwicklung im Browser · `npx expo start` – auf dem iPhone mit „Expo Go“
 - `npm run build:web` – Web-Fassung bauen: `dist/` → `docs/` (mit `.nojekyll` und `404.html`) für GitHub Pages aus `main` / `docs`.
   `app.json` → `experiments.baseUrl` = `/habivale` (= Name des Repositorys auf GitHub).
 - Browser-Test: `docs/` unter `/habivale/` ausliefern (z. B. Ordner mit Verknüpfung `habivale → docs`, `python3 -m http.server`),
-  Playwright in Chromium **und WebKit**; Unterseiten über die Leiste öffnen (der Python-Server kennt `/sammlung` ohne `.html` nicht).
+  Playwright in Chromium **und WebKit**; Unterseiten über die Leiste öffnen (einfacher Python-Server kennt `/sammlung` ohne `.html` nicht – ein kleiner Server, der wie GitHub Pages `pfad → pfad.html` liefert, löst das).
 
 ## Veröffentlichen
 Claude kann nicht pushen. Die Nutzer veröffentlichen über **GitHub Desktop** (Push origin). Danach ist die Web-Fassung nach ein paar Minuten

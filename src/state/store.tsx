@@ -7,7 +7,8 @@ import { dayKey } from '../logic/date.ts';
 import { toggleDone } from '../logic/habits.ts';
 import { DEFAULT_SPLIT, balances, splitCents } from '../logic/money.ts';
 import { updateFirsts } from '../logic/trophies.ts';
-import type { AppState, Habit, Jar, MoneyEntry, SavingsGoal, Split } from '../logic/types.ts';
+import { emptyEntry, looksLikeBackup } from '../logic/journal.ts';
+import type { AppState, Goal, Habit, Jar, JournalEntry, MoneyEntry, SavingsGoal, Split } from '../logic/types.ts';
 
 const KEY = 'habivale_state_v1';
 
@@ -16,7 +17,7 @@ export function newId(): string {
 }
 
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {} };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true };
 }
 
 function normalize(raw: unknown): AppState {
@@ -30,6 +31,10 @@ function normalize(raw: unknown): AppState {
     done: r.done || {},
     habits: r.habits || [],
     firsts: r.firsts || {},
+    journal: r.journal || {},
+    goals: r.goals || [],
+    weeks: r.weeks || {},
+    premium: r.premium ?? true,
   } as AppState;
 }
 
@@ -49,6 +54,15 @@ type Store = {
   setSplit: (s: Split) => void;
   setGoal: (g: SavingsGoal | null) => void;
   resetAll: () => void;
+  setEntry: (day: string, patch: Partial<Omit<JournalEntry, 'day' | 'mt'>>) => void;
+  saveGoal: (g: Omit<Goal, 'id' | 'createdAt' | 'mt' | 'reachedAt'> & { id?: string }) => void;
+  toggleStep: (goalId: string, stepId: string) => void;
+  setGoalReached: (goalId: string, reached: boolean) => void;
+  deleteGoal: (goalId: string) => void;
+  setWeekNote: (monday: string, proud: string) => void;
+  setPremium: (on: boolean) => void;
+  exportJson: () => string;
+  importJson: (json: string) => boolean;
 };
 
 const Ctx = createContext<Store | null>(null);
@@ -131,6 +145,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setSplit: (sp) => money((m) => ({ ...m, split: sp })),
       setGoal: (g) => money((m) => ({ ...m, goal: g })),
       resetAll: () => update(() => emptyState()),
+      setEntry: (day, patch) =>
+        update((s) => ({ ...s, journal: { ...s.journal, [day]: { ...(s.journal[day] || emptyEntry(day)), ...patch, day, mt: Date.now() } } })),
+      saveGoal: (g) =>
+        update((s) => {
+          const now = Date.now();
+          if (g.id) return { ...s, goals: s.goals.map((x) => (x.id === g.id ? { ...x, ...g, id: x.id, mt: now } : x)) };
+          return { ...s, goals: [...s.goals, { ...g, id: newId(), createdAt: now, mt: now, reachedAt: null }] };
+        }),
+      toggleStep: (goalId, stepId) =>
+        update((s) => ({
+          ...s,
+          goals: s.goals.map((g) => (g.id !== goalId ? g : { ...g, mt: Date.now(), steps: g.steps.map((x) => (x.id === stepId ? { ...x, done: !x.done } : x)) })),
+        })),
+      setGoalReached: (goalId, reached) =>
+        update((s) => ({ ...s, goals: s.goals.map((g) => (g.id === goalId ? { ...g, reachedAt: reached ? Date.now() : null, mt: Date.now() } : g)) })),
+      deleteGoal: (goalId) => update((s) => ({ ...s, goals: s.goals.filter((g) => g.id !== goalId) })),
+      setWeekNote: (monday, proud) => update((s) => ({ ...s, weeks: { ...s.weeks, [monday]: { proud, mt: Date.now() } } })),
+      setPremium: (on) => update((s) => ({ ...s, premium: on })),
+      exportJson: () => JSON.stringify({ app: 'habivale', version: 1, exportedAt: new Date().toISOString(), state }, null, 1),
+      importJson: (json) => {
+        try {
+          const o = JSON.parse(json);
+          if (!looksLikeBackup(o)) return false;
+          update(() => normalize(o.state));
+          return true;
+        } catch {
+          return false;
+        }
+      },
     };
   }, [state, ready, today, update]);
 

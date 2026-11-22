@@ -2,6 +2,7 @@
 // damit eine Trophäe nie wieder verschwindet (Bestandsschutz).
 
 import { activeDays, doneByDay } from './habits.ts';
+import { entryHasContent } from './journal.ts';
 import type { AppState } from './types.ts';
 
 export interface TrophyDef {
@@ -21,6 +22,9 @@ export const TROPHIES: TrophyDef[] = [
   { id: 'done-100', name: '100 erledigte Habits', text: 'Hundert Mal abgehakt.', icon: 'diamond-stone', reached: (s) => doneCount(s) >= 100 },
   { id: 'money-first', name: 'Das erste Taschengeld', text: 'Du hast dein erstes Taschengeld in die Gläser verteilt.', icon: 'cup', reached: (s) => s.money.entries.some((e) => e.kind === 'allowance') },
   { id: 'money-share', name: 'Erstes Mal geteilt', text: 'Du hast aus dem Teilen-Glas etwas weitergegeben.', icon: 'hand-heart', reached: (s) => s.money.entries.some((e) => e.kind === 'share') },
+  { id: 'journal-first', name: 'Die erste Seite', text: 'Du hast zum ersten Mal in dein Tagebuch geschrieben.', icon: 'book-open-variant', reached: (s) => Object.values(s.journal).some(entryHasContent) },
+  { id: 'journal-7', name: 'Sieben Seiten', text: 'An sieben Tagen hast du Tagebuch geschrieben.', icon: 'book-multiple', reached: (s) => Object.values(s.journal).filter(entryHasContent).length >= 7 },
+  { id: 'goal-first', name: 'Das erste Ziel', text: 'Du hast dein erstes Ziel erreicht.', icon: 'flag-checkered', reached: (s) => s.goals.some((g) => !!g.reachedAt) },
   { id: 'goal-reached', name: 'Sparziel erreicht', text: 'Dein Sparglas hat dein Ziel erreicht.', icon: 'piggy-bank', reached: (s) => !!s.money.goal?.reachedAt },
 ];
 

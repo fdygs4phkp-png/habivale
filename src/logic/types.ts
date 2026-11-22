@@ -50,6 +50,52 @@ export interface AppState {
   };
   /** Erstes Erreichen (Bestandsschutz): Trophäe/Wolf-Stufe → Zeitpunkt */
   firsts: Record<string, number>;
+  /** Tagebuch: ein Eintrag je Tag (privat, wird nie mit Eltern geteilt) */
+  journal: Record<DayKey, JournalEntry>;
+  goals: Goal[];
+  /** Wochenrückblick: Schlüssel = Montag der Woche */
+  weeks: Record<DayKey, WeekNote>;
+  /** Testphase: Premium-Funktionen an/aus (später über das Abo) */
+  premium: boolean;
+}
+
+export type Mood = 1 | 2 | 3 | 4 | 5;
+
+export interface JournalEntry {
+  day: DayKey;
+  mood: Mood | null;
+  win: string; // Mein größter Erfolg
+  hard: string; // Was war schwer?
+  thanks: string; // Dafür bin ich dankbar
+  tomorrow: string; // Was möchte ich morgen besser machen?
+  free: string; // Freier Text
+  mt: number;
+}
+
+export const LIFE_AREAS = ['school', 'friends', 'family', 'health', 'joy', 'money'] as const;
+export type LifeArea = (typeof LIFE_AREAS)[number];
+
+export interface GoalStep {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+export interface Goal {
+  id: string;
+  title: string;
+  area: LifeArea;
+  why: string;
+  steps: GoalStep[];
+  due: DayKey | null;
+  reachedAt: number | null;
+  createdAt: number;
+  mt: number;
+}
+
+export interface WeekNote {
+  proud: string;
+  mt: number;
 }
 
 export const FREE_HABIT_LIMIT = 3;

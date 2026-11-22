@@ -43,5 +43,8 @@ export const TROPHY_IMG: Record<string, number> = {
   'done-100': require('../../assets/img/leih/trophy-n-cup.webp'),
   'money-first': require('../../assets/img/leih/stickers-treasure.webp'),
   'money-share': require('../../assets/img/leih/stickers-heart-red.webp'),
+  'journal-first': require('../../assets/img/leih/trophy-n-books-1.webp'),
+  'journal-7': require('../../assets/img/leih/stickers-leaf.webp'),
+  'goal-first': require('../../assets/img/leih/trophy-n-telescope.webp'),
   'goal-reached': require('../../assets/img/leih/trophy-n-cup-grand.webp'),
 };
