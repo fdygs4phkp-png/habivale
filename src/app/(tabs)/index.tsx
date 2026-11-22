@@ -12,6 +12,7 @@ import { useStore } from '../../state/store';
 import { useAccount } from '../../state/account';
 import { useMode } from '../../ui/mode';
 import { useUpdate } from '../../ui/update';
+import { MentorEvents } from '../../ui/mentorEvent';
 import { IMG, STICKERS } from '../../ui/images';
 import { formatEuro as fmtEuro } from '../../logic/money.ts';
 import { ask as askUser, tell } from '../../ui/kit';
@@ -71,6 +72,7 @@ export default function Today() {
         </Card>
       ) : null}
 
+      <MentorEvents />
       {update.latest ? (
         <Card style={{ borderColor: C.mint }}>
           <H2>Neue Version {update.latest}</H2>

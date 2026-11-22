@@ -6,6 +6,8 @@ import { totalXp, xpToday, levelInfo, wolfStage, xpForLevel } from '../src/logic
 import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT, allocate, monthSummary, moneyXp, wishDue, newWaitUntil } from '../src/logic/money.ts';
 import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
 import { mergeState, hasContent } from '../src/logic/merge.ts';
+import { updateFirsts, pendingEvents, keptWolf } from '../src/logic/trophies.ts';
+import { ruleMet, unlockedOutfits } from '../src/logic/world.ts';
 import { buildSnapshot } from '../src/logic/share.ts';
 import { ageStage, defaultShares } from '../src/logic/types.ts';
 import { weekStart, weekSummary, goalProgress, looksLikeBackup, entryHasContent, emptyEntry } from '../src/logic/journal.ts';
@@ -127,7 +129,7 @@ ok('Tagebuch leer/gefüllt, Ziel-Fortschritt, Backup erkennen', () => {
   assert.equal(looksLikeBackup({ app: 'ewolfe', state: { habits: [], done: {} } }), false);
 });
 
-const base = (): AppState => ({ version: 1, profileName: '', habits: [], done: {}, money: { split: { save: 50, spend: 40, share: 10 }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [] });
+const base = (): AppState => ({ version: 1, profileName: '', habits: [], done: {}, money: { split: { save: 50, spend: 40, share: 10 }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {} });
 
 ok('Abgleich: Vereinigung, neuere Fassung gewinnt', () => {
   const a = { ...base(), habits: [h('x', { name: 'alt', mt: 1 })], done: { 'x|2026-11-20': 5 } };
@@ -194,6 +196,24 @@ ok('Sparziele der Reihe nach, Monatsübersicht, Geld-XP', () => {
   assert.equal(moneyXp({ money: { split: DEFAULT_SPLIT, entries: e, goals: [], wishes: [] } }), 2 * 5 + 10);
   const w = { id: 'w', name: 'x', cents: 1, addedAt: 0, waitUntil: newWaitUntil('2026-11-22'), answer: null, answeredAt: null, mt: 0 };
   assert.equal(w.waitUntil, '2026-11-29'); assert.equal(wishDue(w, '2026-11-28'), false); assert.equal(wishDue(w, '2026-11-29'), true);
+});
+
+ok('Phase 4: Level/Wolf als Ereignisse, nur höchstes Level, Bestandsschutz, Kleidung freischalten', () => {
+  let st = { ...base(), habits: [h('a', { start: '2025-01-01' })] } as AppState;
+  let d = {};
+  for (let i = 0; i < 31; i++) d = toggleDone(d, 'a', addDays(T, -i));
+  st = { ...st, done: d };
+  const f = updateFirsts(st, 1000, T)!;
+  assert.ok(f['t:first-step'] && f['t:days-30'] && f['wolf:1'] && f['lv:2']);
+  st = { ...st, firsts: f };
+  const ev = pendingEvents(st);
+  assert.equal(ev.filter((e) => e.kind === 'level').length, 1);
+  assert.ok(ev.some((e) => e.kind === 'wolf' && e.wolf === 1));
+  // Haken weg: der Wolf bleibt (Bestandsschutz über firsts)
+  assert.equal(keptWolf({ ...st, done: {} }), 1);
+  assert.equal(ruleMet(st, { kind: 'days', n: 30 }, T), true);
+  assert.ok(unlockedOutfits(st, T).has('lyra-winter'));
+  assert.ok(!unlockedOutfits(st, T).has('lyra-starnight'));
 });
 
 console.log(n + ' Prüfungen bestanden');

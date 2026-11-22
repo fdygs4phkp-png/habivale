@@ -28,7 +28,7 @@ function migrateMoney(m: AppState['money'] & { goal?: { name: string; icon: stri
 }
 
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {} };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {} };
 }
 
 function normalize(raw: unknown): AppState {
@@ -53,6 +53,10 @@ function normalize(raw: unknown): AppState {
     fMt: r.fMt ?? 0,
     inbox: r.inbox || [],
     lessons: r.lessons || {},
+    hero: r.hero === 'kael' ? 'kael' : 'lyra',
+    outfits: { lyra: r.outfits?.lyra || 'lyra-start', kael: r.outfits?.kael || 'kael-start' },
+    // Beim ersten Start mit dieser Version: alles schon Erreichte gilt als verkündet (keine Flut von Meldungen)
+    celebrated: r.celebrated || { ...(r.firsts || {}) },
   } as AppState;
 }
 
@@ -76,6 +80,9 @@ type Store = {
   addWish: (name: string, cents: number) => void;
   answerWish: (id: string, answer: 'buy' | 'goal' | 'no') => void;
   markLesson: (id: string) => void;
+  setHero: (h: 'lyra' | 'kael') => void;
+  wearOutfit: (hero: 'lyra' | 'kael', id: string) => void;
+  celebrate: (key: string) => void;
   resetAll: () => void;
   setEntry: (day: string, patch: Partial<Omit<JournalEntry, 'day' | 'mt'>>) => void;
   saveGoal: (g: Omit<Goal, 'id' | 'createdAt' | 'mt' | 'reachedAt'> & { id?: string }) => void;
@@ -211,6 +218,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const now = Date.now();
         update((s) => ({ ...s, money: { ...s.money, wishes: s.money.wishes.map((w) => (w.id === id ? { ...w, answer, answeredAt: now, mt: now } : w)) } }));
       },
+      setHero: (h) => update((s) => ({ ...s, hero: h, sMt: Date.now() })),
+      wearOutfit: (hero, id) => update((s) => ({ ...s, outfits: { ...s.outfits, [hero]: id }, sMt: Date.now() })),
+      celebrate: (key) =>
+        update((s) => {
+          const now = Date.now();
+          const c = { ...s.celebrated, [key]: now };
+          // Level: alle kleineren gleich mit
+          if (key.startsWith('lv:')) for (const k of Object.keys(s.firsts)) if (k.startsWith('lv:') && Number(k.slice(3)) <= Number(key.slice(3))) c[k] = c[k] ?? now;
+          return { ...s, celebrated: c };
+        }),
       markLesson: (id) => update((s) => ({ ...s, lessons: { ...s.lessons, [id]: s.lessons[id] ?? Date.now() } })),
       resetAll: () => update(() => emptyState()),
       setEntry: (day, patch) =>

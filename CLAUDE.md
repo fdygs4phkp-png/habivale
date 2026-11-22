@@ -66,6 +66,13 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - **Weiße Seiten nach Updates (behoben in 0.9.0):** SDK 58 lädt Seiten im Browser als eigene Dateien (async routes). Eine alte, im Browser/Home-Bildschirm
   gespeicherte Startseite suchte nach einem Update Dateien, die es nicht mehr gab → weiß. Jetzt `["expo-router", {"asyncRoutes": {"web": false}}]` (ein Paket).
   Dazu `docs/version.json` (von `scripts/pages.mjs` geschrieben) und `useUpdate()` (`src/ui/update.ts`): Karte „Neue Version – Jetzt aktualisieren“ auf „Heute“.
+- **Phase 4, Teil 1 (0.10.0):** Trophäen jetzt 18 (`src/logic/trophies.ts`, `free` = Basistrophäen), Bilder Habivale-eigen (`assets/img/trophy/`, Serie 1 nach
+  Auswahl der Nutzer + Spar-Trophäen), fünf noch geliehen (`TROPHY_BORROWED`). `updateFirsts` merkt auch 'lv:N' und 'wolf:N' (Wolf nie kleiner: `keptWolf`).
+  **Mentorin-Ereignisse** (`src/ui/mentorEvent.tsx`, auf „Heute“): alles in `firsts`, was nicht in `state.celebrated` steht, eins nach dem anderen, bei Level nur
+  das höchste; beim ersten Start mit 0.10 gilt Vorhandenes als verkündet. **Lyra/Kael** wählen (`state.hero`), **Outfits** (`OUTFITS`, `state.outfits`, Bilder
+  `OUTFIT_IMG`, bisher nur Grundausstattung) und **Gegenstände** (`ITEMS`) in `src/logic/world.ts`, freigeschaltet nur durch Fortschritt (`Rule`). Sammlung mit
+  Trophäen/Kleidung/Gegenstände und großer Trophäen-Ansicht. Ohne Premium: Wolf bleibt Welpe, Kleidung/Gegenstände als Vorschau. Avatare rund freigestellt.
+  Browser-Tests klicken die Mentorin per `add_locator_handler(get_by_role('alert'))` weg.
 - Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle

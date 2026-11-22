@@ -87,6 +87,11 @@ export interface AppState {
   inbox: InboxItem[];
   /** Gelesene Geld-Lektionen der Mentorin → Zeitpunkt */
   lessons: Record<string, number>;
+  /** Wer im Vordergrund steht und was Lyra und Kael tragen (Einstellungs-Block, `sMt`) */
+  hero: 'lyra' | 'kael';
+  outfits: { lyra: string; kael: string };
+  /** Von der Mentorin schon verkündete Ereignisse (Schlüssel wie in `firsts`) */
+  celebrated: Record<string, number>;
 }
 
 export interface InboxItem {
