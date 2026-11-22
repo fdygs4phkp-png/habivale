@@ -25,7 +25,9 @@ export const TROPHIES: TrophyDef[] = [
   { id: 'journal-first', name: 'Die erste Seite', text: 'Du hast zum ersten Mal in dein Tagebuch geschrieben.', icon: 'book-open-variant', reached: (s) => Object.values(s.journal).some(entryHasContent) },
   { id: 'journal-7', name: 'Sieben Seiten', text: 'An sieben Tagen hast du Tagebuch geschrieben.', icon: 'book-multiple', reached: (s) => Object.values(s.journal).filter(entryHasContent).length >= 7 },
   { id: 'goal-first', name: 'Das erste Ziel', text: 'Du hast dein erstes Ziel erreicht.', icon: 'flag-checkered', reached: (s) => s.goals.some((g) => !!g.reachedAt) },
-  { id: 'goal-reached', name: 'Sparziel erreicht', text: 'Dein Sparglas hat dein Ziel erreicht.', icon: 'piggy-bank', reached: (s) => !!s.money.goal?.reachedAt },
+  { id: 'goal-reached', name: 'Sparziel erreicht', text: 'Dein Sparglas hat dein Ziel erreicht.', icon: 'piggy-bank', reached: (s) => s.money.goals.some((g) => !!g.reachedAt) },
+  { id: 'goals-3', name: 'Drei Sparziele', text: 'Du hast drei Sparziele erreicht.', icon: 'treasure-chest', reached: (s) => s.money.goals.filter((g) => !!g.reachedAt).length >= 3 },
+  { id: 'waited', name: 'Eine Woche gewartet', text: 'Du hast bei einem Wunsch eine Woche gewartet, bevor du entschieden hast.', icon: 'timer-sand', reached: (s) => s.money.wishes.some((w) => !!w.answer) },
 ];
 
 /** Neue erste Erreichungen eintragen. Gibt `null` zurück, wenn sich nichts ändert. */

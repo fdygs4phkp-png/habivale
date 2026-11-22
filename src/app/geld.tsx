@@ -2,8 +2,10 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { shortDateDe } from '../logic/date.ts';
-import { balances, fillLevel, formatEuro, isValidSplit, JARS, parseEuro, splitCents } from '../logic/money.ts';
-import type { Jar, MoneyEntry } from '../logic/types.ts';
+import { lessonsFor, type Lesson } from '../logic/lessons.ts';
+import { allocate, balances, fillLevel, formatEuro, isValidSplit, JARS, monthSummary, openGoals, parseEuro, splitCents, wishDaysLeft, wishDue } from '../logic/money.ts';
+import { FREE_SAVINGS_GOALS, MAX_SAVINGS_GOALS, type Jar, type MoneyEntry, type SavingsGoal } from '../logic/types.ts';
+import { useMode } from '../ui/mode';
 import { useStore } from '../state/store';
 import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, JarPicture, P, PlaceholderNote, Screen, Sheet, tell, useLayout } from '../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../ui/theme';
@@ -22,15 +24,21 @@ export default function Money() {
   const [need, setNeed] = useState<'want' | 'need' | null>(null);
   const [from, setFrom] = useState<Jar>('save');
   const [to, setTo] = useState<Jar>('spend');
-  const [goalName, setGoalName] = useState(m.goal?.name ?? '');
+  const [goalName, setGoalName] = useState('');
+  const [goalId, setGoalId] = useState<string | null>(null);
+  const [goalIcon, setGoalIcon] = useState(GOAL_ICONS[0]);
+  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [month, setMonth] = useState(store.today.slice(0, 7));
+  const { stage } = useMode();
   const [split, setSplitDraft] = useState(m.split);
 
   const open = (md: Mode) => {
     setAmount('');
     setNote('');
     setNeed(null);
-    setGoalName(m.goal?.name ?? '');
-    if (md === 'goal' && m.goal) setAmount((m.goal.cents / 100).toString().replace('.', ','));
+    setGoalName('');
+    setGoalId(null);
+    setGoalIcon(GOAL_ICONS[0]);
     setSplitDraft(m.split);
     setMode(md);
   };
@@ -49,7 +57,7 @@ export default function Money() {
     else if (mode === 'spend') okay = store.addSpend(cents, note.trim(), need);
     else if (mode === 'share') okay = store.addShare(cents, note.trim());
     else if (mode === 'move') okay = note.trim().length > 0 && store.move(cents, from, to, note.trim());
-    else if (mode === 'goal') store.setGoal({ name: goalName.trim() || 'Mein Sparziel', icon: 'piggy-bank', cents, reachedAt: null });
+    else if (mode === 'goal') store.saveSavingsGoal({ id: goalId ?? undefined, name: goalName.trim() || 'Mein Sparziel', icon: goalIcon, cents });
     if (!okay) {
       const jar: Jar = mode === 'spend' ? 'spend' : mode === 'share' ? 'share' : from;
       if (mode === 'move' && !note.trim()) return tell('Kurze Begründung', 'Schreib kurz auf, warum du umbuchst.');
@@ -59,7 +67,30 @@ export default function Money() {
   };
 
   const preview = mode === 'allowance' && cents ? splitCents(cents, m.split) : null;
-  const goal = m.goal;
+  const open_ = openGoals(m.goals);
+  const alloc = allocate(b.save, m.goals);
+  const goal = open_[0] ?? null;
+  const premium = state.premium;
+  const canAddGoal = open_.length < (premium ? MAX_SAVINGS_GOALS : FREE_SAVINGS_GOALS);
+  const dueWishes = m.wishes.filter((w) => wishDue(w, store.today));
+  const waiting = m.wishes.filter((w) => !w.answer && !wishDue(w, store.today));
+  const ms = monthSummary(m.entries, month);
+  const editGoal = (g: SavingsGoal) => {
+    open('goal');
+    setGoalId(g.id);
+    setGoalName(g.name);
+    setGoalIcon(g.icon);
+    setAmount((g.cents / 100).toString().replace('.', ','));
+  };
+  const shiftMonth = (d: number) => {
+    const [y, mo] = month.split('-').map(Number);
+    const dt = new Date(y, mo - 1 + d, 15);
+    setMonth(dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0'));
+  };
+  const monthName = (() => {
+    const [y, mo] = month.split('-').map(Number);
+    return new Date(y, mo - 1, 15).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+  })();
 
   return (
     <Screen
@@ -92,19 +123,104 @@ export default function Money() {
       </Grid>
       {!tablet ? <Button title="Umbuchen" kind="ghost" icon="swap-horizontal" onPress={() => open('move')} /> : null}
 
+      {dueWishes.map((w) => (
+        <Card key={w.id} style={{ borderColor: C.gold }}>
+          <H2>Eine Woche ist um</H2>
+          <P>Ist dir „{w.name}“ ({formatEuro(w.cents)}) noch wichtig?</P>
+          <Button title="Ja – ich kaufe es" onPress={() => { store.answerWish(w.id, 'buy'); open('spend'); setAmount((w.cents / 100).toString().replace('.', ',')); setNote(w.name); setNeed('want'); }} />
+          <Button title="Ja – ich spare darauf" kind="ghost" disabled={!canAddGoal} onPress={() => { store.answerWish(w.id, 'goal'); store.saveSavingsGoal({ name: w.name, icon: 'gift-outline', cents: w.cents }); }} />
+          <Button title="Nicht mehr so wichtig" kind="ghost" onPress={() => store.answerWish(w.id, 'no')} />
+          <P dim>Gut gemacht, dass du gewartet hast!</P>
+        </Card>
+      ))}
+
+      <H2>Meine Sparziele</H2>
+      {open_.length === 0 ? <P dim>Wofür sparst du? Leg ein Ziel fest – zum Beispiel ein Buch oder ein Fahrrad.</P> : null}
       <Grid cols={tablet ? 2 : 1}>
-      <Card onPress={() => open('goal')} label="Sparziel bearbeiten" style={{ flex: 1 }}>
-        <H2>Mein Sparziel</H2>
-        {goal ? (
-          <>
-            <P>{goal.name}: {formatEuro(Math.min(b.save, goal.cents))} von {formatEuro(goal.cents)}</P>
-            <Bar value={b.save / goal.cents} color={C.jarSave} height={14} />
-            {goal.reachedAt ? <P style={{ color: C.mint, fontFamily: F.bold }}>Geschafft! Dein Sparglas hat das Ziel erreicht.</P> : <P dim>Noch {formatEuro(Math.max(0, goal.cents - b.save))}</P>}
-          </>
-        ) : (
-          <P dim>Wofür sparst du? Tippe hier und leg ein Ziel fest – zum Beispiel ein Buch oder ein Fahrrad.</P>
-        )}
-      </Card>
+        {open_.map((g, i) => {
+          const saved = alloc[g.id] ?? 0;
+          const done = saved >= g.cents;
+          return (
+            <Card key={g.id} onPress={() => editGoal(g)} label={g.name + ' bearbeiten'} style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Icon name={g.icon} size={34} color={C.jarSave} />
+                <View style={{ flex: 1 }}>
+                  <Text style={s.goalName}>{g.name}</Text>
+                  <Text style={s.entryDate}>{i === 0 ? 'Wird gerade gefüllt' : `Ziel ${i + 1} – kommt nach dem ersten dran`}</Text>
+                </View>
+              </View>
+              <P>{formatEuro(saved)} von {formatEuro(g.cents)}</P>
+              <Bar value={saved / g.cents} color={C.jarSave} height={14} />
+              {done ? (
+                <>
+                  <P style={{ color: C.mint, fontFamily: F.bold }}>Geschafft! Dein Sparglas hat genug für {g.name}.</P>
+                  <Button title="Ich habe es mir gekauft" icon="gift-open-outline" onPress={async () => (await ask('Gekauft?', `${formatEuro(g.cents)} gehen aus dem Sparglas. Das Sparziel kommt in deine erreichten Ziele.`, 'Ja')) && store.buySavingsGoal(g.id)} />
+                </>
+              ) : (
+                <P dim>Noch {formatEuro(g.cents - saved)}</P>
+              )}
+            </Card>
+          );
+        })}
+      </Grid>
+      {canAddGoal ? (
+        <Button title="Sparziel hinzufügen" kind="ghost" icon="plus" onPress={() => open('goal')} />
+      ) : !premium ? (
+        <P dim>In der kostenlosen Version gibt es ein Sparziel. Mit Premium bis zu {MAX_SAVINGS_GOALS}.</P>
+      ) : null}
+      {m.goals.some((g) => g.boughtAt) ? <P dim>Erreicht: {m.goals.filter((g) => g.boughtAt).map((g) => g.name).join(', ')}</P> : null}
+
+      {premium ? (
+        <>
+          {waiting.length ? (
+            <Card>
+              <H2>Meine Wunschliste</H2>
+              {waiting.map((w) => (
+                <View key={w.id} style={s.entry}>
+                  <Icon name="timer-sand" color={C.lavender} />
+                  <Text style={[s.entryText, { flex: 1 }]}>{w.name} · {formatEuro(w.cents)}</Text>
+                  <Text style={s.entryDate}>noch {wishDaysLeft(w, store.today)} {wishDaysLeft(w, store.today) === 1 ? 'Tag' : 'Tage'}</Text>
+                </View>
+              ))}
+              <P dim>Nach einer Woche fragt dich Habivale, ob dir der Wunsch noch wichtig ist.</P>
+            </Card>
+          ) : null}
+
+          <Card>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Pressable onPress={() => shiftMonth(-1)} accessibilityRole="button" accessibilityLabel="Monat davor" style={s.back}><Icon name="chevron-left" color={C.gold} /></Pressable>
+              <Text style={[s.goalName, { flex: 1, textAlign: 'center' }]}>{monthName}</Text>
+              <Pressable onPress={() => month < store.today.slice(0, 7) && shiftMonth(1)} accessibilityRole="button" accessibilityLabel="Monat danach" style={[s.back, month >= store.today.slice(0, 7) && { opacity: 0.25 }]}><Icon name="chevron-right" color={C.gold} /></Pressable>
+            </View>
+            {ms.count === 0 ? <P dim>In diesem Monat gibt es noch keine Einträge.</P> : (
+              <>
+                <P>Bekommen: {formatEuro(ms.income)}</P>
+                <P>Ausgegeben: {formatEuro(ms.spent)}{ms.spentWant || ms.spentNeed ? ` (Wünsche ${formatEuro(ms.spentWant)}, Bedürfnisse ${formatEuro(ms.spentNeed)})` : ''}</P>
+                <P>Geteilt: {formatEuro(ms.shared)}</P>
+                {ms.goalsBought ? <P>Sparziele erfüllt: {formatEuro(ms.goalsBought)}</P> : null}
+              </>
+            )}
+          </Card>
+
+          <H2>Die Mentorin erklärt</H2>
+          <Grid cols={tablet ? 2 : 1} gap={10}>
+            {lessonsFor(stage).map((l) => (
+              <Card key={l.id} onPress={() => { setLesson(l); store.markLesson(l.id); }} label={'Lektion ' + l.title} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Icon name={state.lessons[l.id] ? 'check-circle' : 'book-open-page-variant-outline'} color={state.lessons[l.id] ? C.mint : C.gold} />
+                <Text style={[s.entryText, { flex: 1 }]}>{l.title}</Text>
+                <Icon name="chevron-right" color={C.dim} />
+              </Card>
+            ))}
+          </Grid>
+        </>
+      ) : (
+        <Card>
+          <H2>Mehr mit Premium</H2>
+          <P dim>Mehrere Sparziele, eine Wunschliste mit „eine Woche warten“, die Monatsübersicht und kleine Geld-Lektionen der Mentorin.</P>
+        </Card>
+      )}
+
+      <Grid cols={tablet ? 2 : 1}>
 
       <Card onPress={() => open('split')} label="Aufteilung ändern" style={{ flex: 1 }}>
         <H2>Aufteilung</H2>
@@ -138,7 +254,18 @@ export default function Money() {
           </>
         ) : (
           <>
-            {mode === 'goal' ? <Field label="Wofür sparst du?" value={goalName} onChangeText={setGoalName} placeholder="z. B. Fahrrad" maxLength={40} /> : null}
+            {mode === 'goal' ? (
+              <>
+                <Field label="Wofür sparst du?" value={goalName} onChangeText={setGoalName} placeholder="z. B. Fahrrad" maxLength={40} />
+                <View style={s.row}>
+                  {GOAL_ICONS.map((ic) => (
+                    <Pressable key={ic} onPress={() => setGoalIcon(ic)} accessibilityRole="radio" aria-checked={goalIcon === ic} accessibilityLabel={ic} style={[s.icon, goalIcon === ic && { backgroundColor: C.jarSave, borderColor: C.jarSave }]}>
+                      <Icon name={ic} size={26} color={goalIcon === ic ? C.bg : C.jarSave} />
+                    </Pressable>
+                  ))}
+                </View>
+              </>
+            ) : null}
             <Field label={mode === 'goal' ? 'Zielbetrag in €' : 'Betrag in €'} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="z. B. 2,50" autoFocus={mode !== 'goal'} />
             {mode === 'move' ? (
               <>
@@ -176,9 +303,34 @@ export default function Money() {
             ) : null}
             {amount && !cents ? <P style={{ color: '#F2A7A0' }}>Bitte einen Betrag wie 2,50 eingeben.</P> : null}
             <Button title={mode === 'goal' ? 'Ziel speichern' : 'Eintragen'} onPress={submit} disabled={!cents} />
-            {mode === 'goal' && goal ? <Button title="Sparziel entfernen" kind="danger" onPress={() => { store.setGoal(null); close(); }} /> : null}
+            {mode === 'spend' && premium ? (
+              <Button
+                title="Lieber eine Woche warten"
+                kind="ghost"
+                icon="timer-sand"
+                disabled={!cents}
+                onPress={() => {
+                  store.addWish(note.trim() || 'Mein Wunsch', cents!);
+                  close();
+                  tell('Auf der Wunschliste', 'In einer Woche fragt dich Habivale, ob dir der Wunsch noch wichtig ist.');
+                }}
+              />
+            ) : null}
+            {mode === 'goal' && goalId ? (
+              <Button title="Sparziel entfernen" kind="danger" onPress={async () => { if (await ask('Sparziel entfernen?', 'Das Geld bleibt im Sparglas.', 'Entfernen')) { store.deleteSavingsGoal(goalId); close(); } }} />
+            ) : null}
           </>
         )}
+      </Sheet>
+
+      <Sheet visible={!!lesson} onClose={() => setLesson(null)} title={lesson?.title ?? ''}>
+        {lesson ? (
+          <>
+            {lesson.text.map((x, i) => <P key={i}>{x}</P>)}
+            <P style={{ color: C.gold, fontFamily: F.bold }}>Zum Nachdenken: {lesson.question}</P>
+            <Button title="Danke!" onPress={() => setLesson(null)} />
+          </>
+        ) : null}
       </Sheet>
     </Screen>
   );
@@ -189,6 +341,7 @@ function EntryRow({ e, onDelete }: { e: MoneyEntry; onDelete: () => void }) {
     e.kind === 'allowance' ? 'Taschengeld' + (e.note ? ' ' + e.note : '') :
     e.kind === 'spend' ? 'Ausgegeben' + (e.note ? ': ' + e.note : '') + (e.need === 'want' ? ' (Wunsch)' : e.need === 'need' ? ' (Bedürfnis)' : '') :
     e.kind === 'share' ? 'Geteilt' + (e.note ? ': ' + e.note : '') :
+    e.kind === 'savebuy' ? 'Sparziel erfüllt: ' + e.note :
     `Umgebucht ${JAR_NAME[e.from]} → ${JAR_NAME[e.to]}` + (e.note ? ': ' + e.note : '');
   const sign = e.kind === 'allowance' ? '+' : e.kind === 'move' ? '' : '−';
   return (
@@ -205,7 +358,11 @@ function EntryRow({ e, onDelete }: { e: MoneyEntry; onDelete: () => void }) {
   );
 }
 
+const GOAL_ICONS = ['piggy-bank-outline', 'bike', 'book-open-variant', 'gamepad-variant-outline', 'teddy-bear', 'music', 'soccer', 'palette-outline', 'headphones', 'gift-outline'];
+
 const s = StyleSheet.create({
+  goalName: { fontFamily: F.bold, fontSize: 17, color: C.text },
+  icon: { width: 48, height: 48, borderRadius: 12, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   jars: { flexDirection: 'row', justifyContent: 'space-around' },
   jar: { alignItems: 'center', gap: 4 },

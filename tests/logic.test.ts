@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { addDays, dayKey, weekday } from '../src/logic/date.ts';
 import { currentStreak, longestStreak, successRate, toggleDone, isDue, activeDays } from '../src/logic/habits.ts';
 import { totalXp, xpToday, levelInfo, wolfStage, xpForLevel } from '../src/logic/progress.ts';
-import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT } from '../src/logic/money.ts';
+import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT, allocate, monthSummary, moneyXp, wishDue, newWaitUntil } from '../src/logic/money.ts';
 import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
 import { mergeState, hasContent } from '../src/logic/merge.ts';
 import { buildSnapshot } from '../src/logic/share.ts';
@@ -174,6 +174,26 @@ ok('Familie: Altersstufen, Voreinstellung, Freigabe ohne Tagebuch', () => {
   assert.equal(snap.goals, undefined);
   assert.equal(snap.money, undefined);
   assert.ok(!JSON.stringify(snap).includes('GEHEIM'));
+});
+
+ok('Sparziele der Reihe nach, Monatsübersicht, Geld-XP', () => {
+  const g = (id: string, cents: number, createdAt: number, boughtAt: number | null = null) => ({ id, name: id, icon: 'x', cents, createdAt, reachedAt: null, boughtAt, mt: 0 });
+  assert.deepEqual(allocate(700, [g('rad', 500, 1), g('buch', 400, 2), g('alt', 100, 0, 5)]), { rad: 500, buch: 200 });
+  const e: MoneyEntry[] = [
+    { id: '1', kind: 'allowance', cents: 500, day: '2026-11-01', note: '', parts: splitCents(500, DEFAULT_SPLIT), at: 1 },
+    { id: '2', kind: 'allowance', cents: 500, day: '2026-11-01', note: '', parts: splitCents(500, DEFAULT_SPLIT), at: 2 },
+    { id: '3', kind: 'spend', cents: 120, day: '2026-11-03', note: 'Eis', need: 'want', at: 3 },
+    { id: '4', kind: 'share', cents: 50, day: '2026-11-04', note: '', at: 4 },
+    { id: '5', kind: 'savebuy', cents: 300, day: '2026-11-05', note: 'Buch', goalId: 'b', at: 5 },
+    { id: '6', kind: 'allowance', cents: 500, day: '2026-12-01', note: '', parts: splitCents(500, DEFAULT_SPLIT), at: 6 },
+  ];
+  const ms = monthSummary(e, '2026-11');
+  assert.equal(ms.income, 1000); assert.equal(ms.spentWant, 120); assert.equal(ms.shared, 50); assert.equal(ms.goalsBought, 300);
+  assert.equal(balances(e).save, 750 - 300);
+  // XP: 2 Tage Taschengeld (5), 1 Tag Teilen (10) – nie nach Betrag
+  assert.equal(moneyXp({ money: { split: DEFAULT_SPLIT, entries: e, goals: [], wishes: [] } }), 2 * 5 + 10);
+  const w = { id: 'w', name: 'x', cents: 1, addedAt: 0, waitUntil: newWaitUntil('2026-11-22'), answer: null, answeredAt: null, mt: 0 };
+  assert.equal(w.waitUntil, '2026-11-29'); assert.equal(wishDue(w, '2026-11-28'), false); assert.equal(wishDue(w, '2026-11-29'), true);
 });
 
 console.log(n + ' Prüfungen bestanden');

@@ -47,6 +47,8 @@ export const TROPHY_IMG: Record<string, number> = {
   'journal-7': require('../../assets/img/leih/stickers-leaf.webp'),
   'goal-first': require('../../assets/img/leih/trophy-n-telescope.webp'),
   'goal-reached': require('../../assets/img/leih/trophy-n-cup-grand.webp'),
+  'goals-3': require('../../assets/img/leih/faberge-n-blue.webp'),
+  waited: require('../../assets/img/leih/trophy-n-watch.webp'),
 };
 
 /** Sticker fürs Lob der Eltern (vorerst aus der Lebensrad-App geliehen). */

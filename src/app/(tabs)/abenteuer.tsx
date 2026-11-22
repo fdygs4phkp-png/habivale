@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 import { levelInfo, totalXp, wolfStage, WOLF_STAGES } from '../../logic/progress.ts';
+import { moneyXp } from '../../logic/money.ts';
 import { useStore } from '../../state/store';
 import { IMG } from '../../ui/images';
 import { Bar, Card, Grid, H2, P, PlaceholderNote, Screen, useLayout } from '../../ui/kit';
@@ -9,7 +10,7 @@ import { C, F } from '../../ui/theme';
 export default function Adventure() {
   const { state } = useStore();
   const { tablet } = useLayout();
-  const xp = totalXp(state.habits, state.done);
+  const xp = totalXp(state.habits, state.done) + moneyXp(state);
   const lv = levelInfo(xp);
   const w = wolfStage(state.habits, state.done);
 

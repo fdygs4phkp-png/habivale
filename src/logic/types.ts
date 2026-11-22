@@ -29,13 +29,29 @@ export type MoneyEntry =
   | { id: string; kind: 'allowance'; cents: number; day: DayKey; note: string; parts: Record<Jar, number>; at: number }
   | { id: string; kind: 'spend'; cents: number; day: DayKey; note: string; need: 'want' | 'need' | null; at: number }
   | { id: string; kind: 'share'; cents: number; day: DayKey; note: string; at: number }
-  | { id: string; kind: 'move'; cents: number; day: DayKey; note: string; from: Jar; to: Jar; at: number };
+  | { id: string; kind: 'move'; cents: number; day: DayKey; note: string; from: Jar; to: Jar; at: number }
+  | { id: string; kind: 'savebuy'; cents: number; day: DayKey; note: string; goalId: string; at: number };
 
 export interface SavingsGoal {
+  id: string;
   name: string;
   icon: string;
   cents: number;
-  reachedAt: number | null;
+  createdAt: number;
+  reachedAt: number | null; // Sparglas hat genug für dieses Ziel
+  boughtAt: number | null; // gekauft / erfüllt – das Geld ist aus dem Sparglas raus
+  mt: number;
+}
+
+export interface Wish {
+  id: string;
+  name: string;
+  cents: number;
+  addedAt: number;
+  waitUntil: DayKey; // eine Woche warten
+  answer: 'buy' | 'goal' | 'no' | null;
+  answeredAt: number | null;
+  mt: number;
 }
 
 export interface AppState {
@@ -46,7 +62,8 @@ export interface AppState {
   money: {
     split: Split;
     entries: MoneyEntry[];
-    goal: SavingsGoal | null;
+    goals: SavingsGoal[];
+    wishes: Wish[];
   };
   /** Erstes Erreichen (Bestandsschutz): Trophäe/Wolf-Stufe → Zeitpunkt */
   firsts: Record<string, number>;
@@ -68,6 +85,8 @@ export interface AppState {
   fMt: number;
   /** Eingang vom Familienkonto: Vorschläge, Lob, Taschengeld-Hinweise (bis das Kind sie annimmt oder wegtippt) */
   inbox: InboxItem[];
+  /** Gelesene Geld-Lektionen der Mentorin → Zeitpunkt */
+  lessons: Record<string, number>;
 }
 
 export interface InboxItem {
@@ -160,3 +179,5 @@ export interface WeekNote {
 }
 
 export const FREE_HABIT_LIMIT = 3;
+export const FREE_SAVINGS_GOALS = 1;
+export const MAX_SAVINGS_GOALS = 5;

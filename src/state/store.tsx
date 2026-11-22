@@ -5,11 +5,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { dayKey } from '../logic/date.ts';
 import { toggleDone } from '../logic/habits.ts';
-import { DEFAULT_SPLIT, balances, splitCents } from '../logic/money.ts';
+import { DEFAULT_SPLIT, allocate, balances, newWaitUntil, splitCents } from '../logic/money.ts';
 import { updateFirsts } from '../logic/trophies.ts';
 import { emptyEntry, looksLikeBackup } from '../logic/journal.ts';
 import { FREE_HABIT_LIMIT } from '../logic/types.ts';
-import type { AppState, Goal, Habit, Jar, JournalEntry, MoneyEntry, SavingsGoal, Split } from '../logic/types.ts';
+import type { AppState, Goal, Habit, Jar, JournalEntry, MoneyEntry, Split } from '../logic/types.ts';
 
 const KEY = 'habivale_state_v1';
 
@@ -19,8 +19,16 @@ export function newId(): string {
 
 export { normalize };
 
+/** Früher gab es nur ein Sparziel (`money.goal`) – es wird zum ersten Eintrag der Liste. */
+function migrateMoney(m: AppState['money'] & { goal?: { name: string; icon: string; cents: number; reachedAt: number | null } | null }): AppState['money'] {
+  const { goal, ...rest } = m;
+  const goals = rest.goals || [];
+  if (goal && !goals.length) goals.push({ id: 'sg-alt', name: goal.name, icon: goal.icon || 'piggy-bank', cents: goal.cents, createdAt: 0, reachedAt: goal.reachedAt, boughtAt: null, mt: 1 });
+  return { split: rest.split, entries: rest.entries || [], goals, wishes: rest.wishes || [] };
+}
+
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [] };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {} };
 }
 
 function normalize(raw: unknown): AppState {
@@ -30,7 +38,7 @@ function normalize(raw: unknown): AppState {
   return {
     ...s,
     ...r,
-    money: { ...s.money, ...(r.money || {}) },
+    money: migrateMoney({ ...s.money, ...(r.money || {}) }),
     done: r.done || {},
     habits: r.habits || [],
     firsts: r.firsts || {},
@@ -44,6 +52,7 @@ function normalize(raw: unknown): AppState {
     family: r.family ?? null,
     fMt: r.fMt ?? 0,
     inbox: r.inbox || [],
+    lessons: r.lessons || {},
   } as AppState;
 }
 
@@ -61,7 +70,12 @@ type Store = {
   move: (cents: number, from: Jar, to: Jar, note: string) => boolean;
   deleteEntry: (id: string) => void;
   setSplit: (s: Split) => void;
-  setGoal: (g: SavingsGoal | null) => void;
+  saveSavingsGoal: (g: { id?: string; name: string; icon: string; cents: number }) => void;
+  deleteSavingsGoal: (id: string) => void;
+  buySavingsGoal: (id: string) => boolean;
+  addWish: (name: string, cents: number) => void;
+  answerWish: (id: string, answer: 'buy' | 'goal' | 'no') => void;
+  markLesson: (id: string) => void;
   resetAll: () => void;
   setEntry: (day: string, patch: Partial<Omit<JournalEntry, 'day' | 'mt'>>) => void;
   saveGoal: (g: Omit<Goal, 'id' | 'createdAt' | 'mt' | 'reachedAt'> & { id?: string }) => void;
@@ -107,9 +121,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const update = useCallback((f: (s: AppState) => AppState) => {
     setState((prev) => {
       let next = f(prev);
-      const g = next.money.goal;
-      if (g && !g.reachedAt && balances(next.money.entries).save >= g.cents) {
-        next = { ...next, money: { ...next.money, goal: { ...g, reachedAt: Date.now() } }, sMt: Date.now() };
+      // Sparziele, die das Sparglas jetzt füllt, als erreicht markieren (bleibt erreicht – Bestandsschutz)
+      const alloc = allocate(balances(next.money.entries).save, next.money.goals);
+      if (next.money.goals.some((g) => !g.reachedAt && !g.boughtAt && (alloc[g.id] ?? 0) >= g.cents)) {
+        const now = Date.now();
+        next = { ...next, money: { ...next.money, goals: next.money.goals.map((g) => (!g.reachedAt && !g.boughtAt && (alloc[g.id] ?? 0) >= g.cents ? { ...g, reachedAt: now, mt: now } : g)) } };
       }
       const firsts = updateFirsts(next);
       if (firsts) next = { ...next, firsts };
@@ -164,7 +180,38 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
       deleteEntry: (id) => update((s) => ({ ...s, money: { ...s.money, entries: s.money.entries.filter((e) => e.id !== id) }, deleted: { ...s.deleted, ['m:' + id]: Date.now() } })),
       setSplit: (sp) => update((s) => ({ ...s, money: { ...s.money, split: sp }, sMt: Date.now() })),
-      setGoal: (g) => update((s) => ({ ...s, money: { ...s.money, goal: g }, sMt: Date.now() })),
+      saveSavingsGoal: (g) =>
+        update((s) => {
+          const now = Date.now();
+          const goals = g.id
+            ? s.money.goals.map((x) => (x.id === g.id ? { ...x, name: g.name, icon: g.icon, cents: g.cents, reachedAt: g.cents > x.cents ? null : x.reachedAt, mt: now } : x))
+            : [...s.money.goals, { id: newId(), name: g.name, icon: g.icon, cents: g.cents, createdAt: now, reachedAt: null, boughtAt: null, mt: now }];
+          return { ...s, money: { ...s.money, goals } };
+        }),
+      deleteSavingsGoal: (id) => update((s) => ({ ...s, money: { ...s.money, goals: s.money.goals.filter((g) => g.id !== id) }, deleted: { ...s.deleted, ['sg:' + id]: Date.now() } })),
+      buySavingsGoal: (id) => {
+        const g = state.money.goals.find((x) => x.id === id);
+        if (!g || g.boughtAt || balances(state.money.entries).save < g.cents) return false;
+        const now = Date.now();
+        update((s) => ({
+          ...s,
+          money: {
+            ...s.money,
+            entries: [...s.money.entries, { id: newId(), kind: 'savebuy', cents: g.cents, day: dayKey(), note: g.name, goalId: g.id, at: now }],
+            goals: s.money.goals.map((x) => (x.id === id ? { ...x, boughtAt: now, reachedAt: x.reachedAt ?? now, mt: now } : x)),
+          },
+        }));
+        return true;
+      },
+      addWish: (name, cents) => {
+        const now = Date.now();
+        update((s) => ({ ...s, money: { ...s.money, wishes: [...s.money.wishes, { id: newId(), name: name.slice(0, 40), cents, addedAt: now, waitUntil: newWaitUntil(dayKey()), answer: null, answeredAt: null, mt: now }] } }));
+      },
+      answerWish: (id, answer) => {
+        const now = Date.now();
+        update((s) => ({ ...s, money: { ...s.money, wishes: s.money.wishes.map((w) => (w.id === id ? { ...w, answer, answeredAt: now, mt: now } : w)) } }));
+      },
+      markLesson: (id) => update((s) => ({ ...s, lessons: { ...s.lessons, [id]: s.lessons[id] ?? Date.now() } })),
       resetAll: () => update(() => emptyState()),
       setEntry: (day, patch) =>
         update((s) => ({ ...s, journal: { ...s.journal, [day]: { ...(s.journal[day] || emptyEntry(day)), ...patch, day, mt: Date.now() } } })),

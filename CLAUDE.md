@@ -58,6 +58,14 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   (Einstellungen, nur Erwachsene). Faktor `k` 1,15 für Schrift/Knöpfe in `kit.tsx`, größere Haken, kurze Mentorinnen-Sätze, Tagebuch mit farbigen
   Stimmungsbildern + drei Fragen (schön → `free`, gut gemacht → `win`, dankbar → `thanks`), Vorlagen `HABIT_TEMPLATES` (im Kinder-Modus große Kacheln,
   sonst „Ideen“). Leistenbeschriftung nur auf Tablets größer (sonst wird „Sammlung“ abgeschnitten).
+- **Erweitertes Taschengeld (0.9.0):** `money.goals` (mehrere Sparziele; altes `money.goal` wird beim Laden zu `sg-alt`), das Sparglas füllt sie der
+  Reihe nach (`allocate`), „Ich habe es mir gekauft“ = Buchung `savebuy`. Free 1 Sparziel, Premium bis 5. Wunschliste `money.wishes` („Lieber eine Woche
+  warten“ im Ausgeben-Fenster, nach 7 Tagen Frage kaufen / darauf sparen / nicht mehr). Monatsübersicht `monthSummary`, Geld-Lektionen `src/logic/lessons.ts`
+  nach Altersstufe (`state.lessons`). Geld-XP `moneyXp` (Verhalten, nie Betrag) zählt zum Level. Trophäen „Drei Sparziele“, „Eine Woche gewartet“.
+  Grabsteine 'sg:'/'w:'. Test `t07geld.py` mit `page.clock` (Woche vorspulen: `set_system_time`, nicht `set_fixed_time`).
+- **Weiße Seiten nach Updates (behoben in 0.9.0):** SDK 58 lädt Seiten im Browser als eigene Dateien (async routes). Eine alte, im Browser/Home-Bildschirm
+  gespeicherte Startseite suchte nach einem Update Dateien, die es nicht mehr gab → weiß. Jetzt `["expo-router", {"asyncRoutes": {"web": false}}]` (ein Paket).
+  Dazu `docs/version.json` (von `scripts/pages.mjs` geschrieben) und `useUpdate()` (`src/ui/update.ts`): Karte „Neue Version – Jetzt aktualisieren“ auf „Heute“.
 - Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle

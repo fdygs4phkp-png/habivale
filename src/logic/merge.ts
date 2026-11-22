@@ -63,7 +63,8 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     done,
     money: {
       split: s.money.split,
-      goal: s.money.goal,
+      goals: byId(local.money.goals || [], remote.money.goals || [], deleted, 'sg:'),
+      wishes: byId(local.money.wishes || [], remote.money.wishes || [], deleted, 'w:'),
       entries: byId(
         local.money.entries.map((e) => ({ ...e, mt: e.at })),
         remote.money.entries.map((e) => ({ ...e, mt: e.at })),
@@ -78,6 +79,7 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     firsts,
     deleted,
     family: mergeFamily(local, remote),
+    lessons: (() => { const o = { ...(remote.lessons || {}) }; for (const [k, v] of Object.entries(local.lessons || {})) if (o[k] === undefined || v < o[k]) o[k] = v; return o; })(),
     inbox: byId((local.inbox || []).map((x) => ({ ...x, mt: x.at })), (remote.inbox || []).map((x) => ({ ...x, mt: x.at })), deleted, 'i:').map(({ mt: _m, ...x }) => x as AppState['inbox'][number]),
     fMt: Math.max(local.fMt, remote.fMt),
   };

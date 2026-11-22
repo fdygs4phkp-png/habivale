@@ -3,7 +3,7 @@
 import { addDays, type DayKey } from './date.ts';
 import { activeHabits, currentStreak, isDone, isDue } from './habits.ts';
 import { goalProgress } from './journal.ts';
-import { balances } from './money.ts';
+import { allocate, balances, openGoals } from './money.ts';
 import type { AppState, Jar, LifeArea, Shares } from './types.ts';
 
 export interface Snapshot {
@@ -12,7 +12,7 @@ export interface Snapshot {
   shares: Shares;
   habits?: { name: string; icon: string; streak: number; days: (0 | 1 | null)[] }[]; // letzte 14 Tage, null = nicht fällig
   goals?: { title: string; area: LifeArea; progress: number; reached: boolean }[];
-  money?: { balances: Record<Jar, number>; goal: { name: string; cents: number } | null };
+  money?: { balances: Record<Jar, number>; goals: { name: string; cents: number; saved: number }[] };
 }
 
 export function buildSnapshot(s: AppState, today: DayKey, shares: Shares, now = Date.now()): Snapshot {
@@ -32,8 +32,9 @@ export function buildSnapshot(s: AppState, today: DayKey, shares: Shares, now = 
     snap.goals = s.goals.map((g) => ({ title: g.title, area: g.area, progress: goalProgress(g), reached: !!g.reachedAt }));
   }
   if (shares.money) {
-    const g = s.money.goal;
-    snap.money = { balances: balances(s.money.entries), goal: g ? { name: g.name, cents: g.cents } : null };
+    const b = balances(s.money.entries);
+    const alloc = allocate(b.save, s.money.goals);
+    snap.money = { balances: b, goals: openGoals(s.money.goals).map((g) => ({ name: g.name, cents: g.cents, saved: alloc[g.id] ?? 0 })) };
   }
   return snap;
 }

@@ -102,7 +102,7 @@ function ChildCard({ v, onInvite, onRemove, onAct }: { v: ChildView; onInvite: (
               </View>
             ))}
           </View>
-          {snap.money.goal ? <P dim>Sparziel: {snap.money.goal.name} ({formatEuro(snap.money.goal.cents)})</P> : null}
+          {(snap.money.goals || []).map((g) => <P key={g.name} dim>Sparziel {g.name}: {formatEuro(g.saved)} von {formatEuro(g.cents)}</P>)}
         </View>
       ) : null}
 

@@ -7,9 +7,11 @@ import { balances, formatEuro, JARS } from '../../logic/money.ts';
 import { levelInfo, totalXp, xpToday } from '../../logic/progress.ts';
 import { FREE_HABIT_LIMIT } from '../../logic/types.ts';
 import { Image } from 'expo-image';
+import { moneyXp } from '../../logic/money.ts';
 import { useStore } from '../../state/store';
 import { useAccount } from '../../state/account';
 import { useMode } from '../../ui/mode';
+import { useUpdate } from '../../ui/update';
 import { IMG, STICKERS } from '../../ui/images';
 import { formatEuro as fmtEuro } from '../../logic/money.ts';
 import { ask as askUser, tell } from '../../ui/kit';
@@ -37,12 +39,13 @@ export default function Today() {
   const { tablet } = useLayout();
   const account = useAccount();
   const { kid, k } = useMode();
+  const update = useUpdate();
   if (!ready) return <View style={{ flex: 1, backgroundColor: C.bg }} />;
 
   const day = which === 'today' ? today : addDays(today, -1);
   const due = dueHabits(state.habits, day);
   const doneN = due.filter((h) => isDone(state.done, h.id, day)).length;
-  const xp = totalXp(state.habits, state.done);
+  const xp = totalXp(state.habits, state.done) + moneyXp(state);
   const lv = levelInfo(xp);
   const notDue = activeHabits(state.habits).filter((h) => !due.includes(h));
   const canAdd = activeHabits(state.habits).length < FREE_HABIT_LIMIT;
@@ -65,6 +68,14 @@ export default function Today() {
           <Field label="Dein Name" value={nameDraft} onChangeText={setNameDraft} maxLength={30} returnKeyType="done" onSubmitEditing={() => nameDraft.trim() && setName(nameDraft)} />
           <Button title="Los geht’s" onPress={() => setName(nameDraft)} disabled={!nameDraft.trim()} />
           <Button title="Meine Eltern haben mir einen Code gegeben" kind="ghost" icon="account-child-outline" onPress={() => router.push('/verbinden')} />
+        </Card>
+      ) : null}
+
+      {update.latest ? (
+        <Card style={{ borderColor: C.mint }}>
+          <H2>Neue Version {update.latest}</H2>
+          <P dim>Habivale hat eine neue Version. Deine Daten bleiben dabei erhalten.</P>
+          <Button title="Jetzt aktualisieren" icon="update" onPress={update.reload} />
         </Card>
       ) : null}
 
