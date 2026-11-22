@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, Share, View } from 'react-native';
 import { dayKey } from '../logic/date.ts';
+import { useAccount } from '../state/account';
 import { useStore } from '../state/store';
 import { APP_VERSION } from '../version';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen, tell } from '../ui/kit';
@@ -36,6 +37,7 @@ function pickFile(): Promise<string | null> {
 export default function Settings() {
   const store = useStore();
   const { state } = store;
+  const account = useAccount();
   const [name, setName] = useState(state.profileName);
 
   const exportNow = async () => {
@@ -63,6 +65,17 @@ export default function Settings() {
         </Pressable>
       }
     >
+      <Card onPress={() => router.push('/konto')} label="Konto öffnen">
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Icon name={account.status === 'none' ? 'account-outline' : 'account-check-outline'} color={C.gold} size={28} />
+          <View style={{ flex: 1 }}>
+            <H2>Konto</H2>
+            <P dim>{account.status === 'none' ? 'Kein Konto – Daten nur auf diesem Gerät' : account.email + (account.status === 'locked' ? ' (gesperrt)' : '')}</P>
+          </View>
+          <Icon name="chevron-right" color={C.dim} />
+        </View>
+      </Card>
+
       <Card>
         <H2>Dein Name</H2>
         <Field label="Vorname oder Spitzname" value={name} onChangeText={setName} maxLength={30} />
@@ -91,7 +104,11 @@ export default function Settings() {
           title="Alle Daten auf diesem Gerät löschen"
           kind="danger"
           icon="trash-can-outline"
-          onPress={async () => (await ask('Alles löschen?', 'Gewohnheiten, Haken, Gläser, Tagebuch, Ziele und Trophäen auf diesem Gerät werden gelöscht.', 'Alles löschen')) && store.resetAll()}
+          onPress={async () => {
+            if (!(await ask('Alles löschen?', 'Gewohnheiten, Haken, Gläser, Tagebuch, Ziele und Trophäen auf diesem Gerät werden gelöscht.' + (account.status !== 'none' ? ' Du wirst dabei abgemeldet; dein Konto bleibt erhalten.' : ''), 'Alles löschen'))) return;
+            if (account.status !== 'none') await account.logout();
+            store.resetAll();
+          }}
         />
       </Card>
 

@@ -96,7 +96,7 @@ function DayPage() {
         <Text style={s.q}>Wie geht es dir?</Text>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           {MOODS.map((m) => (
-            <Pressable key={m.v} onPress={() => set({ mood: e.mood === m.v ? null : m.v })} accessibilityRole="radio" accessibilityState={{ checked: e.mood === m.v }} accessibilityLabel={m.label} style={[s.mood, e.mood === m.v && s.moodOn]}>
+            <Pressable key={m.v} onPress={() => set({ mood: e.mood === m.v ? null : m.v })} accessibilityRole="radio" aria-checked={e.mood === m.v} accessibilityLabel={m.label} style={[s.mood, e.mood === m.v && s.moodOn]}>
               <Icon name={m.icon} size={tablet ? 40 : 32} color={e.mood === m.v ? C.bg : C.gold} />
             </Pressable>
           ))}
@@ -166,7 +166,7 @@ function Goals() {
             {g.why ? <P dim>Warum: {g.why}</P> : null}
             <Bar value={goalProgress(g)} color={C.lavender} />
             {g.steps.map((st) => (
-              <Pressable key={st.id} onPress={() => toggleStep(g.id, st.id)} accessibilityRole="checkbox" accessibilityState={{ checked: st.done }} style={s.step}>
+              <Pressable key={st.id} onPress={() => toggleStep(g.id, st.id)} accessibilityRole="checkbox" aria-checked={st.done} style={s.step}>
                 <View style={[s.box, st.done && s.boxOn]}>{st.done ? <Icon name="check-bold" size={18} color={C.bg} /> : null}</View>
                 <Text style={[s.stepText, st.done && { color: C.dim, textDecorationLine: 'line-through' }]}>{st.text}</Text>
               </Pressable>

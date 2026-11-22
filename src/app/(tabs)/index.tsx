@@ -89,7 +89,7 @@ export default function Today() {
                 <Text style={s.habitSub}>{streak > 0 ? `${streak} ${streak === 1 ? 'Tag' : 'Tage'} in Folge` : 'Neuer Anfang'}</Text>
               </View>
             </Pressable>
-            <Pressable onPress={() => toggle(h.id, day)} accessibilityRole="checkbox" accessibilityState={{ checked: yes }} accessibilityLabel={h.name + ' erledigt'} style={[s.check, yes && s.checkOn]}>
+            <Pressable onPress={() => toggle(h.id, day)} accessibilityRole="checkbox" aria-checked={yes} accessibilityLabel={h.name + ' erledigt'} style={[s.check, yes && s.checkOn]}>
               {yes ? <Icon name="check-bold" size={28} color={C.bg} /> : null}
             </Pressable>
           </View>

@@ -57,6 +57,10 @@ export interface AppState {
   weeks: Record<DayKey, WeekNote>;
   /** Testphase: Premium-Funktionen an/aus (später über das Abo) */
   premium: boolean;
+  /** Änderungszeit des Einstellungs-Blocks (Name, Premium, Aufteilung, Sparziel) */
+  sMt: number;
+  /** Grabsteine: 'h:'/'g:'/'m:' + id, 'd:' + Haken-Schlüssel → Zeitpunkt des Löschens */
+  deleted: Record<string, number>;
 }
 
 export type Mood = 1 | 2 | 3 | 4 | 5;

@@ -16,8 +16,10 @@ export function newId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+export { normalize };
+
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {} };
 }
 
 function normalize(raw: unknown): AppState {
@@ -35,6 +37,8 @@ function normalize(raw: unknown): AppState {
     goals: r.goals || [],
     weeks: r.weeks || {},
     premium: r.premium ?? true,
+    sMt: r.sMt ?? 0,
+    deleted: r.deleted || {},
   } as AppState;
 }
 
@@ -63,6 +67,8 @@ type Store = {
   setPremium: (on: boolean) => void;
   exportJson: () => string;
   importJson: (json: string) => boolean;
+  /** Abgleich: zusammengeführten Stand übernehmen (ohne Änderungsstempel zu setzen) */
+  applyMerged: (s: AppState) => void;
 };
 
 const Ctx = createContext<Store | null>(null);
@@ -94,7 +100,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       let next = f(prev);
       const g = next.money.goal;
       if (g && !g.reachedAt && balances(next.money.entries).save >= g.cents) {
-        next = { ...next, money: { ...next.money, goal: { ...g, reachedAt: Date.now() } } };
+        next = { ...next, money: { ...next.money, goal: { ...g, reachedAt: Date.now() } }, sMt: Date.now() };
       }
       const firsts = updateFirsts(next);
       if (firsts) next = { ...next, firsts };
@@ -111,7 +117,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ready,
       state,
       today,
-      setName: (n) => update((s) => ({ ...s, profileName: n.trim().slice(0, 30) })),
+      setName: (n) => update((s) => ({ ...s, profileName: n.trim().slice(0, 30), sMt: Date.now() })),
       saveHabit: (h) =>
         update((s) => {
           const now = Date.now();
@@ -122,9 +128,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         update((s) => {
           const done = { ...s.done };
           for (const k of Object.keys(done)) if (k.startsWith(id + '|')) delete done[k];
-          return { ...s, habits: s.habits.filter((h) => h.id !== id), done };
+          return { ...s, habits: s.habits.filter((h) => h.id !== id), done, deleted: { ...s.deleted, ['h:' + id]: Date.now() } };
         }),
-      toggle: (habitId, day) => update((s) => ({ ...s, done: toggleDone(s.done, habitId, day) })),
+      toggle: (habitId, day) =>
+        update((s) => {
+          const now = Date.now();
+          const key = habitId + '|' + day;
+          const removing = s.done[key] !== undefined;
+          return { ...s, done: toggleDone(s.done, habitId, day, now), deleted: removing ? { ...s.deleted, ['d:' + key]: now } : s.deleted };
+        }),
       addAllowance: (cents, note) => entry({ ...base(), kind: 'allowance', cents, note, parts: splitCents(cents, state.money.split) }),
       addSpend: (cents, note, need) => {
         if (balances(state.money.entries).spend < cents) return false;
@@ -141,9 +153,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         entry({ ...base(), kind: 'move', cents, from, to, note });
         return true;
       },
-      deleteEntry: (id) => money((m) => ({ ...m, entries: m.entries.filter((e) => e.id !== id) })),
-      setSplit: (sp) => money((m) => ({ ...m, split: sp })),
-      setGoal: (g) => money((m) => ({ ...m, goal: g })),
+      deleteEntry: (id) => update((s) => ({ ...s, money: { ...s.money, entries: s.money.entries.filter((e) => e.id !== id) }, deleted: { ...s.deleted, ['m:' + id]: Date.now() } })),
+      setSplit: (sp) => update((s) => ({ ...s, money: { ...s.money, split: sp }, sMt: Date.now() })),
+      setGoal: (g) => update((s) => ({ ...s, money: { ...s.money, goal: g }, sMt: Date.now() })),
       resetAll: () => update(() => emptyState()),
       setEntry: (day, patch) =>
         update((s) => ({ ...s, journal: { ...s.journal, [day]: { ...(s.journal[day] || emptyEntry(day)), ...patch, day, mt: Date.now() } } })),
@@ -160,9 +172,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         })),
       setGoalReached: (goalId, reached) =>
         update((s) => ({ ...s, goals: s.goals.map((g) => (g.id === goalId ? { ...g, reachedAt: reached ? Date.now() : null, mt: Date.now() } : g)) })),
-      deleteGoal: (goalId) => update((s) => ({ ...s, goals: s.goals.filter((g) => g.id !== goalId) })),
+      deleteGoal: (goalId) => update((s) => ({ ...s, goals: s.goals.filter((g) => g.id !== goalId), deleted: { ...s.deleted, ['g:' + goalId]: Date.now() } })),
       setWeekNote: (monday, proud) => update((s) => ({ ...s, weeks: { ...s.weeks, [monday]: { proud, mt: Date.now() } } })),
-      setPremium: (on) => update((s) => ({ ...s, premium: on })),
+      setPremium: (on) => update((s) => ({ ...s, premium: on, sMt: Date.now() })),
+      applyMerged: (next) => update(() => next),
       exportJson: () => JSON.stringify({ app: 'habivale', version: 1, exportedAt: new Date().toISOString(), state }, null, 1),
       importJson: (json) => {
         try {

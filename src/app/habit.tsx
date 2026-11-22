@@ -61,7 +61,7 @@ export default function HabitEdit() {
       <H2>Symbol</H2>
       <View style={s.icons}>
         {HABIT_ICONS.map((ic) => (
-          <Pressable key={ic} onPress={() => setIcon(ic)} accessibilityRole="button" accessibilityState={{ selected: ic === icon }} style={[s.icon, ic === icon && s.iconOn]}>
+          <Pressable key={ic} onPress={() => setIcon(ic)} accessibilityRole="button" aria-selected={ic === icon} style={[s.icon, ic === icon && s.iconOn]}>
             <Icon name={ic} size={26} color={ic === icon ? C.bg : C.gold} />
           </Pressable>
         ))}

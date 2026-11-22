@@ -5,6 +5,7 @@ import { currentStreak, longestStreak, successRate, toggleDone, isDue, activeDay
 import { totalXp, xpToday, levelInfo, wolfStage, xpForLevel } from '../src/logic/progress.ts';
 import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT } from '../src/logic/money.ts';
 import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
+import { mergeState, hasContent } from '../src/logic/merge.ts';
 import { weekStart, weekSummary, goalProgress, looksLikeBackup, entryHasContent, emptyEntry } from '../src/logic/journal.ts';
 
 let n = 0;
@@ -122,6 +123,41 @@ ok('Tagebuch leer/gefüllt, Ziel-Fortschritt, Backup erkennen', () => {
   assert.equal(goalProgress({ ...g, steps: [...g.steps] }), 0.5);
   assert.equal(looksLikeBackup({ app: 'habivale', state: { habits: [], done: {} } }), true);
   assert.equal(looksLikeBackup({ app: 'ewolfe', state: { habits: [], done: {} } }), false);
+});
+
+const base = (): AppState => ({ version: 1, profileName: '', habits: [], done: {}, money: { split: { save: 50, spend: 40, share: 10 }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {} });
+
+ok('Abgleich: Vereinigung, neuere Fassung gewinnt', () => {
+  const a = { ...base(), habits: [h('x', { name: 'alt', mt: 1 })], done: { 'x|2026-11-20': 5 } };
+  const b = { ...base(), habits: [h('x', { name: 'neu', mt: 2 }), h('y', { mt: 1 })], done: { 'x|2026-11-21': 6 } };
+  const m = mergeState(a, b);
+  assert.deepEqual(m.habits.map((x) => x.name), ['neu', 'y']);
+  assert.equal(Object.keys(m.done).length, 2);
+});
+
+ok('Abgleich: Löschen reist mit, Haken wegnehmen auch', () => {
+  const a = { ...base(), habits: [h('x', { mt: 1 })], done: { 'x|2026-11-20': 5 } };
+  const b = { ...base(), deleted: { 'h:x': 9, 'd:x|2026-11-20': 7 } };
+  const m = mergeState(a, b);
+  assert.equal(m.habits.length, 0);
+  assert.equal(Object.keys(m.done).length, 0);
+  // später wieder abgehakt → bleibt
+  const c = mergeState({ ...base(), done: { 'x|2026-11-20': 8 } }, { ...base(), deleted: { 'd:x|2026-11-20': 7 } });
+  assert.equal(c.done['x|2026-11-20'], 8);
+});
+
+ok('Abgleich: Tagebuch je Tag, Einstellungen, Trophäen, Geld', () => {
+  const e1 = { day: T, mood: 3, win: 'a', hard: '', thanks: '', tomorrow: '', free: '', mt: 1 } as const;
+  const e2 = { ...e1, win: 'b', mt: 2 };
+  const a = { ...base(), profileName: 'Lena', sMt: 5, journal: { [T]: e1 }, firsts: { 't:x': 10 }, money: { ...base().money, entries: [{ id: 'm1', kind: 'share', cents: 50, day: T, note: '', at: 1 } as MoneyEntry] } };
+  const b = { ...base(), profileName: 'Lenchen', sMt: 3, journal: { [T]: e2 }, firsts: { 't:x': 4 }, money: { ...base().money, entries: [{ id: 'm2', kind: 'share', cents: 20, day: T, note: '', at: 2 } as MoneyEntry] } };
+  const m = mergeState(a, b);
+  assert.equal(m.journal[T].win, 'b');
+  assert.equal(m.profileName, 'Lena');
+  assert.equal(m.firsts['t:x'], 4);
+  assert.deepEqual(m.money.entries.map((e) => e.id), ['m1', 'm2']);
+  assert.deepEqual(mergeState(m, m), m);
+  assert.equal(hasContent(base()), false);
 });
 
 console.log(n + ' Prüfungen bestanden');

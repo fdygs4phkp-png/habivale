@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AccountProvider } from '../state/account';
 import { StoreProvider } from '../state/store';
 import { C } from '../ui/theme';
 
@@ -21,13 +22,16 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <StoreProvider>
+        <AccountProvider>
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: C.bg } }}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="habit" options={{ presentation: 'modal' }} />
           <Stack.Screen name="geld" />
           <Stack.Screen name="einstellungen" />
+          <Stack.Screen name="konto" />
         </Stack>
+        </AccountProvider>
       </StoreProvider>
     </SafeAreaProvider>
   );

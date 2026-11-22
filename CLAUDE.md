@@ -33,7 +33,15 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - Premium nur als Test-Schalter (`state.premium`, Einstellungen); ohne Premium zeigt das Tagebuch eine ruhige Vorschau.
 - Einstellungen (`src/app/einstellungen.tsx`, Zahnrad oben rechts auf Heute): Name, Premium-Test, Backup als JSON (Web: Datei; Gerät: Teilen), Einspielen (nur Web), alles löschen.
 - Root-Layout zeichnet erst nach dem Start (`mounted`), sonst React-Fehler 418 beim Neuladen einer Unterseite (statische Seite ≠ echte).
-- Noch offen in Phase 3: Konto + verschlüsselter Abgleich (neues Supabase-Projekt), Familienkonto mit Kinderprofilen, Altersstufen, erweitertes Taschengeld.
+- **Konto + Abgleich (0.5.0):** Supabase-Projekt „habivale“, Ref `ivjcedxmjhnptabnrzjm`, Frankfurt, Organisation eWolfe, kostenloser Plan. Tabelle
+  `public.user_data` (user_id, data jsonb, revision, updated_at; RLS nur eigene Zeile; Trigger erhöht revision), Funktion `delete_own_account()`.
+  App: `src/sync/supabase.ts` (fetch, publishable Key), `src/sync/crypto.ts` (Umschlag: Datenschlüssel AES-256-GCM, mit Passwort PBKDF2 600 000 und
+  Wiederherstellungs-Code verschlossen, Code selbst im Umschlag; WebCrypto – auf iPhone/Android später native Krypto), `src/state/account.tsx`
+  (holen → `mergeState` → übernehmen → hochladen mit `revision=eq.X`, bis 3 Versuche; 2,5 s nach Änderungen, jede Minute, beim Zurückkehren).
+  Zusammenführen `src/logic/merge.ts`: Vereinigung, neueres `mt` gewinnt, Grabsteine `state.deleted` ('h:'/'g:'/'m:' + id, 'd:' + Haken), Einstellungen
+  nach `sMt`, Trophäen frühestes Datum. Konto nur ab 16 (Häkchen), Kinder später übers Familienkonto. Seite `src/app/konto.tsx`.
+  Barrierefreiheit: `aria-checked`/`aria-selected`/`aria-disabled` statt `accessibilityState` (RN-Web 0.21 gibt das alte nicht weiter).
+- Noch offen in Phase 3: Familienkonto mit Kinderprofilen, Altersstufen, erweitertes Taschengeld.
 
 ## Befehle
 - `npm test` – Logik prüfen · `npx tsc --noEmit` – Typen prüfen

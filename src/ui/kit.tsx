@@ -75,7 +75,7 @@ export function Button({ title, onPress, kind = 'main', icon, disabled }: { titl
     <Pressable
       onPress={disabled ? undefined : onPress}
       accessibilityRole="button"
-      accessibilityState={{ disabled }}
+      aria-disabled={!!disabled}
       style={({ pressed }) => [st.btn, main ? st.btnMain : st.btnGhost, kind === 'danger' && { borderColor: '#F2A7A0' }, (pressed || disabled) && { opacity: disabled ? 0.45 : 0.8 }]}
     >
       {icon ? <Icon name={icon} size={20} color={col} /> : null}
@@ -176,7 +176,7 @@ export function tell(title: string, text: string) {
 
 export function Chip({ title, on, onPress, color = C.gold }: { title: string; on: boolean; onPress: () => void; color?: string }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} style={[st.chip, on && { backgroundColor: color, borderColor: color }]}>
+    <Pressable onPress={onPress} accessibilityRole="button" aria-selected={on} style={[st.chip, on && { backgroundColor: color, borderColor: color }]}>
       <Text style={[st.chipText, on && { color: C.bg }]}>{title}</Text>
     </Pressable>
   );
