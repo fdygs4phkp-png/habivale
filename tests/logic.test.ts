@@ -6,6 +6,8 @@ import { totalXp, xpToday, levelInfo, wolfStage, xpForLevel } from '../src/logic
 import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT } from '../src/logic/money.ts';
 import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
 import { mergeState, hasContent } from '../src/logic/merge.ts';
+import { buildSnapshot } from '../src/logic/share.ts';
+import { ageStage, defaultShares } from '../src/logic/types.ts';
 import { weekStart, weekSummary, goalProgress, looksLikeBackup, entryHasContent, emptyEntry } from '../src/logic/journal.ts';
 
 let n = 0;
@@ -158,6 +160,20 @@ ok('Abgleich: Tagebuch je Tag, Einstellungen, Trophäen, Geld', () => {
   assert.deepEqual(m.money.entries.map((e) => e.id), ['m1', 'm2']);
   assert.deepEqual(mergeState(m, m), m);
   assert.equal(hasContent(base()), false);
+});
+
+ok('Familie: Altersstufen, Voreinstellung, Freigabe ohne Tagebuch', () => {
+  assert.equal(ageStage(2017, 2026), 'kind');
+  assert.equal(ageStage(2012, 2026), 'jugend');
+  assert.equal(ageStage(2010, 2026), 'erwachsen');
+  assert.deepEqual(defaultShares('kind'), { habits: true, goals: true, money: true });
+  assert.equal(defaultShares('jugend').money, false);
+  const st = { ...base(), profileName: 'Lena', habits: [h('a', { start: '2026-11-01' })], done: { 'a|2026-11-22': 1 }, journal: { [T]: { day: T, mood: 5, win: 'GEHEIM', hard: '', thanks: '', tomorrow: '', free: '', mt: 1 } } };
+  const snap = buildSnapshot(st, T, { habits: true, goals: false, money: false });
+  assert.equal(snap.habits![0].days[13], 1);
+  assert.equal(snap.goals, undefined);
+  assert.equal(snap.money, undefined);
+  assert.ok(!JSON.stringify(snap).includes('GEHEIM'));
 });
 
 console.log(n + ' Prüfungen bestanden');

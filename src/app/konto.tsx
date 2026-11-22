@@ -2,6 +2,9 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { errorText, useAccount } from '../state/account';
+import { useStore } from '../state/store';
+import { ageStage, type Shares } from '../logic/types.ts';
+import { ParentGate } from '../ui/gate';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen } from '../ui/kit';
 import { C, F } from '../ui/theme';
 
@@ -26,6 +29,8 @@ function CodeCard({ code, onDone }: { code: string; onDone?: () => void }) {
 
 export default function AccountScreen() {
   const a = useAccount();
+  const store = useStore();
+  const fam = store.state.family?.role === 'child' ? store.state.family : null;
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
@@ -74,6 +79,12 @@ export default function AccountScreen() {
 
       {a.status === 'none' && a.available ? (
         <>
+          <Button title="Meine Eltern haben mir einen Code gegeben" kind="ghost" icon="account-child-outline" onPress={() => router.push('/verbinden')} />
+        </>
+      ) : null}
+
+      {a.status === 'none' && a.available ? (
+        <>
           <Card>
             <P>Mit einem Konto werden deine Gewohnheiten, Gläser, Ziele und dein Tagebuch <Text style={{ fontFamily: F.bold }}>verschlüsselt</Text> gespeichert. So sind sie sicher, auch wenn du das Gerät wechselst. Ohne Konto bleibt alles nur auf diesem Gerät.</P>
             <P dim>Ein eigenes Konto gibt es ab 16 Jahren. Für Jüngere kommt bald das Familienkonto: Eltern legen das Profil an, ganz ohne E-Mail des Kindes.</P>
@@ -114,7 +125,46 @@ export default function AccountScreen() {
         </Card>
       ) : null}
 
-      {a.status !== 'none' && a.status !== 'locked' ? (
+      {a.isChild && fam && a.status !== 'locked' ? (
+        <>
+          <Card>
+            <H2>Verbunden mit deiner Familie</H2>
+            <P>Hallo {fam.name}! Deine Sachen werden verschlüsselt gesichert. Deine Eltern sehen nur, was du hier freigibst.</P>
+            <P dim>{ageStage(fam.birthYear) === 'kind' ? 'Kinder-Modus' : ageStage(fam.birthYear) === 'jugend' ? 'Jugend-Modus' : 'ab 16'} · {a.status === 'idle' ? 'Alles gesichert' : a.status === 'syncing' ? 'Wird gesichert …' : a.status === 'offline' ? 'Offline – wird später gesichert' : a.error || ''}</P>
+          </Card>
+          <Card>
+            <H2>Was deine Eltern sehen</H2>
+            {([
+              ['habits', 'Meine Gewohnheiten und Haken'],
+              ['goals', 'Meine Ziele'],
+              ['money', 'Meine drei Gläser'],
+            ] as [keyof Shares, string][]).map(([k, label]) => (
+              <Pressable key={k} onPress={() => store.setFamily({ ...fam, shares: { ...fam.shares, [k]: !fam.shares[k] } })} accessibilityRole="switch" aria-checked={fam.shares[k]} style={s.check}>
+                <Icon name={fam.shares[k] ? 'toggle-switch' : 'toggle-switch-off-outline'} color={fam.shares[k] ? C.mint : C.dim} size={40} />
+                <Text style={s.checkText}>{label}</Text>
+              </Pressable>
+            ))}
+            <View style={s.check}>
+              <Icon name="lock-outline" color={C.gold} size={28} />
+              <Text style={s.checkText}>Dein Tagebuch sieht niemand außer dir.</Text>
+            </View>
+          </Card>
+          <ParentGate what="Wiederherstellungs-Code und Abmelden sind für Eltern.">
+            {shownCode ? <CodeCard code={shownCode} /> : <Button title="Wiederherstellungs-Code anzeigen" kind="ghost" icon="key-outline" onPress={() => run(async () => setShownCode(await a.recoveryCode()))} />}
+            <Button
+              title="Dieses Gerät trennen"
+              kind="danger"
+              icon="link-off"
+              onPress={async () => {
+                if (!(await ask('Gerät trennen?', 'Das Profil bleibt erhalten. Auf diesem Gerät bleiben die Daten, werden aber nicht mehr gesichert. Zum Wiederverbinden brauchst du einen neuen Code und den Wiederherstellungs-Code.', 'Trennen'))) return;
+                await run(a.logout);
+              }}
+            />
+          </ParentGate>
+        </>
+      ) : null}
+
+      {!a.isChild && a.status !== 'none' && a.status !== 'locked' ? (
         <>
           <Card>
             <H2>Angemeldet</H2>

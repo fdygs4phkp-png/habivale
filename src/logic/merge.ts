@@ -76,7 +76,21 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     weeks: byKeyMt(local.weeks, remote.weeks),
     firsts,
     deleted,
+    family: mergeFamily(local, remote),
+    fMt: Math.max(local.fMt, remote.fMt),
   };
+}
+
+/** Familie: der neuere Block gewinnt; bei Eltern gehen Kinderprofile von zwei Geräten nicht verloren. */
+function mergeFamily(local: AppState, remote: AppState): AppState['family'] {
+  const win = remote.fMt > local.fMt ? remote.family : local.family;
+  const other = win === remote.family ? local.family : remote.family;
+  if (win?.role === 'parent' && other?.role === 'parent' && other.familyId === win.familyId) {
+    const ids = new Set(win.children.map((c) => c.memberId));
+    const removed = (id: string) => (local.deleted['k:' + id] ?? remote.deleted['k:' + id]) !== undefined;
+    return { ...win, children: [...win.children, ...other.children.filter((c) => !ids.has(c.memberId))].filter((c) => !removed(c.memberId)) };
+  }
+  return win;
 }
 
 /** Hat der Stand eigene Inhalte? (Ein leeres Gerät lädt nur herunter.) */

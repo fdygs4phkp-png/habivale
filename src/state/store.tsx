@@ -19,7 +19,7 @@ export function newId(): string {
 export { normalize };
 
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {} };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {}, family: null, fMt: 0 };
 }
 
 function normalize(raw: unknown): AppState {
@@ -39,6 +39,8 @@ function normalize(raw: unknown): AppState {
     premium: r.premium ?? true,
     sMt: r.sMt ?? 0,
     deleted: r.deleted || {},
+    family: r.family ?? null,
+    fMt: r.fMt ?? 0,
   } as AppState;
 }
 
@@ -69,6 +71,7 @@ type Store = {
   importJson: (json: string) => boolean;
   /** Abgleich: zusammengeführten Stand übernehmen (ohne Änderungsstempel zu setzen) */
   applyMerged: (s: AppState) => void;
+  setFamily: (f: AppState['family']) => void;
 };
 
 const Ctx = createContext<Store | null>(null);
@@ -176,6 +179,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setWeekNote: (monday, proud) => update((s) => ({ ...s, weeks: { ...s.weeks, [monday]: { proud, mt: Date.now() } } })),
       setPremium: (on) => update((s) => ({ ...s, premium: on, sMt: Date.now() })),
       applyMerged: (next) => update(() => next),
+      setFamily: (f) => update((s) => ({ ...s, family: f, fMt: Date.now() })),
       exportJson: () => JSON.stringify({ app: 'habivale', version: 1, exportedAt: new Date().toISOString(), state }, null, 1),
       importJson: (json) => {
         try {

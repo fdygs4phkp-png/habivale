@@ -41,7 +41,17 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   Zusammenführen `src/logic/merge.ts`: Vereinigung, neueres `mt` gewinnt, Grabsteine `state.deleted` ('h:'/'g:'/'m:' + id, 'd:' + Haken), Einstellungen
   nach `sMt`, Trophäen frühestes Datum. Konto nur ab 16 (Häkchen), Kinder später übers Familienkonto. Seite `src/app/konto.tsx`.
   Barrierefreiheit: `aria-checked`/`aria-selected`/`aria-disabled` statt `accessibilityState` (RN-Web 0.21 gibt das alte nicht weiter).
-- Noch offen in Phase 3: Familienkonto mit Kinderprofilen, Altersstufen, erweitertes Taschengeld.
+- **Familienkonto (0.6.0):** Supabase-Migration `family_account`: `families`, `family_members` (role parent/child, user_id, pub = ECDH-Schlüssel),
+  `family_invites` (nur SHA-256 des Codes, Inhalt mit dem Code verschlüsselt, 24 h, einmal), `child_data` (Kinderdaten je Profil, nur das Kind liest),
+  `family_shares` (je Kind und Elternteil verschlüsselt für dessen öffentlichen Schlüssel). Funktionen `family_create` (nur nicht-anonyme Konten),
+  `family_add_child` (max. 8), `family_invite`, `family_redeem`, `family_remove_child`. Kinder melden sich **anonym** an (Supabase-Schalter
+  „Allow anonymous sign-ins“ muss AN sein). Eltern-Schlüsselpaar liegt in `state.family` (mit dem Elternkonto verschlüsselt synchronisiert).
+  Kind: eigener Datenschlüssel nur mit Wiederherstellungs-Code (Karte für die Eltern); neues Gerät = neuer Code + Wiederherstellungs-Code.
+  Freigaben (`state.family.shares`, Voreinstellung nach Alter `defaultShares`), Schnappschuss `src/logic/share.ts` (Gewohnheiten 14 Tage, Ziele, Gläser – nie Tagebuch).
+  Seiten `src/app/familie.tsx` (Eltern, QR-Code zum Link `verbinden?code=`), `src/app/verbinden.tsx` (Kind), Kind-Ansicht in `konto.tsx`.
+  Eltern-Sperre `src/ui/gate.tsx` (Zahl in Worten) vor Premium/Backup/Löschen und Wiederherstellungs-Code auf Kindergeräten.
+- Noch offen im Familienkonto: Eltern schlagen Gewohnheiten vor, tragen Taschengeld ein, schicken Lob/Sticker (Eingang fürs Kind); Kinder-Modus der Oberfläche
+  (größere Schrift, einfachere Tagebuchfragen); Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
 - `npm test` – Logik prüfen · `npx tsc --noEmit` – Typen prüfen

@@ -61,6 +61,42 @@ export interface AppState {
   sMt: number;
   /** Grabsteine: 'h:'/'g:'/'m:' + id, 'd:' + Haken-Schlüssel → Zeitpunkt des Löschens */
   deleted: Record<string, number>;
+  /** Familienkonto (Eltern: Schlüsselpaar und Kinderprofile; Kind: Verbindung und Freigaben) */
+  family: FamilyInfo | null;
+  fMt: number;
+}
+
+export type Avatar = 'lyra' | 'kael';
+
+export interface ChildProfile {
+  memberId: string;
+  name: string;
+  birthYear: number;
+  avatar: Avatar;
+  addedAt: number;
+}
+
+export interface Shares {
+  habits: boolean;
+  goals: boolean;
+  money: boolean;
+}
+
+export type FamilyInfo =
+  | { role: 'parent'; familyId: string; pub: JsonWebKey; priv: JsonWebKey; children: ChildProfile[] }
+  | { role: 'child'; familyId: string; memberId: string; name: string; birthYear: number; avatar: Avatar; parents: { id: string; pub: JsonWebKey }[]; shares: Shares; pub: JsonWebKey; priv: JsonWebKey };
+
+export type AgeStage = 'kind' | 'jugend' | 'erwachsen';
+
+export function ageStage(birthYear: number | null | undefined, year = new Date().getFullYear()): AgeStage {
+  if (!birthYear) return 'erwachsen';
+  const age = year - birthYear;
+  return age < 12 ? 'kind' : age < 16 ? 'jugend' : 'erwachsen';
+}
+
+/** Voreinstellung der Freigaben nach Alter (Master-Prompt Abschnitt 21). Das Tagebuch gibt es hier bewusst nicht. */
+export function defaultShares(stage: AgeStage): Shares {
+  return { habits: true, goals: true, money: stage === 'kind' };
 }
 
 export type Mood = 1 | 2 | 3 | 4 | 5;

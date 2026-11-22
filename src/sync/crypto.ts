@@ -124,3 +124,72 @@ export async function rewrapPassword(env: Envelope, dataKey: Uint8Array, passwor
 export function isEnvelope(x: unknown): x is Envelope {
   return !!x && typeof x === 'object' && (x as Envelope).e2e === 1 && !!(x as Envelope).pw && !!(x as Envelope).data;
 }
+
+/* ---------- Familienkonto: Schlüsselpaare und Versiegeln für Eltern ---------- */
+
+export interface KeyPair {
+  pub: JsonWebKey;
+  priv: JsonWebKey;
+}
+
+export async function newKeyPair(): Promise<KeyPair> {
+  const kp = (await subtle().generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey'])) as CryptoKeyPair;
+  return { pub: await subtle().exportKey('jwk', kp.publicKey), priv: await subtle().exportKey('jwk', kp.privateKey) };
+}
+
+export interface SealedFor {
+  epk: JsonWebKey; // Einmal-Schlüssel des Absenders
+  iv: string;
+  ct: string;
+}
+
+async function ecdhAes(priv: CryptoKey, pub: CryptoKey): Promise<CryptoKey> {
+  return subtle().deriveKey({ name: 'ECDH', public: pub }, priv, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+}
+
+/** Verschlüsselt Text so, dass nur der Besitzer des privaten Schlüssels zu `pub` ihn lesen kann. */
+export async function sealFor(pub: JsonWebKey, text: string): Promise<SealedFor> {
+  const eph = (await subtle().generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey'])) as CryptoKeyPair;
+  const their = await subtle().importKey('jwk', pub, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  const s = await seal(await ecdhAes(eph.privateKey, their), enc.encode(text));
+  return { epk: await subtle().exportKey('jwk', eph.publicKey), ...s };
+}
+
+export async function openSealed(priv: JsonWebKey, box: SealedFor): Promise<string> {
+  const mine = await subtle().importKey('jwk', priv, { name: 'ECDH', namedCurve: 'P-256' }, false, ['deriveKey']);
+  const eph = await subtle().importKey('jwk', box.epk, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  return dec.decode(await open(await ecdhAes(mine, eph), box));
+}
+
+/* ---------- Einladungs-Codes ---------- */
+
+/** 8 Zeichen, gut abzutippen (keine 0/O, 1/I). */
+export function newInviteCode(): string {
+  const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const r = rand(8);
+  return Array.from(r, (x) => abc[x % abc.length]).join('');
+}
+
+export function normInvite(c: string): string {
+  return c.toUpperCase().replace(/[^A-Z0-9]/g, '');
+}
+
+export async function hashInvite(code: string): Promise<string> {
+  const h = await subtle().digest('SHA-256', enc.encode('habivale-invite:' + normInvite(code)));
+  return Array.from(new Uint8Array(h), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+const INVITE_SALT = enc.encode('habivale-invite-payload-v1');
+
+export async function sealWithCode(code: string, text: string): Promise<Sealed> {
+  return seal(await pwKey(normInvite(code), INVITE_SALT, 100000), enc.encode(text));
+}
+
+export async function openWithCode(code: string, s: Sealed): Promise<string> {
+  return dec.decode(await open(await pwKey(normInvite(code), INVITE_SALT, 100000), s));
+}
+
+/** Geheimnis, das nur dieses Gerät kennt (für Kinderprofile ohne Passwort). */
+export function randomSecret(): string {
+  return b64(rand(32));
+}

@@ -52,6 +52,7 @@ export default function Today() {
           <P>Wie sollen Lyra, Kael und die Mentorin dich nennen? Ein Vorname oder Spitzname reicht.</P>
           <Field label="Dein Name" value={nameDraft} onChangeText={setNameDraft} maxLength={30} returnKeyType="done" onSubmitEditing={() => nameDraft.trim() && setName(nameDraft)} />
           <Button title="Los geht’s" onPress={() => setName(nameDraft)} disabled={!nameDraft.trim()} />
+          <Button title="Meine Eltern haben mir einen Code gegeben" kind="ghost" icon="account-child-outline" onPress={() => router.push('/verbinden')} />
         </Card>
       ) : null}
 

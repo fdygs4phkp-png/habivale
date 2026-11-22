@@ -90,3 +90,70 @@ export async function updateRow(s: Session, data: unknown, revision: number): Pr
 export async function deleteAccount(s: Session): Promise<void> {
   await call('/rest/v1/rpc/delete_own_account', { method: 'POST', token: s.access_token, body: '{}' });
 }
+
+/* ---------- Familienkonto ---------- */
+
+/** Anonyme Anmeldung für Kindergeräte (keine E-Mail). Muss bei Supabase eingeschaltet sein. */
+export async function signInAnonymously(): Promise<Session> {
+  const s = toSession(await call('/auth/v1/signup', { method: 'POST', body: JSON.stringify({}) }));
+  if (!s) throw new ApiError(400, 'anonymous_failed', 'Anonyme Anmeldung nicht möglich');
+  return s;
+}
+
+export async function rpc<T>(s: Session, name: string, args: Record<string, unknown>): Promise<T> {
+  return (await call('/rest/v1/rpc/' + name, { method: 'POST', token: s.access_token, body: JSON.stringify(args) })) as T;
+}
+
+export type Store = { table: 'user_data'; key: 'user_id'; id: string } | { table: 'child_data'; key: 'member_id'; id: string };
+
+export const adultStore = (s: Session): Store => ({ table: 'user_data', key: 'user_id', id: s.user.id });
+export const childStore = (memberId: string): Store => ({ table: 'child_data', key: 'member_id', id: memberId });
+
+export async function getRowIn(s: Session, st: Store): Promise<Row | null> {
+  const rows = (await call(`/rest/v1/${st.table}?${st.key}=eq.${st.id}&select=data,revision`, { token: s.access_token })) as Row[];
+  return rows[0] || null;
+}
+
+export async function insertRowIn(s: Session, st: Store, data: unknown): Promise<Row> {
+  const rows = (await call('/rest/v1/' + st.table, { method: 'POST', token: s.access_token, headers: { Prefer: 'return=representation' }, body: JSON.stringify({ [st.key]: st.id, data }) })) as Row[];
+  return rows[0];
+}
+
+export async function updateRowIn(s: Session, st: Store, data: unknown, revision: number): Promise<Row | null> {
+  const rows = (await call(`/rest/v1/${st.table}?${st.key}=eq.${st.id}&revision=eq.${revision}`, {
+    method: 'PATCH',
+    token: s.access_token,
+    headers: { Prefer: 'return=representation' },
+    body: JSON.stringify({ data }),
+  })) as Row[];
+  return rows[0] || null;
+}
+
+export interface MemberRow {
+  id: string;
+  family_id: string;
+  role: 'parent' | 'child';
+  user_id: string | null;
+  pub: JsonWebKey | null;
+}
+
+export async function familyMembers(s: Session): Promise<MemberRow[]> {
+  return (await call('/rest/v1/family_members?select=id,family_id,role,user_id,pub', { token: s.access_token })) as MemberRow[];
+}
+
+export async function putShare(s: Session, childId: string, parentId: string, data: unknown): Promise<void> {
+  await call('/rest/v1/family_shares?on_conflict=child_id,parent_id', {
+    method: 'POST',
+    token: s.access_token,
+    headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+    body: JSON.stringify({ child_id: childId, parent_id: parentId, data, updated_at: new Date().toISOString() }),
+  });
+}
+
+export async function deleteShares(s: Session, childId: string): Promise<void> {
+  await call(`/rest/v1/family_shares?child_id=eq.${childId}`, { method: 'DELETE', token: s.access_token });
+}
+
+export async function sharesForMe(s: Session, parentId: string): Promise<{ child_id: string; data: unknown; updated_at: string }[]> {
+  return (await call(`/rest/v1/family_shares?parent_id=eq.${parentId}&select=child_id,data,updated_at`, { token: s.access_token })) as { child_id: string; data: unknown; updated_at: string }[];
+}

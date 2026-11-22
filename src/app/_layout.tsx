@@ -30,6 +30,8 @@ export default function RootLayout() {
           <Stack.Screen name="geld" />
           <Stack.Screen name="einstellungen" />
           <Stack.Screen name="konto" />
+          <Stack.Screen name="familie" />
+          <Stack.Screen name="verbinden" />
         </Stack>
         </AccountProvider>
       </StoreProvider>

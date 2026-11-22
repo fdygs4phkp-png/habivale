@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Platform, Pressable, Share, View } from 'react-native';
 import { dayKey } from '../logic/date.ts';
 import { useAccount } from '../state/account';
+import { ParentGate } from '../ui/gate';
 import { useStore } from '../state/store';
 import { APP_VERSION } from '../version';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen, tell } from '../ui/kit';
@@ -76,12 +77,32 @@ export default function Settings() {
         </View>
       </Card>
 
+      {!account.isChild ? (
+        <Card onPress={() => router.push('/familie')} label="Familienkonto öffnen">
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Icon name="home-heart" color={C.gold} size={28} />
+            <View style={{ flex: 1 }}>
+              <H2>Familienkonto</H2>
+              <P dim>{state.family?.role === 'parent' ? `${state.family.children.length} ${state.family.children.length === 1 ? 'Kinderprofil' : 'Kinderprofile'}` : 'Kinderprofile anlegen und Geräte verbinden'}</P>
+            </View>
+            <Icon name="chevron-right" color={C.dim} />
+          </View>
+        </Card>
+      ) : null}
+
       <Card>
         <H2>Dein Name</H2>
         <Field label="Vorname oder Spitzname" value={name} onChangeText={setName} maxLength={30} />
         <Button title="Speichern" kind="ghost" onPress={() => store.setName(name)} disabled={!name.trim() || name.trim() === state.profileName} />
       </Card>
 
+      {account.isChild ? <ParentGate what="Premium, Backup und Löschen sind für Eltern.">{grown()}</ParentGate> : grown()}
+    </Screen>
+  );
+
+  function grown() {
+    return (
+      <>
       <Card>
         <H2>Premium (Testversion)</H2>
         <P dim>Später gehört Premium zum Abo. In der Testversion kannst du es hier ein- und ausschalten, um beide Fassungen auszuprobieren. Deine Daten bleiben dabei immer erhalten.</P>
@@ -113,6 +134,7 @@ export default function Settings() {
       </Card>
 
       <P dim style={{ textAlign: 'center' }}>Habivale Testversion {APP_VERSION} · © 2026 eWolfe GbR</P>
-    </Screen>
-  );
+      </>
+    );
+  }
 }
