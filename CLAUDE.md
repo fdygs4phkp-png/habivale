@@ -34,4 +34,4 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 
 ## Veröffentlichen
 Claude kann nicht pushen. Die Nutzer veröffentlichen über **GitHub Desktop** (Push origin). Danach ist die Web-Fassung nach ein paar Minuten
-unter `https://k9vk58y99f-max.github.io/habivale/` erreichbar (wenn Pages eingeschaltet ist).
+unter `https://fdygs4phkp-png.github.io/habivale/ (GitHub-Konto `fdygs4phkp-png`, nicht das eWolfe-Konto)` erreichbar (wenn Pages eingeschaltet ist).
