@@ -21,7 +21,9 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - **Tablet zuerst mitdenken** (die meisten Kinder haben ein Tablet): `useLayout()` in `src/ui/kit.tsx` (Tablet ab 700 px Breite und
   kürzere Seite ≥ 600), `Grid` für Spalten (Heute 2, Sammlung 3–4, Gläser groß). Hoch- und Querformat erlaubt (`orientation: default`).
   Immer auch in 820×1180 und 1180×820 testen.
-- Bilder sind noch Platzhalter (roter Hinweis `PlaceholderNote`).
+- Bilder: alle in `src/ui/images.ts` (`IMG`, `TROPHY_IMG`), Dateien in `assets/img/` als WebP (`chars/`, `wolf/`, `scene/`). Zugeschnitten mit
+  `HABIVALE/Habivale-Skripte/zuschneiden.py` (teilt Blätter mit Alpha nach leeren Spalten). `assets/img/leih/` = Übergangsbilder aus der Lebensrad-App
+  (A Mystery World: Trophäen, Sticker, Tagebuch-Cover), bis eigene kommen. Hauptbild Jungwolf fehlt (Prompt 4.4) – solange das Welpenbild. Fehlendes: roter Hinweis `PlaceholderNote`.
 - Bei jeder Änderung `src/version.ts` erhöhen.
 
 ## Befehle

@@ -6,7 +6,9 @@ import { activeHabits, currentStreak, dueHabits, isDone } from '../../logic/habi
 import { balances, formatEuro, JARS } from '../../logic/money.ts';
 import { levelInfo, totalXp, xpToday } from '../../logic/progress.ts';
 import { FREE_HABIT_LIMIT } from '../../logic/types.ts';
+import { Image } from 'expo-image';
 import { useStore } from '../../state/store';
+import { IMG } from '../../ui/images';
 import { APP_VERSION } from '../../version';
 import { Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, Ring, Screen, useLayout } from '../../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../../ui/theme';
@@ -56,7 +58,7 @@ export default function Today() {
       </Card>
 
       <View style={[s.mentor, tablet && { minHeight: 126 }]}>
-        <Icon name="wizard-hat" size={30} color={C.mint} />
+        <Image source={IMG.mentorHead} style={s.mentorImg} accessibilityLabel="Die Mentorin" />
         <Text style={s.mentorText}>{mentorLine(due.length, doneN)}</Text>
       </View>
       </Grid>
@@ -121,6 +123,7 @@ export default function Today() {
 
 const s = StyleSheet.create({
   mentor: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: 'rgba(31,77,58,0.55)', borderRadius: 16, padding: 14 },
+  mentorImg: { width: 56, height: 56, borderRadius: 28, borderWidth: 2, borderColor: C.gold },
   mentorText: { flex: 1, fontFamily: F.text, fontSize: 16, lineHeight: 22, color: C.text, fontStyle: 'italic' },
   habit: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.line, paddingLeft: 14, paddingRight: 10, minHeight: 72 },
   habitMain: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },
