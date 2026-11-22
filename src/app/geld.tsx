@@ -6,6 +6,8 @@ import { lessonsFor, type Lesson } from '../logic/lessons.ts';
 import { allocate, balances, fillLevel, formatEuro, isValidSplit, JARS, monthSummary, openGoals, parseEuro, splitCents, wishDaysLeft, wishDue } from '../logic/money.ts';
 import { FREE_SAVINGS_GOALS, MAX_SAVINGS_GOALS, type Jar, type MoneyEntry, type SavingsGoal } from '../logic/types.ts';
 import { useMode } from '../ui/mode';
+import { Image } from 'expo-image';
+import { GOAL_IMG } from '../ui/images';
 import { useStore } from '../state/store';
 import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, JarPicture, P, PlaceholderNote, Screen, Sheet, tell, useLayout } from '../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../ui/theme';
@@ -143,7 +145,7 @@ export default function Money() {
           return (
             <Card key={g.id} onPress={() => editGoal(g)} label={g.name + ' bearbeiten'} style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Icon name={g.icon} size={34} color={C.jarSave} />
+                {GOAL_IMG[g.icon] ? <Image source={GOAL_IMG[g.icon]} style={{ width: 54, height: 54 }} contentFit="contain" /> : <Icon name={g.icon} size={34} color={C.jarSave} />}
                 <View style={{ flex: 1 }}>
                   <Text style={s.goalName}>{g.name}</Text>
                   <Text style={s.entryDate}>{i === 0 ? 'Wird gerade gefüllt' : `Ziel ${i + 1} – kommt nach dem ersten dran`}</Text>
@@ -259,8 +261,8 @@ export default function Money() {
                 <Field label="Wofür sparst du?" value={goalName} onChangeText={setGoalName} placeholder="z. B. Fahrrad" maxLength={40} />
                 <View style={s.row}>
                   {GOAL_ICONS.map((ic) => (
-                    <Pressable key={ic} onPress={() => setGoalIcon(ic)} accessibilityRole="radio" aria-checked={goalIcon === ic} accessibilityLabel={ic} style={[s.icon, goalIcon === ic && { backgroundColor: C.jarSave, borderColor: C.jarSave }]}>
-                      <Icon name={ic} size={26} color={goalIcon === ic ? C.bg : C.jarSave} />
+                    <Pressable key={ic} onPress={() => setGoalIcon(ic)} accessibilityRole="radio" aria-checked={goalIcon === ic} accessibilityLabel={ic} style={[s.icon, { width: 64, height: 64 }, goalIcon === ic && { borderColor: C.jarSave, borderWidth: 3, backgroundColor: 'rgba(226,188,102,0.15)' }]}>
+                      {GOAL_IMG[ic] ? <Image source={GOAL_IMG[ic]} style={{ width: 50, height: 50 }} contentFit="contain" /> : <Icon name={ic} size={26} color={C.jarSave} />}
                     </Pressable>
                   ))}
                 </View>

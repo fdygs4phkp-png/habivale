@@ -9,6 +9,13 @@ import { IMG, OUTFIT_IMG } from '../../ui/images';
 import { Bar, Button, Card, Grid, H2, Icon, P, PlaceholderNote, Screen, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 
+const STORY = [
+  { title: 'Der Aufbruch', text: 'Lyra und Kael haben große Träume. Aber im Alltag geht vieles durcheinander: Sie fangen ständig Neues an und bleiben selten dran. Darum machen sie sich auf den Weg zu einer weisen Frau, die tief im Zauberwald lebt.' },
+  { title: 'Bei der Mentorin', text: 'Nach einer langen Reise öffnet die Mentorin ihnen die Tür. „Ein großer Traum ist wie ein ferner Berg“, sagt sie. „Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
+  { title: 'Der kleine Wolf', text: 'In einem Korb liegt ein Wolfswelpe. Er hat keine Mutter mehr. „Zieht ihn auf“, sagt die Mentorin. „Er braucht euch – jeden Tag. So lernt ihr, Verantwortung zu tragen und an einer Sache dranzubleiben.“' },
+  { title: 'Ein neues Zuhause', text: 'In einer kleinen, alten Hütte beginnt ihr neues Leben. Jeden Tag kümmern sie sich um den Welpen – und mit jeder Gewohnheit, die sie pflegen, wird er größer und stärker.' },
+];
+
 export default function Adventure() {
   const { state, setHero } = useStore();
   const { tablet } = useLayout();
@@ -119,7 +126,18 @@ export default function Adventure() {
           ))}
         </View>
       </Card>
-      <P dim>Die Geschichte von Lyra und Kael kommt mit der Spielwelt (Phase 5).</P>
+      <H2>Die Geschichte</H2>
+      <Grid cols={tablet ? 2 : 1}>
+        {STORY.map((x, i) => (
+          <Card key={i} style={{ flex: 1, padding: 0, overflow: 'hidden', gap: 0 }}>
+            <Image source={IMG.story[i]} style={{ width: '100%', aspectRatio: 16 / 9 }} contentFit="cover" accessibilityLabel={x.title} />
+            <View style={{ padding: 14, gap: 6 }}>
+              <Text style={s.charName}>{x.title}</Text>
+              <P>{x.text}</P>
+            </View>
+          </Card>
+        ))}
+      </Grid>
     </Screen>
   );
 }

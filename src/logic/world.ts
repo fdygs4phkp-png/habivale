@@ -33,11 +33,11 @@ export function ruleText(r: Rule): string {
     case 'wolf': return ['', 'Euer Wolf wird ein Jungwolf', 'Euer Wolf wird erwachsen', 'Euer Wolf wird legendär'][r.n];
     case 'streak': return `Schaffe eine Gewohnheit ${r.n} Tage in Folge`;
     case 'trophies': return `Sammle ${r.n} Trophäen`;
-    case 'journal': return `Schreib an ${r.n} Tagen ins Tagebuch`;
+    case 'journal': return r.n === 1 ? 'Schreib zum ersten Mal ins Tagebuch' : `Schreib an ${r.n} Tagen ins Tagebuch`;
     case 'goals': return r.n === 1 ? 'Erreiche ein Ziel im Tagebuch' : `Erreiche ${r.n} Ziele im Tagebuch`;
     case 'savings': return r.n === 1 ? 'Erreiche ein Sparziel' : `Erreiche ${r.n} Sparziele`;
-    case 'lessons': return `Lies ${r.n} Lektionen der Mentorin`;
-    case 'shared': return `Teile ${r.n}-mal aus dem grünen Glas`;
+    case 'lessons': return r.n === 1 ? 'Lies eine Lektion der Mentorin' : `Lies ${r.n} Lektionen der Mentorin`;
+    case 'shared': return r.n === 1 ? 'Teile zum ersten Mal aus dem grünen Glas' : `Teile ${r.n}-mal aus dem grünen Glas`;
   }
 }
 
@@ -71,11 +71,13 @@ export interface Outfit {
 export const OUTFITS: Outfit[] = [
   { id: 'lyra-start', hero: 'lyra', name: 'Reisekleid', rarity: 'common', rule: { kind: 'start' }, text: 'Lyras violettes Kleid mit Tuch und Zöpfen voller Perlen.' },
   { id: 'lyra-ranger', hero: 'lyra', name: 'Waldläuferin', rarity: 'common', rule: { kind: 'level', n: 3 }, text: 'Waldgrün, mit kurzem Moos-Umhang – perfekt für Streifzüge.' },
+  { id: 'lyra-bluegold', hero: 'lyra', name: 'Blau und Gold', rarity: 'rare', rule: { kind: 'level', n: 5 }, text: 'Nachtblau mit grünem Unterrock und goldenen Ranken.' },
   { id: 'lyra-winter', hero: 'lyra', name: 'Wintermantel', rarity: 'rare', rule: { kind: 'days', n: 30 }, text: 'Warm, mit weichem Kragen und Schneeflocken-Spange.' },
   { id: 'lyra-festive', hero: 'lyra', name: 'Festtagskleid', rarity: 'epic', rule: { kind: 'level', n: 8 }, text: 'Violett und Gold, für besondere Tage.' },
   { id: 'lyra-starnight', hero: 'lyra', name: 'Sternennacht', rarity: 'legendary', rule: { kind: 'wolf', n: 3 }, text: 'Ein Kleid wie der Nachthimmel, voller kleiner Sterne.' },
   { id: 'kael-start', hero: 'kael', name: 'Reisegewand', rarity: 'common', rule: { kind: 'start' }, text: 'Kaels dunkelblaue Tunika mit Goldstickerei und Umhang.' },
   { id: 'kael-ranger', hero: 'kael', name: 'Waldläufer', rarity: 'common', rule: { kind: 'level', n: 3 }, text: 'Waldgrün mit Lederweste und Karte am Gürtel.' },
+  { id: 'kael-scout', hero: 'kael', name: 'Kundschafter', rarity: 'rare', rule: { kind: 'level', n: 5 }, text: 'Lederweste, Kapuzenumhang und eine Schriftrolle für unterwegs.' },
   { id: 'kael-winter', hero: 'kael', name: 'Wintermantel', rarity: 'rare', rule: { kind: 'days', n: 30 }, text: 'Langer Wollmantel mit violettem Schal.' },
   { id: 'kael-festive', hero: 'kael', name: 'Festtagsgewand', rarity: 'epic', rule: { kind: 'level', n: 8 }, text: 'Navy und Gold mit Eichenlaub-Stickerei.' },
   { id: 'kael-moonwarden', hero: 'kael', name: 'Mondwächter', rarity: 'legendary', rule: { kind: 'wolf', n: 3 }, text: 'Mitternachtsblau mit silbernen Monden.' },

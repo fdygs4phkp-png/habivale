@@ -7,7 +7,7 @@ import { dueHabits, isDone } from '../../logic/habits.ts';
 import { AREA_ICON, AREA_NAME, emptyEntry, goalProgress, weekDays, weekStart, weekSummary } from '../../logic/journal.ts';
 import { newId, useStore } from '../../state/store';
 import { LIFE_AREAS, type Goal, type LifeArea, type Mood } from '../../logic/types.ts';
-import { IMG } from '../../ui/images';
+import { IMG, MOOD_IMG } from '../../ui/images';
 import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, PlaceholderNote, Screen, Sheet, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 import { useMode } from '../../ui/mode';
@@ -100,8 +100,12 @@ function DayPage() {
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           {MOODS.map((m) => (
             <Pressable key={m.v} onPress={() => set({ mood: e.mood === m.v ? null : m.v })} accessibilityRole="radio" aria-checked={e.mood === m.v} accessibilityLabel={m.label} style={{ alignItems: 'center', gap: 4 }}>
-              <View style={[s.mood, kid && { width: tablet ? 84 : 60, height: tablet ? 84 : 60, borderRadius: 42, borderColor: m.color }, e.mood === m.v && (kid ? { backgroundColor: m.color, borderColor: m.color } : s.moodOn)]}>
-                <Icon name={m.icon} size={kid ? (tablet ? 60 : 44) : tablet ? 40 : 32} color={e.mood === m.v ? C.bg : kid ? m.color : C.gold} />
+              <View style={[s.mood, kid && { width: tablet ? 84 : 60, height: tablet ? 84 : 60, borderRadius: 42, borderColor: m.color }, e.mood === m.v && (kid ? { borderColor: m.color, borderWidth: 4, transform: [{ scale: 1.08 }] } : s.moodOn)]}>
+                {kid ? (
+                  <Image source={MOOD_IMG[m.v - 1]} style={{ width: tablet ? 76 : 54, height: tablet ? 76 : 54, borderRadius: 40 }} contentFit="cover" />
+                ) : (
+                  <Icon name={m.icon} size={tablet ? 40 : 32} color={e.mood === m.v ? C.bg : C.gold} />
+                )}
               </View>
               {kid ? <Text style={[s.moodLabel, e.mood === m.v && { color: C.text }]}>{m.label}</Text> : null}
             </Pressable>

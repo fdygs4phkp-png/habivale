@@ -8,6 +8,8 @@ import { useStore } from '../state/store';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen } from '../ui/kit';
 import { C } from '../ui/theme';
 import { HABIT_ICONS, HABIT_TEMPLATES } from '../ui/habitIcons';
+import { Image } from 'expo-image';
+import { HABIT_IMG } from '../ui/images';
 import { useMode } from '../ui/mode';
 import { Text } from 'react-native';
 import { F } from '../ui/theme';
@@ -72,7 +74,7 @@ export default function HabitEdit() {
                 accessibilityLabel={'Vorlage ' + tp.name}
                 style={[s.tpl, kid && s.tplKid, name === tp.name && { borderColor: C.gold, backgroundColor: 'rgba(226,188,102,0.15)' }]}
               >
-                <Icon name={tp.icon} size={kid ? 36 : 24} color={C.gold} />
+                {HABIT_IMG[tp.icon] ? <Image source={HABIT_IMG[tp.icon]} style={{ width: kid ? 48 : 30, height: kid ? 48 : 30 }} contentFit="contain" /> : <Icon name={tp.icon} size={kid ? 36 : 24} color={C.gold} />}
                 <Text style={[s.tplText, kid && { fontSize: 15 }]}>{tp.name}</Text>
               </Pressable>
             ))}
@@ -86,7 +88,7 @@ export default function HabitEdit() {
       <View style={s.icons}>
         {HABIT_ICONS.map((ic) => (
           <Pressable key={ic} onPress={() => setIcon(ic)} accessibilityRole="button" aria-selected={ic === icon} style={[s.icon, ic === icon && s.iconOn]}>
-            <Icon name={ic} size={26} color={ic === icon ? C.bg : C.gold} />
+            {HABIT_IMG[ic] ? <Image source={HABIT_IMG[ic]} style={{ width: 38, height: 38 }} contentFit="contain" /> : <Icon name={ic} size={26} color={ic === icon ? C.bg : C.gold} />}
           </Pressable>
         ))}
       </View>

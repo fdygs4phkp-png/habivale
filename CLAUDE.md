@@ -73,6 +73,10 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   `OUTFIT_IMG`, bisher nur Grundausstattung) und **Gegenstände** (`ITEMS`) in `src/logic/world.ts`, freigeschaltet nur durch Fortschritt (`Rule`). Sammlung mit
   Trophäen/Kleidung/Gegenstände und großer Trophäen-Ansicht. Ohne Premium: Wolf bleibt Welpe, Kleidung/Gegenstände als Vorschau. Avatare rund freigestellt.
   Browser-Tests klicken die Mentorin per `add_locator_handler(get_by_role('alert'))` weg.
+- **0.11.0:** alle Bilder vom 22./23.11. eingebaut: Gegenstände (`ITEM_IMG`), Trophäen Serie 2 (keine geliehenen mehr) + 3 neue Trophäen, Mentorin-Gesten
+  und Jubel/Wolf-freut-sich in den Ereignissen, Wolfsgesichter im Kinder-Tagebuch (`MOOD_IMG`), Sparziel-Bilder (`GOAL_IMG`), Gewohnheits-Bilder
+  (`HABIT_IMG`, nach Symbolname), App-Symbol (Wolf vor Sichelmond), Outfits als **Übergang** (`assets/img/outfits/`, werden ersetzt), Geschichte auf
+  „Abenteuer“ (Welpe ohne Mutter → Verantwortung, dranbleiben). Raster schneiden: `HABIVALE/Habivale-Skripte/raster.py`.
 - Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle

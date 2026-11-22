@@ -6,7 +6,7 @@ import { dayKey, shortDateDe } from '../../logic/date.ts';
 import { TROPHIES, type TrophyDef } from '../../logic/trophies.ts';
 import { ITEMS, OUTFITS, RARITY_COLOR, RARITY_NAME, ruleText, unlockedItems, unlockedOutfits, type Hero } from '../../logic/world.ts';
 import { useStore } from '../../state/store';
-import { OUTFIT_IMG, TROPHY_BORROWED, TROPHY_IMG } from '../../ui/images';
+import { ITEM_IMG, OUTFIT_IMG, TROPHY_BORROWED, TROPHY_IMG } from '../../ui/images';
 import { Button, Card, Chip, Grid, H2, Icon, P, PlaceholderNote, Screen, Sheet, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 
@@ -54,7 +54,6 @@ export default function Collection() {
             })}
           </Grid>
           {!premium ? <P dim>Mit Premium gibt es viele weitere Trophäen.</P> : null}
-          <P dim>Einige Bilder sind noch aus der Lebensrad-App geliehen; die eigenen Habivale-Trophäen sind bestellt.</P>
         </>
       ) : !premium ? (
         <Card style={{ borderColor: C.gold }}>
@@ -96,7 +95,7 @@ export default function Collection() {
               const ok = itemsOk.has(it.id);
               return (
                 <View key={it.id} style={[s.tile, ok && { borderColor: RARITY_COLOR[it.rarity] }]}>
-                  <Icon name={ok ? it.icon : 'lock-outline'} size={44} color={ok ? RARITY_COLOR[it.rarity] : 'rgba(194,187,168,0.35)'} />
+                  {ITEM_IMG[it.id] ? <Image source={ITEM_IMG[it.id]} style={[s.img, !ok && { opacity: 0.18 }]} contentFit="contain" /> : <Icon name={ok ? it.icon : 'lock-outline'} size={44} color={ok ? RARITY_COLOR[it.rarity] : 'rgba(194,187,168,0.35)'} />}
                   <Text style={[s.name, !ok && { color: C.dim }]}>{it.name}</Text>
                   <Text style={[s.rar, { color: RARITY_COLOR[it.rarity] }]}>{RARITY_NAME[it.rarity]}</Text>
                   <Text style={s.text}>{ok ? it.text : ruleText(it.rule)}</Text>
@@ -104,7 +103,6 @@ export default function Collection() {
               );
             })}
           </Grid>
-          <PlaceholderNote text="Platzhalter – die gemalten Gegenstände folgen" />
         </>
       )}
 

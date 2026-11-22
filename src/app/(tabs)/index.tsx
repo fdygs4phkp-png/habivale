@@ -13,7 +13,7 @@ import { useAccount } from '../../state/account';
 import { useMode } from '../../ui/mode';
 import { useUpdate } from '../../ui/update';
 import { MentorEvents } from '../../ui/mentorEvent';
-import { IMG, STICKERS } from '../../ui/images';
+import { HABIT_IMG, IMG, STICKERS } from '../../ui/images';
 import { formatEuro as fmtEuro } from '../../logic/money.ts';
 import { ask as askUser, tell } from '../../ui/kit';
 import { APP_VERSION } from '../../version';
@@ -156,7 +156,7 @@ export default function Today() {
         return (
           <View key={h.id} style={[s.habit, yes && { borderColor: C.mint }]}>
             <Pressable onPress={() => router.push({ pathname: '/habit', params: { id: h.id } })} style={s.habitMain} accessibilityRole="button" accessibilityLabel={h.name + ' bearbeiten'}>
-              <Icon name={h.icon} size={28} color={C.gold} />
+              {HABIT_IMG[h.icon] ? <Image source={HABIT_IMG[h.icon]} style={{ width: kid ? 48 : 38, height: kid ? 48 : 38 }} contentFit="contain" /> : <Icon name={h.icon} size={28} color={C.gold} />}
               <View style={{ flex: 1 }}>
                 <Text style={[s.habitName, { fontSize: 17 * k }]}>{h.name}</Text>
                 <Text style={s.habitSub}>{streak > 0 ? `${streak} ${streak === 1 ? 'Tag' : 'Tage'} in Folge` : 'Neuer Anfang'}</Text>
