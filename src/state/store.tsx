@@ -20,7 +20,7 @@ export function newId(): string {
 export { normalize };
 
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [] };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [] };
 }
 
 function normalize(raw: unknown): AppState {
@@ -38,6 +38,7 @@ function normalize(raw: unknown): AppState {
     goals: r.goals || [],
     weeks: r.weeks || {},
     premium: r.premium ?? true,
+    kidPreview: r.kidPreview ?? false,
     sMt: r.sMt ?? 0,
     deleted: r.deleted || {},
     family: r.family ?? null,
@@ -69,6 +70,7 @@ type Store = {
   deleteGoal: (goalId: string) => void;
   setWeekNote: (monday: string, proud: string) => void;
   setPremium: (on: boolean) => void;
+  setKidPreview: (on: boolean) => void;
   exportJson: () => string;
   importJson: (json: string) => boolean;
   /** Abgleich: zusammengeführten Stand übernehmen (ohne Änderungsstempel zu setzen) */
@@ -182,6 +184,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       deleteGoal: (goalId) => update((s) => ({ ...s, goals: s.goals.filter((g) => g.id !== goalId), deleted: { ...s.deleted, ['g:' + goalId]: Date.now() } })),
       setWeekNote: (monday, proud) => update((s) => ({ ...s, weeks: { ...s.weeks, [monday]: { proud, mt: Date.now() } } })),
       setPremium: (on) => update((s) => ({ ...s, premium: on, sMt: Date.now() })),
+      setKidPreview: (on) => update((s) => ({ ...s, kidPreview: on, sMt: Date.now() })),
       applyMerged: (next) => update(() => next),
       setFamily: (f) => update((s) => ({ ...s, family: f, fMt: Date.now() })),
       inboxDone: (id) => update((s) => ({ ...s, inbox: s.inbox.filter((x) => x.id !== id), deleted: { ...s.deleted, ['i:' + id]: Date.now() } })),

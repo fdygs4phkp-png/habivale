@@ -9,6 +9,7 @@ import { FREE_HABIT_LIMIT } from '../../logic/types.ts';
 import { Image } from 'expo-image';
 import { useStore } from '../../state/store';
 import { useAccount } from '../../state/account';
+import { useMode } from '../../ui/mode';
 import { IMG, STICKERS } from '../../ui/images';
 import { formatEuro as fmtEuro } from '../../logic/money.ts';
 import { ask as askUser, tell } from '../../ui/kit';
@@ -16,7 +17,13 @@ import { APP_VERSION } from '../../version';
 import { Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, Ring, Screen, useLayout } from '../../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../../ui/theme';
 
-function mentorLine(due: number, done: number): string {
+function mentorLine(due: number, done: number, kid = false): string {
+  if (kid) {
+    if (due === 0) return 'Heute ist frei. Ruh dich aus!';
+    if (done === 0) return 'Fang mit einer Sache an. Du schaffst das!';
+    if (done < due) return due - done === 1 ? 'Nur noch eins!' : 'Super! Weiter so.';
+    return 'Alles geschafft! Dein Wolf freut sich.';
+  }
   if (due === 0) return 'Heute ist nichts fällig. Ruh dich aus – auch das gehört zum Weg.';
   if (done === 0) return 'Ein großer Traum ist wie ein ferner Berg. Fang mit einem kleinen Schritt an.';
   if (done < due) return due - done === 1 ? 'Noch einer – dann ist dein Tag geschafft.' : 'Gut so. Schritt für Schritt.';
@@ -29,6 +36,7 @@ export default function Today() {
   const [nameDraft, setNameDraft] = useState('');
   const { tablet } = useLayout();
   const account = useAccount();
+  const { kid, k } = useMode();
   if (!ready) return <View style={{ flex: 1, backgroundColor: C.bg }} />;
 
   const day = which === 'today' ? today : addDays(today, -1);
@@ -119,7 +127,7 @@ export default function Today() {
 
       <View style={[s.mentor, tablet && { minHeight: 126 }]}>
         <Image source={IMG.mentorHead} style={s.mentorImg} accessibilityLabel="Die Mentorin" />
-        <Text style={s.mentorText}>{mentorLine(due.length, doneN)}</Text>
+        <Text style={s.mentorText}>{mentorLine(due.length, doneN, kid)}</Text>
       </View>
       </Grid>
 
@@ -137,11 +145,11 @@ export default function Today() {
             <Pressable onPress={() => router.push({ pathname: '/habit', params: { id: h.id } })} style={s.habitMain} accessibilityRole="button" accessibilityLabel={h.name + ' bearbeiten'}>
               <Icon name={h.icon} size={28} color={C.gold} />
               <View style={{ flex: 1 }}>
-                <Text style={s.habitName}>{h.name}</Text>
+                <Text style={[s.habitName, { fontSize: 17 * k }]}>{h.name}</Text>
                 <Text style={s.habitSub}>{streak > 0 ? `${streak} ${streak === 1 ? 'Tag' : 'Tage'} in Folge` : 'Neuer Anfang'}</Text>
               </View>
             </Pressable>
-            <Pressable onPress={() => toggle(h.id, day)} accessibilityRole="checkbox" aria-checked={yes} accessibilityLabel={h.name + ' erledigt'} style={[s.check, yes && s.checkOn]}>
+            <Pressable onPress={() => toggle(h.id, day)} accessibilityRole="checkbox" aria-checked={yes} accessibilityLabel={h.name + ' erledigt'} style={[s.check, kid && { width: 64, height: 64, borderRadius: 32 }, yes && s.checkOn]}>
               {yes ? <Icon name="check-bold" size={28} color={C.bg} /> : null}
             </Pressable>
           </View>

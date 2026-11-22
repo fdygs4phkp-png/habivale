@@ -54,8 +54,11 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   nur das Kind liest/löscht, max. 50 offen). Inhalt `ParentMessage` (suggest/praise/allowance) mit `sealFor` für den Schlüssel des Kindes.
   Kind holt nach jedem Abgleich ab (`pullInbox`), Taschengeld wird sofort als Eintrag `in-<id>` verteilt, alles erscheint als Karte auf „Heute“
   (`state.inbox`, Grabstein 'i:'); Vorschlag annehmen (`acceptSuggestion`, beachtet 3 Gewohnheiten in Free) oder ablehnen. Sticker/Sätze `STICKERS`, `PRAISE_TEXTS`.
-- Noch offen im Familienkonto: Kinder-Modus der Oberfläche
-  (größere Schrift, einfachere Tagebuchfragen); Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
+- **Kinder-Modus (0.8.0):** `useMode()` in `src/ui/mode.ts`: an bei Kinderprofilen 8–11 (Geburtsjahr) oder per Test-Schalter `state.kidPreview`
+  (Einstellungen, nur Erwachsene). Faktor `k` 1,15 für Schrift/Knöpfe in `kit.tsx`, größere Haken, kurze Mentorinnen-Sätze, Tagebuch mit farbigen
+  Stimmungsbildern + drei Fragen (schön → `free`, gut gemacht → `win`, dankbar → `thanks`), Vorlagen `HABIT_TEMPLATES` (im Kinder-Modus große Kacheln,
+  sonst „Ideen“). Leistenbeschriftung nur auf Tablets größer (sonst wird „Sammlung“ abgeschnitten).
+- Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
 - `npm test` – Logik prüfen · `npx tsc --noEmit` – Typen prüfen

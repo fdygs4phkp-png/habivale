@@ -56,6 +56,7 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     ...local,
     profileName: s.profileName,
     premium: s.premium,
+    kidPreview: s.kidPreview ?? false,
     sMt: Math.max(local.sMt, remote.sMt),
     habits: byId(local.habits, remote.habits, deleted, 'h:'),
     goals: byId(local.goals, remote.goals, deleted, 'g:'),

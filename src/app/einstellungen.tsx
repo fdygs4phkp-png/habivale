@@ -112,6 +112,17 @@ export default function Settings() {
         </View>
       </Card>
 
+      {!account.isChild ? (
+        <Card>
+          <H2>Kinder-Modus ansehen (Testversion)</H2>
+          <P dim>Für Kinderprofile von 8 bis 11 Jahren schaltet sich der Kinder-Modus von selbst ein: größere Schrift, einfache Tagebuchfragen, Vorlagen mit Bildern. Hier kannst du ihn zum Ausprobieren ansehen.</P>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <Chip title="Kinder-Modus" on={state.kidPreview} onPress={() => store.setKidPreview(true)} />
+            <Chip title="Normal" on={!state.kidPreview} onPress={() => store.setKidPreview(false)} />
+          </View>
+        </Card>
+      ) : null}
+
       <Card>
         <H2>Backup</H2>
         <P dim>Speichere alles als Datei, zum Beispiel bevor du die Browser-Daten löschst. Die Datei ist nicht verschlüsselt – bewahre sie gut auf.</P>

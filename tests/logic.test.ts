@@ -127,7 +127,7 @@ ok('Tagebuch leer/gefüllt, Ziel-Fortschritt, Backup erkennen', () => {
   assert.equal(looksLikeBackup({ app: 'ewolfe', state: { habits: [], done: {} } }), false);
 });
 
-const base = (): AppState => ({ version: 1, profileName: '', habits: [], done: {}, money: { split: { save: 50, spend: 40, share: 10 }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {} });
+const base = (): AppState => ({ version: 1, profileName: '', habits: [], done: {}, money: { split: { save: 50, spend: 40, share: 10 }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [] });
 
 ok('Abgleich: Vereinigung, neuere Fassung gewinnt', () => {
   const a = { ...base(), habits: [h('x', { name: 'alt', mt: 1 })], done: { 'x|2026-11-20': 5 } };

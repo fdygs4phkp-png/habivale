@@ -4,6 +4,7 @@ import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextIn
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 import { C, F, S } from './theme';
+import { useMode } from './mode';
 
 export type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
 
@@ -34,13 +35,14 @@ export function Grid({ cols, gap = 12, children }: { cols: number; gap?: number;
 
 export function Screen({ title, sub, children, right }: { title: string; sub?: string; children: React.ReactNode; right?: React.ReactNode }) {
   const { maxW, tablet } = useLayout();
+  const { k } = useMode();
   return (
     <SafeAreaView style={st.safe} edges={['top']}>
       <ScrollView contentContainerStyle={st.scroll} keyboardShouldPersistTaps="handled">
         <View style={[st.head, { maxWidth: maxW }, tablet && { paddingTop: 28 }]}>
           <View style={{ flex: 1 }}>
-            <Text style={st.title} accessibilityRole="header">{title}</Text>
-            {sub ? <Text style={st.sub}>{sub}</Text> : null}
+            <Text style={[st.title, { fontSize: 26 * k }]} accessibilityRole="header">{title}</Text>
+            {sub ? <Text style={[st.sub, { fontSize: 16 * k }]}>{sub}</Text> : null}
           </View>
           {right}
         </View>
@@ -61,35 +63,39 @@ export function Card({ children, style, onPress, label }: { children: React.Reac
 }
 
 export function H2({ children }: { children: React.ReactNode }) {
-  return <Text style={st.h2}>{children}</Text>;
+  const { k } = useMode();
+  return <Text style={[st.h2, { fontSize: 20 * k }]}>{children}</Text>;
 }
 
 export function P({ children, dim, style }: { children: React.ReactNode; dim?: boolean; style?: object }) {
-  return <Text style={[st.p, dim && { color: C.dim }, style]}>{children}</Text>;
+  const { k } = useMode();
+  return <Text style={[st.p, { fontSize: 16 * k, lineHeight: 23 * k }, dim && { color: C.dim }, style]}>{children}</Text>;
 }
 
 export function Button({ title, onPress, kind = 'main', icon, disabled }: { title: string; onPress: () => void; kind?: 'main' | 'ghost' | 'danger'; icon?: string; disabled?: boolean }) {
   const main = kind === 'main';
+  const { k } = useMode();
   const col = main ? C.bg : kind === 'danger' ? '#F2A7A0' : C.gold;
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
       accessibilityRole="button"
       aria-disabled={!!disabled}
-      style={({ pressed }) => [st.btn, main ? st.btnMain : st.btnGhost, kind === 'danger' && { borderColor: '#F2A7A0' }, (pressed || disabled) && { opacity: disabled ? 0.45 : 0.8 }]}
+      style={({ pressed }) => [st.btn, { minHeight: S.tap * (k > 1 ? 1.15 : 1) }, main ? st.btnMain : st.btnGhost, kind === 'danger' && { borderColor: '#F2A7A0' }, (pressed || disabled) && { opacity: disabled ? 0.45 : 0.8 }]}
     >
       {icon ? <Icon name={icon} size={20} color={col} /> : null}
-      <Text style={[st.btnText, { color: col }]}>{title}</Text>
+      <Text style={[st.btnText, { color: col, fontSize: 16 * k }]}>{title}</Text>
     </Pressable>
   );
 }
 
 export function Field(props: TextInputProps & { label: string }) {
   const { label, style, ...rest } = props;
+  const { k } = useMode();
   return (
     <View style={{ gap: 6 }}>
-      <Text style={st.label}>{label}</Text>
-      <TextInput accessibilityLabel={label} placeholderTextColor="rgba(194,187,168,0.6)" {...rest} style={[st.input, style]} />
+      <Text style={[st.label, { fontSize: 15 * k }]}>{label}</Text>
+      <TextInput accessibilityLabel={label} placeholderTextColor="rgba(194,187,168,0.6)" {...rest} style={[st.input, { fontSize: 17 * k }, style]} />
     </View>
   );
 }
@@ -175,9 +181,10 @@ export function tell(title: string, text: string) {
 }
 
 export function Chip({ title, on, onPress, color = C.gold }: { title: string; on: boolean; onPress: () => void; color?: string }) {
+  const { k } = useMode();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" aria-selected={on} style={[st.chip, on && { backgroundColor: color, borderColor: color }]}>
-      <Text style={[st.chipText, on && { color: C.bg }]}>{title}</Text>
+      <Text style={[st.chipText, { fontSize: 15 * k }, on && { color: C.bg }]}>{title}</Text>
     </Pressable>
   );
 }

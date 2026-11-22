@@ -10,15 +10,16 @@ import { LIFE_AREAS, type Goal, type LifeArea, type Mood } from '../../logic/typ
 import { IMG } from '../../ui/images';
 import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, PlaceholderNote, Screen, Sheet, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
+import { useMode } from '../../ui/mode';
 
 type View_ = 'day' | 'goals' | 'week';
 
-const MOODS: { v: Mood; icon: string; label: string }[] = [
-  { v: 1, icon: 'emoticon-sad-outline', label: 'traurig' },
-  { v: 2, icon: 'emoticon-confused-outline', label: 'nicht so gut' },
-  { v: 3, icon: 'emoticon-neutral-outline', label: 'okay' },
-  { v: 4, icon: 'emoticon-happy-outline', label: 'gut' },
-  { v: 5, icon: 'emoticon-excited-outline', label: 'super' },
+const MOODS: { v: Mood; icon: string; label: string; color: string }[] = [
+  { v: 1, icon: 'emoticon-sad-outline', label: 'traurig', color: '#8FB8F0' },
+  { v: 2, icon: 'emoticon-confused-outline', label: 'nicht so gut', color: '#C9B3F0' },
+  { v: 3, icon: 'emoticon-neutral-outline', label: 'okay', color: '#C2BBA8' },
+  { v: 4, icon: 'emoticon-happy-outline', label: 'gut', color: '#E2BC66' },
+  { v: 5, icon: 'emoticon-excited-outline', label: 'super', color: '#9FD8B5' },
 ];
 
 export default function Journal() {
@@ -63,10 +64,11 @@ function PremiumPreview() {
 /* ---------- Mein Tag ---------- */
 
 function Q({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (t: string) => void; placeholder?: string }) {
+  const { k } = useMode();
   return (
     <View style={{ gap: 6 }}>
-      <Text style={s.q}>{label}</Text>
-      <TextInput accessibilityLabel={label} value={value} onChangeText={onChange} placeholder={placeholder} placeholderTextColor="rgba(194,187,168,0.55)" multiline maxLength={600} style={s.area} />
+      <Text style={[s.q, { fontSize: 16 * k }]}>{label}</Text>
+      <TextInput accessibilityLabel={label} value={value} onChangeText={onChange} placeholder={placeholder} placeholderTextColor="rgba(194,187,168,0.55)" multiline maxLength={600} style={[s.area, { fontSize: 17 * k }]} />
     </View>
   );
 }
@@ -79,6 +81,7 @@ function DayPage() {
   const due = dueHabits(state.habits, day);
   const doneList = due.filter((h) => isDone(state.done, h.id, day));
   const set = (patch: Parameters<typeof setEntry>[1]) => setEntry(day, patch);
+  const { kid } = useMode();
 
   return (
     <>
@@ -96,19 +99,36 @@ function DayPage() {
         <Text style={s.q}>Wie geht es dir?</Text>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           {MOODS.map((m) => (
-            <Pressable key={m.v} onPress={() => set({ mood: e.mood === m.v ? null : m.v })} accessibilityRole="radio" aria-checked={e.mood === m.v} accessibilityLabel={m.label} style={[s.mood, e.mood === m.v && s.moodOn]}>
-              <Icon name={m.icon} size={tablet ? 40 : 32} color={e.mood === m.v ? C.bg : C.gold} />
+            <Pressable key={m.v} onPress={() => set({ mood: e.mood === m.v ? null : m.v })} accessibilityRole="radio" aria-checked={e.mood === m.v} accessibilityLabel={m.label} style={{ alignItems: 'center', gap: 4 }}>
+              <View style={[s.mood, kid && { width: tablet ? 84 : 60, height: tablet ? 84 : 60, borderRadius: 42, borderColor: m.color }, e.mood === m.v && (kid ? { backgroundColor: m.color, borderColor: m.color } : s.moodOn)]}>
+                <Icon name={m.icon} size={kid ? (tablet ? 60 : 44) : tablet ? 40 : 32} color={e.mood === m.v ? C.bg : kid ? m.color : C.gold} />
+              </View>
+              {kid ? <Text style={[s.moodLabel, e.mood === m.v && { color: C.text }]}>{m.label}</Text> : null}
             </Pressable>
           ))}
         </View>
 
         <Text style={s.q}>Mein Tag</Text>
         <P>
-          {due.length === 0
-            ? 'An diesem Tag war keine Gewohnheit fällig.'
-            : `${doneList.length === due.length ? 'Alles geschafft: ' : ''}${doneList.length} von ${due.length} Gewohnheiten erledigt${doneList.length ? ' – ' + doneList.map((h) => h.name).join(', ') : ''}.`}
+          {kid
+            ? due.length === 0
+              ? 'Heute war nichts zu tun.'
+              : doneList.length === due.length
+                ? `Du hast alles geschafft – ${due.length} von ${due.length}!`
+                : `Du hast ${doneList.length} von ${due.length} geschafft.`
+            : due.length === 0
+              ? 'An diesem Tag war keine Gewohnheit fällig.'
+              : `${doneList.length === due.length ? 'Alles geschafft: ' : ''}${doneList.length} von ${due.length} Gewohnheiten erledigt${doneList.length ? ' – ' + doneList.map((h) => h.name).join(', ') : ''}.`}
         </P>
 
+        {kid ? (
+          <Grid cols={tablet ? 3 : 1} gap={14}>
+            <Q label="Was war heute schön?" value={e.free} onChange={(t) => set({ free: t })} />
+            <Q label="Was hast du gut gemacht?" value={e.win} onChange={(t) => set({ win: t })} />
+            <Q label="Wofür bist du dankbar?" value={e.thanks} onChange={(t) => set({ thanks: t })} />
+          </Grid>
+        ) : (
+        <>
         <Grid cols={tablet ? 2 : 1} gap={14}>
           <Q label="Mein größter Erfolg" value={e.win} onChange={(t) => set({ win: t })} placeholder="Was ist dir heute gut gelungen?" />
           <Q label="Was war schwer?" value={e.hard} onChange={(t) => set({ hard: t })} />
@@ -116,6 +136,8 @@ function DayPage() {
           <Q label="Was möchte ich morgen besser machen?" value={e.tomorrow} onChange={(t) => set({ tomorrow: t })} />
         </Grid>
         <Q label="Was ich noch aufschreiben möchte" value={e.free} onChange={(t) => set({ free: t })} />
+        </>
+        )}
       </Card>
       <P dim style={{ textAlign: 'center' }}>Wird automatisch gespeichert. Dein Tagebuch sieht niemand außer dir.</P>
     </>
@@ -314,6 +336,7 @@ const s = StyleSheet.create({
   paper: { gap: 14 },
   q: { fontFamily: F.title, fontSize: 16, color: C.gold },
   area: { minHeight: 84, borderRadius: 12, borderWidth: 1, borderColor: C.line, backgroundColor: 'rgba(0,0,0,0.2)', color: C.text, fontFamily: F.text, fontSize: 17, lineHeight: 24, padding: 12, textAlignVertical: 'top' },
+  moodLabel: { fontFamily: F.bold, fontSize: 13, color: C.dim },
   mood: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: C.line },
   moodOn: { backgroundColor: C.gold, borderColor: C.gold },
   goalTitle: { fontFamily: F.bold, fontSize: 17, color: C.text },

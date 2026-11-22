@@ -7,7 +7,10 @@ import { FREE_HABIT_LIMIT, type Rhythm } from '../logic/types.ts';
 import { useStore } from '../state/store';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen } from '../ui/kit';
 import { C } from '../ui/theme';
-import { HABIT_ICONS } from '../ui/habitIcons';
+import { HABIT_ICONS, HABIT_TEMPLATES } from '../ui/habitIcons';
+import { useMode } from '../ui/mode';
+import { Text } from 'react-native';
+import { F } from '../ui/theme';
 
 
 const MON_FIRST = [1, 2, 3, 4, 5, 6, 0];
@@ -21,6 +24,7 @@ export default function HabitEdit() {
   const [days, setDays] = useState<number[]>(old?.rhythm.kind === 'weekdays' ? old.rhythm.days : [0, 1, 2, 3, 4, 5, 6]);
   const [paused, setPaused] = useState(old?.paused ?? false);
 
+  const { kid } = useMode();
   const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
   const activeOthers = activeHabits(state.habits).filter((h) => h.id !== id).length;
   const limitHit = !paused && activeOthers >= FREE_HABIT_LIMIT;
@@ -52,6 +56,30 @@ export default function HabitEdit() {
         </Pressable>
       }
     >
+      {!old ? (
+        <>
+          <H2>{kid ? 'Was möchtest du jeden Tag schaffen?' : 'Ideen'}</H2>
+          <View style={s.tpls}>
+            {HABIT_TEMPLATES.map((tp) => (
+              <Pressable
+                key={tp.name}
+                onPress={() => {
+                  setName(tp.name);
+                  setIcon(tp.icon);
+                  setDays(tp.days ?? [0, 1, 2, 3, 4, 5, 6]);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={'Vorlage ' + tp.name}
+                style={[s.tpl, kid && s.tplKid, name === tp.name && { borderColor: C.gold, backgroundColor: 'rgba(226,188,102,0.15)' }]}
+              >
+                <Icon name={tp.icon} size={kid ? 36 : 24} color={C.gold} />
+                <Text style={[s.tplText, kid && { fontSize: 15 }]}>{tp.name}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      ) : null}
+
       <Field label="Name" value={name} onChangeText={setName} placeholder="z. B. 20 Minuten lesen" maxLength={40} autoFocus={!old} />
 
       <H2>Symbol</H2>
@@ -98,5 +126,9 @@ export default function HabitEdit() {
 const s = StyleSheet.create({
   icons: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   icon: { width: 52, height: 52, borderRadius: 14, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  tpls: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  tpl: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44, paddingHorizontal: 12, borderRadius: 14, borderWidth: 1, borderColor: C.line },
+  tplKid: { flexDirection: 'column', width: 104, height: 96, justifyContent: 'center', paddingHorizontal: 6 },
+  tplText: { fontFamily: F.bold, fontSize: 14, color: C.text, textAlign: 'center' },
   iconOn: { backgroundColor: C.gold, borderColor: C.gold },
 });

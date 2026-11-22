@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
-import { Icon } from '../../ui/kit';
+import { Icon, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
+import { useMode } from '../../ui/mode';
 
 const TABS = [
   { name: 'index', title: 'Heute', icon: 'white-balance-sunny' },
@@ -11,6 +12,8 @@ const TABS = [
 ];
 
 export default function TabLayout() {
+  const { k } = useMode();
+  const { tablet } = useLayout();
   return (
     <Tabs
       screenOptions={{
@@ -18,7 +21,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: C.gold,
         tabBarInactiveTintColor: C.dim,
         tabBarStyle: { backgroundColor: C.card, borderTopColor: 'rgba(226,188,102,0.35)', minHeight: 62 },
-        tabBarLabelStyle: { fontFamily: F.bold, fontSize: 12 },
+        tabBarLabelStyle: { fontFamily: F.bold, fontSize: 12 * (tablet ? k : 1) },
         sceneStyle: { backgroundColor: C.bg },
       }}
     >
