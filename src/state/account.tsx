@@ -9,7 +9,8 @@ import { AppState as RNAppState } from 'react-native';
 import { dayKey } from '../logic/date.ts';
 import { hasContent, mergeState } from '../logic/merge.ts';
 import { buildSnapshot, snapshotKey, type Snapshot } from '../logic/share.ts';
-import { ageStage, defaultShares, type AppState, type Avatar, type ChildProfile, type FamilyInfo } from '../logic/types.ts';
+import { ageStage, defaultShares, type AppState, type Avatar, type ChildProfile, type FamilyInfo, type InboxItem, type ParentMessage } from '../logic/types.ts';
+import { splitCents } from '../logic/money.ts';
 import * as cr from '../sync/crypto';
 import * as api from '../sync/supabase';
 import { normalize, useStore } from './store';
@@ -25,6 +26,7 @@ export type SyncStatus = 'none' | 'locked' | 'idle' | 'syncing' | 'offline' | 'e
 export interface ChildView {
   profile: ChildProfile;
   connected: boolean;
+  pub: JsonWebKey | null;
   snapshot: Snapshot | null;
   updatedAt: string | null;
 }
@@ -49,6 +51,7 @@ type Account = {
   newInvite: (child: ChildProfile) => Promise<{ code: string; expires: string }>;
   loadChildren: () => Promise<ChildView[]>;
   removeChild: (child: ChildProfile) => Promise<void>;
+  sendToChild: (child: ChildView, msg: ParentMessage) => Promise<void>;
   // Familie – Kind
   joinFamily: (code: string) => Promise<{ recovery: string | null; needsRecovery: boolean }>;
 };
@@ -69,6 +72,7 @@ export function errorText(e: unknown): string {
     if (/code_expired/.test(e.message)) return 'Dieser Code ist abgelaufen. Deine Eltern können einen neuen erstellen.';
     if (/is_parent/.test(e.message)) return 'Auf diesem Gerät ist schon ein Elternkonto angemeldet.';
     if (/adult_only/.test(e.message)) return 'Eine Familie kann nur ein Erwachsenen-Konto gründen.';
+    if (/inbox_full/.test(e.message)) return 'Dein Kind hat noch viele ungelesene Nachrichten. Bitte warte, bis es sie angesehen hat.';
     if (/too_many_children/.test(e.message)) return 'Mehr als acht Kinderprofile gehen nicht.';
     if (e.status === 400) return 'E-Mail oder Passwort stimmt nicht.';
     return e.message;
@@ -155,6 +159,44 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  /** Kind: Nachrichten der Eltern abholen, entschlüsseln, übernehmen und auf dem Server löschen. */
+  const pullInbox = useCallback(async (s: api.Session) => {
+    const f = stateRef.current.family;
+    if (!f || f.role !== 'child') return;
+    const rows = await api.getInbox(s, f.memberId);
+    if (!rows.length) return;
+    let next = stateRef.current;
+    for (const r of rows) {
+      const id = 'in-' + r.id;
+      if (next.deleted['i:' + id] !== undefined || next.inbox.some((x) => x.id === id)) continue;
+      let msg: ParentMessage;
+      try {
+        msg = JSON.parse(await cr.openSealed(f.priv, r.data as cr.SealedFor));
+      } catch {
+        continue; // mit einem alten Schlüssel verschlüsselt – nicht lesbar
+      }
+      const at = Date.parse(r.created_at) || Date.now();
+      const from = String(msg.from || 'Deine Eltern').slice(0, 30);
+      let item: InboxItem | null = null;
+      if (msg.type === 'suggest') item = { id, at, from, kind: 'suggest', habit: { name: String(msg.habit.name).slice(0, 40), icon: String(msg.habit.icon), days: (msg.habit.days || []).filter((d) => d >= 0 && d <= 6) } };
+      else if (msg.type === 'praise') item = { id, at, from, kind: 'praise', sticker: String(msg.sticker), text: String(msg.text).slice(0, 120) };
+      else if (msg.type === 'allowance' && Number.isInteger(msg.cents) && msg.cents > 0 && msg.cents <= 100000) {
+        const eid = 'in-' + r.id;
+        if (!next.money.entries.some((e) => e.id === eid) && next.deleted['m:' + eid] === undefined) {
+          const note = String(msg.note || 'von ' + from).slice(0, 60);
+          next = { ...next, money: { ...next.money, entries: [...next.money.entries, { id: eid, kind: 'allowance', cents: msg.cents, day: dayKey(new Date(at)), note, parts: splitCents(msg.cents, next.money.split), at }] } };
+        }
+        item = { id, at, from, kind: 'allowance', cents: msg.cents, text: String(msg.note || '') };
+      }
+      if (item) next = { ...next, inbox: [...next.inbox, item] };
+    }
+    if (next !== stateRef.current) {
+      applyRef.current(next);
+      stateRef.current = next;
+    }
+    for (const r of rows) await api.deleteInbox(s, r.id).catch(() => {});
+  }, []);
+
   /** Kind: Freigaben für jeden Elternteil verschlüsselt hochladen (nur bei Änderung). */
   const pushShares = useCallback(async (s: api.Session) => {
     const f = stateRef.current.family;
@@ -191,11 +233,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       }
       lastUploaded.current = mergedJson;
       await pushShares(s);
+      await pullInbox(s);
       return;
     }
     throw new Error('Abgleich gerade nicht möglich. Bitte später noch einmal.');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fresh, pushShares]);
+  }, [fresh, pushShares, pullInbox]);
 
   const syncNow = useCallback(async () => {
     if (!keyRef.current || !sessionRef.current) return;
@@ -391,7 +434,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
               snapshot = null;
             }
           }
-          out.push({ profile: c, connected: !!m.user_id, snapshot, updatedAt: sh?.updated_at ?? null });
+          out.push({ profile: c, connected: !!m.user_id, pub: m.pub, snapshot, updatedAt: sh?.updated_at ?? null });
         }
         return out;
       },
@@ -406,6 +449,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         }
       },
 
+      sendToChild: async (child, msg) => {
+        if (!child.pub) throw new Error('Das Gerät deines Kindes ist noch nicht verbunden.');
+        const s = await fresh();
+        const parentId = await myParentId(s);
+        await api.sendInbox(s, child.profile.memberId, parentId, await cr.sealFor(child.pub, JSON.stringify(msg)));
+      },
       joinFamily: async (rawCode) => {
         const code = cr.normInvite(rawCode);
         if (code.length !== 8) throw new Error('Der Code hat 8 Zeichen.');

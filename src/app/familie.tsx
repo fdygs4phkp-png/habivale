@@ -9,7 +9,11 @@ import { ageStage, type Avatar, type ChildProfile } from '../logic/types.ts';
 import { errorText, useAccount, type ChildView } from '../state/account';
 import { useStore } from '../state/store';
 import { IMG } from '../ui/images';
-import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, Screen, useLayout } from '../ui/kit';
+import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, Screen, Sheet, useLayout } from '../ui/kit';
+import { HABIT_ICONS } from '../ui/habitIcons';
+import { PRAISE_TEXTS, STICKERS } from '../ui/images';
+import { parseEuro } from '../logic/money.ts';
+import { WD_SHORT_DE } from '../logic/date.ts';
 import { C, F, JAR_COLOR, JAR_NAME } from '../ui/theme';
 
 const STAGE_NAME = { kind: 'Kinder-Modus (8–11)', jugend: 'Jugend-Modus (12–15)', erwachsen: 'ab 16' } as const;
@@ -37,7 +41,9 @@ function InviteCard({ name, code, expires }: { name: string; code: string; expir
   );
 }
 
-function ChildCard({ v, onInvite, onRemove }: { v: ChildView; onInvite: () => void; onRemove: () => void }) {
+type Act = 'suggest' | 'allowance' | 'praise';
+
+function ChildCard({ v, onInvite, onRemove, onAct }: { v: ChildView; onInvite: () => void; onRemove: () => void; onAct: (a: Act) => void }) {
   const snap = v.snapshot;
   const stage = ageStage(v.profile.birthYear);
   return (
@@ -103,6 +109,13 @@ function ChildCard({ v, onInvite, onRemove }: { v: ChildView; onInvite: () => vo
       {v.connected && !snap ? <P dim>{v.profile.name} teilt gerade nichts mit dir.</P> : null}
       {snap ? <P dim>Stand: {new Date(snap.at).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })} · Das Tagebuch bleibt immer privat.</P> : null}
 
+      {v.connected && v.pub ? (
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          <Button title="Gewohnheit vorschlagen" kind="ghost" icon="lightbulb-on-outline" onPress={() => onAct('suggest')} />
+          <Button title="Taschengeld" kind="ghost" icon="cash-plus" onPress={() => onAct('allowance')} />
+          <Button title="Lob schicken" kind="ghost" icon="star-outline" onPress={() => onAct('praise')} />
+        </View>
+      ) : null}
       <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
         <Chip title={v.connected ? 'Neues Gerät verbinden' : 'Neuer Code'} on={false} onPress={onInvite} />
         <Chip title="Profil entfernen" on={false} onPress={onRemove} />
@@ -124,6 +137,38 @@ export default function Family() {
   const [name, setName] = useState('');
   const [year, setYear] = useState<number | null>(null);
   const [avatar, setAvatar] = useState<Avatar>('lyra');
+  const [act, setAct] = useState<{ a: Act; v: ChildView } | null>(null);
+  const [sent, setSent] = useState<string | null>(null);
+  const [hName, setHName] = useState('');
+  const [hIcon, setHIcon] = useState(HABIT_ICONS[0]);
+  const [hDays, setHDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
+  const [amount, setAmount] = useState('');
+  const [note, setNote] = useState('');
+  const [sticker, setSticker] = useState('star');
+  const [text, setText] = useState(PRAISE_TEXTS[0]);
+  const me = state.profileName || 'Deine Eltern';
+  const openAct = (a: Act, v: ChildView) => {
+    setHName('');
+    setHIcon(HABIT_ICONS[0]);
+    setHDays([0, 1, 2, 3, 4, 5, 6]);
+    setAmount('');
+    setNote('von ' + me);
+    setSticker('star');
+    setText(PRAISE_TEXTS[0]);
+    setSent(null);
+    setAct({ a, v });
+  };
+  const send = () => {
+    if (!act) return;
+    const cents = parseEuro(amount);
+    void run(async () => {
+      if (act.a === 'suggest') await a.sendToChild(act.v, { type: 'suggest', from: me, habit: { name: hName.trim().slice(0, 40), icon: hIcon, days: hDays } });
+      else if (act.a === 'allowance') await a.sendToChild(act.v, { type: 'allowance', from: me, cents: cents!, note: note.trim().slice(0, 60) });
+      else await a.sendToChild(act.v, { type: 'praise', from: me, sticker, text });
+      setSent(`Gesendet! ${act.v.profile.name} sieht es beim nächsten Öffnen von Habivale.`);
+      setAct(null);
+    });
+  };
 
   const run = async (f: () => Promise<void>) => {
     setBusy(true);
@@ -188,6 +233,7 @@ export default function Family() {
               <ChildCard
                 key={v.profile.memberId}
                 v={v}
+                onAct={(x) => openAct(x, v)}
                 onInvite={() => run(async () => setInvite({ name: v.profile.name, ...(await a.newInvite(v.profile)) }))}
                 onRemove={async () => {
                   if (!(await ask('Profil entfernen?', `Das Profil von ${v.profile.name} und alle Daten darin werden gelöscht. Das Gerät deines Kindes ist danach nicht mehr verbunden.`, 'Entfernen'))) return;
@@ -240,7 +286,52 @@ export default function Family() {
           <Button title="Aktualisieren" kind="ghost" icon="refresh" onPress={reload} disabled={busy} />
         </>
       )}
+      {sent ? <P style={{ color: C.mint }}>{sent}</P> : null}
       {msg ? <P style={{ color: '#F2A7A0' }}>{msg}</P> : null}
+
+      <Sheet visible={!!act} onClose={() => setAct(null)} title={act?.a === 'suggest' ? `Gewohnheit für ${act.v.profile.name}` : act?.a === 'allowance' ? `Taschengeld für ${act?.v.profile.name}` : `Lob für ${act?.v.profile.name}`}>
+        {act?.a === 'suggest' ? (
+          <>
+            <P dim>Dein Kind entscheidet selbst, ob es den Vorschlag annimmt.</P>
+            <Field label="Gewohnheit" value={hName} onChangeText={setHName} maxLength={40} placeholder="z. B. 15 Minuten lesen" />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {HABIT_ICONS.slice(0, 16).map((ic) => (
+                <Pressable key={ic} onPress={() => setHIcon(ic)} accessibilityRole="button" aria-selected={ic === hIcon} accessibilityLabel={ic} style={[s.iconBtn, ic === hIcon && { backgroundColor: C.gold, borderColor: C.gold }]}>
+                  <Icon name={ic} size={24} color={ic === hIcon ? C.bg : C.gold} />
+                </Pressable>
+              ))}
+            </View>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {[1, 2, 3, 4, 5, 6, 0].map((d) => <Chip key={d} title={WD_SHORT_DE[d]} on={hDays.includes(d)} onPress={() => setHDays(hDays.includes(d) ? hDays.filter((x) => x !== d) : [...hDays, d])} />)}
+            </View>
+            <Button title="Vorschlag schicken" disabled={!hName.trim() || !hDays.length || busy} onPress={send} />
+          </>
+        ) : act?.a === 'allowance' ? (
+          <>
+            <P dim>Wird automatisch auf die drei Gläser deines Kindes verteilt. Kein echtes Geld – nur zum Festhalten.</P>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {['1', '2', '5', '10'].map((x) => <Chip key={x} title={x + ' €'} on={amount === x} onPress={() => setAmount(x)} />)}
+            </View>
+            <Field label="Betrag in €" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="z. B. 2,50" />
+            <Field label="Notiz" value={note} onChangeText={setNote} maxLength={60} />
+            <Button title="Eintragen" disabled={!parseEuro(amount) || busy} onPress={send} />
+          </>
+        ) : act ? (
+          <>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, justifyContent: 'center' }}>
+              {Object.entries(STICKERS).map(([k, img]) => (
+                <Pressable key={k} onPress={() => setSticker(k)} accessibilityRole="radio" aria-checked={sticker === k} accessibilityLabel={k} style={[s.sticker, sticker === k && { borderColor: C.gold }]}>
+                  <Image source={img} style={{ width: 56, height: 56 }} contentFit="contain" />
+                </Pressable>
+              ))}
+            </View>
+            <View style={{ gap: 8 }}>
+              {PRAISE_TEXTS.map((p) => <Chip key={p} title={p} on={text === p} onPress={() => setText(p)} />)}
+            </View>
+            <Button title="Lob schicken" disabled={busy} onPress={send} />
+          </>
+        ) : null}
+      </Sheet>
     </Screen>
   );
 }
@@ -253,5 +344,7 @@ const s = StyleSheet.create({
   small: { fontFamily: F.text, fontSize: 14, color: C.dim },
   head: { fontFamily: F.bold, fontSize: 15, color: C.gold, marginTop: 4 },
   dot: { flex: 1, height: 14, borderRadius: 4, maxWidth: 22 },
+  iconBtn: { width: 48, height: 48, borderRadius: 12, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
+  sticker: { padding: 6, borderRadius: 14, borderWidth: 2, borderColor: 'transparent' },
   pick: { alignItems: 'center', gap: 4, padding: 8, borderRadius: 14, borderWidth: 2, borderColor: 'transparent' },
 });

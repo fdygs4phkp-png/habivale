@@ -8,7 +8,10 @@ import { levelInfo, totalXp, xpToday } from '../../logic/progress.ts';
 import { FREE_HABIT_LIMIT } from '../../logic/types.ts';
 import { Image } from 'expo-image';
 import { useStore } from '../../state/store';
-import { IMG } from '../../ui/images';
+import { useAccount } from '../../state/account';
+import { IMG, STICKERS } from '../../ui/images';
+import { formatEuro as fmtEuro } from '../../logic/money.ts';
+import { ask as askUser, tell } from '../../ui/kit';
 import { APP_VERSION } from '../../version';
 import { Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, Ring, Screen, useLayout } from '../../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../../ui/theme';
@@ -21,10 +24,11 @@ function mentorLine(due: number, done: number): string {
 }
 
 export default function Today() {
-  const { ready, state, today, toggle, setName } = useStore();
+  const { ready, state, today, toggle, setName, inboxDone, acceptSuggestion } = useStore();
   const [which, setWhich] = useState<'today' | 'yesterday'>('today');
   const [nameDraft, setNameDraft] = useState('');
   const { tablet } = useLayout();
+  const account = useAccount();
   if (!ready) return <View style={{ flex: 1, backgroundColor: C.bg }} />;
 
   const day = which === 'today' ? today : addDays(today, -1);
@@ -55,6 +59,53 @@ export default function Today() {
           <Button title="Meine Eltern haben mir einen Code gegeben" kind="ghost" icon="account-child-outline" onPress={() => router.push('/verbinden')} />
         </Card>
       ) : null}
+
+      {state.inbox.map((it) => (
+        <Card key={it.id} style={{ borderColor: C.gold, gap: 10 }}>
+          {it.kind === 'praise' ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              {it.sticker && STICKERS[it.sticker] ? <Image source={STICKERS[it.sticker]} style={{ width: 64, height: 64 }} contentFit="contain" /> : null}
+              <View style={{ flex: 1 }}>
+                <Text style={s.inboxFrom}>{it.from} schickt dir ein Lob</Text>
+                <Text style={s.inboxText}>„{it.text}“</Text>
+              </View>
+            </View>
+          ) : it.kind === 'allowance' ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Icon name="cash-plus" size={40} color={C.jarSave} />
+              <View style={{ flex: 1 }}>
+                <Text style={s.inboxFrom}>Taschengeld von {it.from}</Text>
+                <Text style={s.inboxText}>{fmtEuro(it.cents || 0)} – schon auf deine drei Gläser verteilt.</Text>
+              </View>
+            </View>
+          ) : (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <Icon name={it.habit?.icon || 'lightbulb-on-outline'} size={40} color={C.gold} />
+              <View style={{ flex: 1 }}>
+                <Text style={s.inboxFrom}>{it.from} schlägt dir eine Gewohnheit vor</Text>
+                <Text style={s.inboxText}>{it.habit?.name}</Text>
+              </View>
+            </View>
+          )}
+          {it.kind === 'suggest' ? (
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Button
+                  title="Annehmen"
+                  onPress={() => {
+                    if (!acceptSuggestion(it.id)) tell('Kein Platz mehr', 'Du hast schon drei aktive Gewohnheiten. Pausiere eine, dann kannst du den Vorschlag annehmen.');
+                  }}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Button title="Nein, danke" kind="ghost" onPress={async () => (await askUser('Vorschlag ablehnen?', 'Der Vorschlag verschwindet. Das ist in Ordnung – du entscheidest.', 'Ablehnen')) && inboxDone(it.id)} />
+              </View>
+            </View>
+          ) : (
+            <Button title="Danke!" kind="ghost" icon="heart-outline" onPress={() => inboxDone(it.id)} />
+          )}
+        </Card>
+      ))}
 
       <Grid cols={tablet ? 2 : 1}>
       <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flex: 1 }}>
@@ -125,13 +176,15 @@ export default function Today() {
         </View>
       </Card>
 
-      <Text style={s.foot}>Testversion {APP_VERSION} · Deine Daten bleiben nur auf diesem Gerät.</Text>
+      <Text style={s.foot}>Testversion {APP_VERSION} · {account.status === 'none' ? 'Deine Daten bleiben nur auf diesem Gerät.' : account.isChild ? 'Verbunden mit deiner Familie, verschlüsselt gesichert.' : 'Verschlüsselt gesichert in deinem Konto.'}</Text>
     </Screen>
   );
 }
 
 const s = StyleSheet.create({
   mentor: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: 'rgba(31,77,58,0.55)', borderRadius: 16, padding: 14 },
+  inboxFrom: { fontFamily: F.bold, fontSize: 15, color: C.gold },
+  inboxText: { fontFamily: F.text, fontSize: 17, color: C.text, marginTop: 2 },
   mentorImg: { width: 56, height: 56, borderRadius: 28, borderWidth: 2, borderColor: C.gold },
   mentorText: { flex: 1, fontFamily: F.text, fontSize: 16, lineHeight: 22, color: C.text, fontStyle: 'italic' },
   habit: { flexDirection: 'row', alignItems: 'center', backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: C.line, paddingLeft: 14, paddingRight: 10, minHeight: 72 },

@@ -64,7 +64,26 @@ export interface AppState {
   /** Familienkonto (Eltern: Schlüsselpaar und Kinderprofile; Kind: Verbindung und Freigaben) */
   family: FamilyInfo | null;
   fMt: number;
+  /** Eingang vom Familienkonto: Vorschläge, Lob, Taschengeld-Hinweise (bis das Kind sie annimmt oder wegtippt) */
+  inbox: InboxItem[];
 }
+
+export interface InboxItem {
+  id: string;
+  at: number;
+  from: string; // Name des Elternteils
+  kind: 'suggest' | 'praise' | 'allowance';
+  habit?: { name: string; icon: string; days: number[] };
+  sticker?: string;
+  text?: string;
+  cents?: number;
+}
+
+/** Was Eltern dem Kind schicken (verschlüsselt im Eingang). */
+export type ParentMessage =
+  | { type: 'suggest'; from: string; habit: { name: string; icon: string; days: number[] } }
+  | { type: 'praise'; from: string; sticker: string; text: string }
+  | { type: 'allowance'; from: string; cents: number; note: string };
 
 export type Avatar = 'lyra' | 'kael';
 

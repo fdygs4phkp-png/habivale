@@ -48,3 +48,21 @@ export const TROPHY_IMG: Record<string, number> = {
   'goal-first': require('../../assets/img/leih/trophy-n-telescope.webp'),
   'goal-reached': require('../../assets/img/leih/trophy-n-cup-grand.webp'),
 };
+
+/** Sticker fürs Lob der Eltern (vorerst aus der Lebensrad-App geliehen). */
+export const STICKERS: Record<string, number> = {
+  star: require('../../assets/img/leih/stickers-star.webp'),
+  moon: require('../../assets/img/leih/stickers-moon.webp'),
+  heart: require('../../assets/img/leih/stickers-heart-red.webp'),
+  sun: require('../../assets/img/leih/stickers-sun.webp'),
+  rainbow: require('../../assets/img/leih/stickers-rainbow.webp'),
+  rose: require('../../assets/img/leih/stickers-rose.webp'),
+};
+export const PRAISE_TEXTS = [
+  'Super gemacht!',
+  'Ich bin stolz auf dich.',
+  'Du bleibst dran – toll!',
+  'Danke für deine Hilfe.',
+  'Weiter so, kleiner Schritt für kleiner Schritt.',
+  'Du hast heute etwas Schweres geschafft.',
+];

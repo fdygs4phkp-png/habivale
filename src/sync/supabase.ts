@@ -157,3 +157,15 @@ export async function deleteShares(s: Session, childId: string): Promise<void> {
 export async function sharesForMe(s: Session, parentId: string): Promise<{ child_id: string; data: unknown; updated_at: string }[]> {
   return (await call(`/rest/v1/family_shares?parent_id=eq.${parentId}&select=child_id,data,updated_at`, { token: s.access_token })) as { child_id: string; data: unknown; updated_at: string }[];
 }
+
+export async function sendInbox(s: Session, childId: string, fromParent: string, data: unknown): Promise<void> {
+  await call('/rest/v1/family_inbox', { method: 'POST', token: s.access_token, headers: { Prefer: 'return=minimal' }, body: JSON.stringify({ child_id: childId, from_parent: fromParent, data }) });
+}
+
+export async function getInbox(s: Session, childId: string): Promise<{ id: string; data: unknown; created_at: string }[]> {
+  return (await call(`/rest/v1/family_inbox?child_id=eq.${childId}&select=id,data,created_at&order=created_at`, { token: s.access_token })) as { id: string; data: unknown; created_at: string }[];
+}
+
+export async function deleteInbox(s: Session, id: string): Promise<void> {
+  await call(`/rest/v1/family_inbox?id=eq.${id}`, { method: 'DELETE', token: s.access_token });
+}

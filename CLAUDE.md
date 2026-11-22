@@ -50,7 +50,11 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   Freigaben (`state.family.shares`, Voreinstellung nach Alter `defaultShares`), Schnappschuss `src/logic/share.ts` (Gewohnheiten 14 Tage, Ziele, Gläser – nie Tagebuch).
   Seiten `src/app/familie.tsx` (Eltern, QR-Code zum Link `verbinden?code=`), `src/app/verbinden.tsx` (Kind), Kind-Ansicht in `konto.tsx`.
   Eltern-Sperre `src/ui/gate.tsx` (Zahl in Worten) vor Premium/Backup/Löschen und Wiederherstellungs-Code auf Kindergeräten.
-- Noch offen im Familienkonto: Eltern schlagen Gewohnheiten vor, tragen Taschengeld ein, schicken Lob/Sticker (Eingang fürs Kind); Kinder-Modus der Oberfläche
+- **Eltern-Aktionen (0.7.0):** Tabelle `family_inbox` (Migration `family_inbox`; Eltern schreiben nur an Kinder der eigenen Familie über `ew_can_send`,
+  nur das Kind liest/löscht, max. 50 offen). Inhalt `ParentMessage` (suggest/praise/allowance) mit `sealFor` für den Schlüssel des Kindes.
+  Kind holt nach jedem Abgleich ab (`pullInbox`), Taschengeld wird sofort als Eintrag `in-<id>` verteilt, alles erscheint als Karte auf „Heute“
+  (`state.inbox`, Grabstein 'i:'); Vorschlag annehmen (`acceptSuggestion`, beachtet 3 Gewohnheiten in Free) oder ablehnen. Sticker/Sätze `STICKERS`, `PRAISE_TEXTS`.
+- Noch offen im Familienkonto: Kinder-Modus der Oberfläche
   (größere Schrift, einfachere Tagebuchfragen); Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle

@@ -8,6 +8,7 @@ import { toggleDone } from '../logic/habits.ts';
 import { DEFAULT_SPLIT, balances, splitCents } from '../logic/money.ts';
 import { updateFirsts } from '../logic/trophies.ts';
 import { emptyEntry, looksLikeBackup } from '../logic/journal.ts';
+import { FREE_HABIT_LIMIT } from '../logic/types.ts';
 import type { AppState, Goal, Habit, Jar, JournalEntry, MoneyEntry, SavingsGoal, Split } from '../logic/types.ts';
 
 const KEY = 'habivale_state_v1';
@@ -19,7 +20,7 @@ export function newId(): string {
 export { normalize };
 
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {}, family: null, fMt: 0 };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goal: null }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [] };
 }
 
 function normalize(raw: unknown): AppState {
@@ -41,6 +42,7 @@ function normalize(raw: unknown): AppState {
     deleted: r.deleted || {},
     family: r.family ?? null,
     fMt: r.fMt ?? 0,
+    inbox: r.inbox || [],
   } as AppState;
 }
 
@@ -72,6 +74,8 @@ type Store = {
   /** Abgleich: zusammengeführten Stand übernehmen (ohne Änderungsstempel zu setzen) */
   applyMerged: (s: AppState) => void;
   setFamily: (f: AppState['family']) => void;
+  inboxDone: (id: string) => void;
+  acceptSuggestion: (id: string) => boolean;
 };
 
 const Ctx = createContext<Store | null>(null);
@@ -180,6 +184,21 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setPremium: (on) => update((s) => ({ ...s, premium: on, sMt: Date.now() })),
       applyMerged: (next) => update(() => next),
       setFamily: (f) => update((s) => ({ ...s, family: f, fMt: Date.now() })),
+      inboxDone: (id) => update((s) => ({ ...s, inbox: s.inbox.filter((x) => x.id !== id), deleted: { ...s.deleted, ['i:' + id]: Date.now() } })),
+      acceptSuggestion: (id) => {
+        const it = state.inbox.find((x) => x.id === id);
+        if (!it?.habit) return false;
+        if (state.habits.filter((h) => !h.archived && !h.paused).length >= FREE_HABIT_LIMIT && !state.premium) return false;
+        const now = Date.now();
+        const days = it.habit.days.length ? it.habit.days : [0, 1, 2, 3, 4, 5, 6];
+        update((s) => ({
+          ...s,
+          habits: [...s.habits, { id: newId(), name: it.habit!.name, icon: it.habit!.icon, rhythm: days.length === 7 ? { kind: 'daily' } : { kind: 'weekdays', days }, start: dayKey(), paused: false, archived: false, createdAt: now, mt: now }],
+          inbox: s.inbox.filter((x) => x.id !== id),
+          deleted: { ...s.deleted, ['i:' + id]: now },
+        }));
+        return true;
+      },
       exportJson: () => JSON.stringify({ app: 'habivale', version: 1, exportedAt: new Date().toISOString(), state }, null, 1),
       importJson: (json) => {
         try {

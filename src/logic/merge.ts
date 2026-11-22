@@ -77,6 +77,7 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     firsts,
     deleted,
     family: mergeFamily(local, remote),
+    inbox: byId((local.inbox || []).map((x) => ({ ...x, mt: x.at })), (remote.inbox || []).map((x) => ({ ...x, mt: x.at })), deleted, 'i:').map(({ mt: _m, ...x }) => x as AppState['inbox'][number]),
     fMt: Math.max(local.fMt, remote.fMt),
   };
 }
