@@ -97,6 +97,7 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   Besuch, gesetzt beim Öffnen von `/hexenhaus` über `visit(today)`, beim Abgleich vereinigt mit frühestem Zeitpunkt). Seite zeigt Besuch des Tages, neue
   Geschichte, Geschichtenbuch (aufklappbar), Erinnerungen. Refugium-Karte sagt „Heute wartet eine neue Geschichte“. Besuche zählen nicht als aktive Tage.
   Test `HABIVALE/Habivale-Skripte/t10hexenhaus.py`.
+- **Sommer neu (0.13.1, 23.11.2026):** `out-summer-1/2` = eigene 16:9-Bilder der Nutzerin (Sommernacht Waldhäuschen/Cottage, je ein Nest, kein Kranz); Stufe 3 Sommer noch das alte quadratische Bild. Innen Stufe 2: Fenster außen = Rundbogen oben, unten gerade, mit Läden (Prompt korrigiert). Probe Einrichtung im Raum: `Ausgang/Ausgang 23.11.2026/Einrichtung im Raum – Probe`.
 - Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
