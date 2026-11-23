@@ -63,6 +63,7 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     celebrated: { ...(remote.celebrated || {}), ...(local.celebrated || {}) },
     visits: (() => { const o = { ...(remote.visits || {}) }; for (const [k, v] of Object.entries(local.visits || {})) if (o[k] === undefined || v < o[k]) o[k] = v; return o; })(),
     sMt: Math.max(local.sMt, remote.sMt),
+    startedAt: Math.min(local.startedAt ?? Infinity, remote.startedAt ?? Infinity) === Infinity ? undefined : Math.min(local.startedAt ?? Infinity, remote.startedAt ?? Infinity),
     habits: byId(local.habits, remote.habits, deleted, 'h:'),
     goals: byId(local.goals, remote.goals, deleted, 'g:'),
     done,

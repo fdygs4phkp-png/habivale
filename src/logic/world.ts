@@ -6,7 +6,7 @@ import { entryHasContent } from './journal.ts';
 import { levelInfo, wolfStage } from './progress.ts';
 import { refugeStage } from './refuge.ts';
 import { xpOf } from './trophies.ts';
-import type { DayKey } from './date.ts';
+import { dayKey, daysBetween, type DayKey } from './date.ts';
 import type { AppState } from './types.ts';
 
 export type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -25,7 +25,9 @@ export type Rule =
   | { kind: 'savings'; n: number }
   | { kind: 'lessons'; n: number }
   | { kind: 'shared'; n: number }
-  | { kind: 'refuge'; n: number };
+  | { kind: 'refuge'; n: number }
+  /** n Tage nach dem ersten Start der App */
+  | { kind: 'since'; n: number };
 
 export function ruleText(r: Rule): string {
   switch (r.kind) {
@@ -41,6 +43,7 @@ export function ruleText(r: Rule): string {
     case 'lessons': return r.n === 1 ? 'Lies eine Lektion von Ylva' : `Lies ${r.n} Lektionen von Ylva`;
     case 'shared': return r.n === 1 ? 'Teile zum ersten Mal aus dem grünen Glas' : `Teile ${r.n}-mal aus dem grünen Glas`;
     case 'refuge': return r.n === 2 ? 'Dein Refugium wird zum Häuschen' : 'Dein Refugium wird zum großen Haus';
+    case 'since': return r.n === 1 ? 'Morgen erzählt Ylva weiter' : `In ein paar Tagen erzählt Ylva weiter`;
   }
 }
 
@@ -58,6 +61,7 @@ export function ruleMet(s: AppState, r: Rule, today: DayKey): boolean {
     case 'lessons': return Object.keys(s.lessons).length >= r.n;
     case 'shared': return s.money.entries.filter((e) => e.kind === 'share').length >= r.n;
     case 'refuge': return refugeStage(s).n >= r.n;
+    case 'since': return daysBetween(dayKey(new Date(s.startedAt ?? Date.now())), today) >= r.n;
   }
 }
 
@@ -159,15 +163,19 @@ export interface Chapter {
   rule: Rule;
 }
 
+/** Was davor geschah: Ylva erzählt die Vorgeschichte, jeden Tag ein Stück (ab dem ersten Start der App). */
+export const BACKSTORY: Chapter[] = [
+  { title: 'Das große Durcheinander', rule: { kind: 'since', n: 0 }, text: 'In einem kleinen Haus am Rand des Dorfes wohnen Lyra und Kael. Und in diesem Haus herrscht Chaos. Auf dem Tisch liegt ein halb gemaltes Bild, daneben ein Pullover mit nur einem Ärmel. Unter dem Bett stapeln sich Bücher, die keiner zu Ende gelesen hat. Kaels Gitarre hat seit Wochen nur fünf Saiten, und Lyras Kräuter am Fenster sind längst vertrocknet. Jeden Morgen suchen die beiden ihre Schuhe, und jeden Abend sagen sie: „Morgen räumen wir auf.“' },
+  { title: '„So geht es nicht weiter!“', rule: { kind: 'since', n: 1 }, text: 'Eines Abends stolpert Kael über einen Korb voller angefangener Sachen und landet mitten in einem Berg aus Wolle. Lyra will lachen – aber dann sitzen beide still auf dem Boden. „Wir fangen so viel an“, sagt Lyra leise, „und nichts wird fertig.“ – „Ich bin es so leid“, sagt Kael. „Was können wir denn tun?“ Sie überlegen lange. Neue Pläne helfen nicht, das wissen sie. Sie haben schon hundert Pläne gemacht.' },
+  { title: 'Die Legende von Ylva', rule: { kind: 'since', n: 2 }, text: 'Da springt Kael auf. „Weißt du noch, was der alte Fährmann erzählt hat? Tief im Zauberwald, hinter dem Silbersee, lebt eine weise Frau. Sie heißt Ylva. Man sagt, sie kann jedem beibringen, an etwas dranzubleiben – sogar Leuten wie uns!“ Lyra zieht die Augenbrauen hoch. „Das ist doch nur eine Legende.“ – „Dann finden wir es eben heraus“, sagt Kael. Noch in der Nacht packen sie zwei Rucksäcke. Zum ersten Mal seit langem machen sie etwas sofort.' },
+  { title: 'Durch den Zauberwald', rule: { kind: 'since', n: 3 }, text: 'Der Weg ist weit. Am zweiten Tag gabelt er sich, und Nebel zieht auf. Die beiden sehen kaum ihre eigenen Füße. Kael will umkehren. Doch Lyra hält ihre Laterne hoch: „Wir müssen nicht den ganzen Weg sehen. Nur die nächsten drei Steine.“ Also gehen sie drei Steine weit. Dann wieder drei. Als der Nebel sich hebt, steht vor ihnen ein krummes kleines Haus mit leuchtenden Fenstern.' },
+  { title: 'Bei Ylva', rule: { kind: 'since', n: 4 }, text: 'Ylva öffnet die Tür, bevor sie anklopfen. Sie hat silbernes Haar und Augen, die alles zu sehen scheinen. „Ihr habt lange gebraucht“, sagt sie und lächelt. „Aber ihr seid angekommen – das ist schon der erste Schritt.“ Am Feuer erzählen die beiden von ihrem Durcheinander. Ylva hört zu und sagt dann: „Ein großer Traum ist wie ein ferner Berg. Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
+  { title: 'Der kleine Wolf', rule: { kind: 'since', n: 5 }, text: 'In einem Korb neben dem Kamin liegt ein Wolfswelpe. Er zittert ein wenig. „Er hat keine Mutter mehr“, sagt Ylva. „Zieht ihn auf. Er braucht euch – jeden Tag, nicht nur, wenn ihr Lust habt. So lernt ihr, an einer Sache dranzubleiben.“ Der Welpe schnuppert an Kaels Hand und schläft auf Lyras Schoß ein. Von da an ist klar: Sie gehen nicht zurück ins Dorf. Sie bleiben im Wald.' },
+];
+
+/** Die Geschichte beginnt mittendrin – mit dem Welpen in der kleinen Hütte (Wunsch der Nutzerin, 24.11.2026). */
 export const STORY_CHAPTERS: Chapter[] = [
-  // Seit 0.17.0 sechzehn Kapitel (Vorschlag vom 24.11.2026, von der Nutzerin freigegeben)
-  { title: 'Das große Durcheinander', rule: { kind: 'start' }, text: 'In einem kleinen Haus am Rand des Dorfes wohnen Lyra und Kael. Und in diesem Haus herrscht Chaos. Auf dem Tisch liegt ein halb gemaltes Bild, daneben ein Pullover mit nur einem Ärmel. Unter dem Bett stapeln sich Bücher, die keiner zu Ende gelesen hat. Kaels Gitarre hat seit Wochen nur fünf Saiten, und Lyras Kräuter am Fenster sind längst vertrocknet. Jeden Morgen suchen die beiden ihre Schuhe, und jeden Abend sagen sie: „Morgen räumen wir auf.“' },
-  { title: '„So geht es nicht weiter!“', rule: { kind: 'start' }, text: 'Eines Abends stolpert Kael über einen Korb voller angefangener Sachen und landet mitten in einem Berg aus Wolle. Lyra will lachen – aber dann sitzen beide still auf dem Boden. „Wir fangen so viel an“, sagt Lyra leise, „und nichts wird fertig.“ – „Ich bin es so leid“, sagt Kael. „Was können wir denn tun?“ Sie überlegen lange. Neue Pläne helfen nicht, das wissen sie. Sie haben schon hundert Pläne gemacht.' },
-  { title: 'Die Legende von Ylva', rule: { kind: 'start' }, text: 'Da springt Kael auf. „Weißt du noch, was der alte Fährmann erzählt hat? Tief im Zauberwald, hinter dem Silbersee, lebt eine weise Frau. Sie heißt Ylva. Man sagt, sie kann jedem beibringen, an etwas dranzubleiben – sogar Leuten wie uns!“ Lyra zieht die Augenbrauen hoch. „Das ist doch nur eine Legende.“ – „Dann finden wir es eben heraus“, sagt Kael. Noch in der Nacht packen sie zwei Rucksäcke. Zum ersten Mal seit langem machen sie etwas sofort.' },
-  { title: 'Durch den Zauberwald', rule: { kind: 'start' }, text: 'Der Weg ist weit. Am zweiten Tag gabelt er sich, und Nebel zieht auf. Die beiden sehen kaum ihre eigenen Füße. Kael will umkehren. Doch Lyra hält ihre Laterne hoch: „Wir müssen nicht den ganzen Weg sehen. Nur die nächsten drei Steine.“ Also gehen sie drei Steine weit. Dann wieder drei. Als der Nebel sich hebt, steht vor ihnen ein krummes kleines Haus mit leuchtenden Fenstern.' },
-  { title: 'Bei Ylva', rule: { kind: 'start' }, text: 'Ylva öffnet die Tür, bevor sie anklopfen. Sie hat silbernes Haar und Augen, die alles zu sehen scheinen. „Ihr habt lange gebraucht“, sagt sie und lächelt. „Aber ihr seid angekommen – das ist schon der erste Schritt.“ Am Feuer erzählen die beiden von ihrem Durcheinander. Ylva hört zu und sagt dann: „Ein großer Traum ist wie ein ferner Berg. Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
-  { title: 'Der kleine Wolf', rule: { kind: 'start' }, text: 'In einem Korb neben dem Kamin liegt ein Wolfswelpe. Er zittert ein wenig. „Er hat keine Mutter mehr“, sagt Ylva. „Zieht ihn auf. Er braucht euch – jeden Tag, nicht nur, wenn ihr Lust habt. So lernt ihr, an einer Sache dranzubleiben.“ Der Welpe schnuppert an Kaels Hand und schläft auf Lyras Schoß ein. Von da an ist klar: Sie gehen nicht zurück ins Dorf. Sie bleiben im Wald.' },
-  { title: 'Ein neues Zuhause', rule: { kind: 'days', n: 1 }, text: 'Ganz in der Nähe finden sie eine kleine, alte Hütte. Das Dach ist undicht und die Tür klemmt. Aber diesmal machen sie es anders: jeden Tag nur ein bisschen. Heute die Tür, morgen das Fenster. Und jeden Tag füttern sie den Welpen, gehen mit ihm hinaus und erzählen ihm, was sie geschafft haben.' },
+  { title: 'Ein neues Zuhause', rule: { kind: 'start' }, text: 'Lyra und Kael wohnen jetzt im Zauberwald, ganz in der Nähe von Ylva – zusammen mit einem kleinen Wolfswelpen, der keine Mutter mehr hat. Ihr Zuhause ist eine kleine, alte Hütte. Das Dach ist undicht und die Tür klemmt. Aber diesmal machen sie es anders: jeden Tag nur ein bisschen. Heute die Tür, morgen das Fenster. Und jeden Tag füttern sie den Welpen, gehen mit ihm hinaus und erzählen ihm, was sie geschafft haben. „Er braucht euch – jeden Tag“, hat Ylva gesagt. Und wie die beiden überhaupt in den Zauberwald gekommen sind? Das erzählt dir Ylva – jeden Tag ein Stück.' },
   { title: 'Der Regentag', rule: { kind: 'days', n: 7 }, text: 'Eines Morgens regnet es so stark, dass Lyra und Kael im Bett bleiben wollen. „Nur heute nicht“, murmelt Kael. Doch dann kratzt es an der Tür. Der Welpe sitzt da, nass bis auf die Pfoten, und wartet. Er hat nicht vergessen, dass sie jeden Tag zusammen hinausgehen. Lyra seufzt, zieht ihre Stiefel an – und draußen springen alle drei lachend durch die Pfützen. Manchmal ist der schwerste Schritt der erste.' },
   { title: 'Ein Schornstein raucht', rule: { kind: 'refuge', n: 2 }, text: 'Drei Wochen sind vergangen. Die Hütte ist geflickt, ein Schornstein ist gemauert und ein kleines Gärtchen angelegt. Ylva kommt zu Besuch und bleibt in der Tür stehen. „Seht ihr?“, sagt sie. „Ein Zuhause wächst wie ihr – Stein für Stein.“ Lyra und Kael schauen sich um. Nichts liegt herum. Kein halbes Bild, kein Pullover mit einem Ärmel.' },
   { title: 'Der große Welpe', rule: { kind: 'wolf', n: 1 }, text: 'Der Welpe ist gewachsen. Seine Pfoten sind viel zu groß für ihn, und beim Rennen fällt er noch oft über sie. Er klaut Kaels Socken und versteckt sie unter Lyras Bett. Aber wenn die beiden abends ihre Gewohnheiten abhaken, legt er sich dazu und schaut zu, als wüsste er genau, was das bedeutet.' },

@@ -8,7 +8,7 @@ import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT, 
 import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
 import { mergeState, hasContent } from '../src/logic/merge.ts';
 import { updateFirsts, pendingEvents, keptWolf } from '../src/logic/trophies.ts';
-import { ruleMet, unlockedOutfits, unlockedDecor, STORY_CHAPTERS } from '../src/logic/world.ts';
+import { ruleMet, unlockedOutfits, unlockedDecor, STORY_CHAPTERS, BACKSTORY } from '../src/logic/world.ts';
 import { adviceFor, talesOpen, taleOfDay, TALES } from '../src/logic/mentor.ts';
 import { refugeStage, seasonOf, sceneOf, isChristmasTime } from '../src/logic/refuge.ts';
 import { buildSnapshot } from '../src/logic/share.ts';
@@ -246,8 +246,8 @@ ok('Phase 5: Jahreszeiten, Kranz nur in der Weihnachtszeit, Ausbaustufen mit Bes
   assert.equal(refugeStage({ ...st, done: {} }).n, 2);
   assert.ok(unlockedDecor(st, T).has('windowbench'));
   assert.ok(!unlockedDecor(st, T).has('wisteria'));
-  assert.equal(ruleMet(st, STORY_CHAPTERS[8].rule, T), true); // Ein Schornstein raucht
-  assert.equal(ruleMet(st, STORY_CHAPTERS[13].rule, T), false); // Das große Haus
+  assert.equal(ruleMet(st, STORY_CHAPTERS[2].rule, T), true); // Ein Schornstein raucht
+  assert.equal(ruleMet(st, STORY_CHAPTERS[7].rule, T), false); // Das große Haus
 });
 
 ok('Hexenhaus: eine Geschichte je Besuchstag, Rat passt zur Lage, Besuche werden zusammengeführt', () => {
@@ -281,4 +281,12 @@ ok('Geld-Lektionen: jeden Tag eine neue, gelesene bleiben offen', () => {
   assert.equal(r.open.size, 1); assert.equal(r.readToday, true);
   r = lessonsOpen(list, { [list[0].id]: 500 }, '2026-11-23', day);
   assert.equal(r.open.size, 2); assert.ok(r.open.has(list[1].id));
+});
+
+ok('Was davor geschah: jeden Tag ein Stück ab dem ersten Start', () => {
+  const st = { ...base(), startedAt: new Date(2026, 10, 20, 12).getTime() } as AppState;
+  assert.equal(BACKSTORY.filter((c) => ruleMet(st, c.rule, '2026-11-20')).length, 1);
+  assert.equal(BACKSTORY.filter((c) => ruleMet(st, c.rule, '2026-11-22')).length, 3);
+  assert.equal(BACKSTORY.filter((c) => ruleMet(st, c.rule, '2026-12-01')).length, 6);
+  assert.equal(ruleMet(st, STORY_CHAPTERS[0].rule, '2026-11-20'), true);
 });

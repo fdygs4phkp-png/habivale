@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { levelInfo, wolfStage, WOLF_STAGES } from '../../logic/progress.ts';
 import { keptWolf, xpOf } from '../../logic/trophies.ts';
-import { OUTFITS, RARITY_COLOR, RARITY_NAME, ruleMet, ruleText, STORY_CHAPTERS } from '../../logic/world.ts';
+import { BACKSTORY, OUTFITS, RARITY_COLOR, RARITY_NAME, ruleMet, ruleText, STORY_CHAPTERS } from '../../logic/world.ts';
 import { useStore } from '../../state/store';
-import { IMG, OUTFIT_IMG, STORY_IMG, STORY_IMG_MISSING } from '../../ui/images';
+import { BACKSTORY_IMG, BACKSTORY_IMG_MISSING, IMG, OUTFIT_IMG, STORY_IMG, STORY_IMG_MISSING } from '../../ui/images';
 import { Bar, Button, Card, Grid, H2, Icon, P, PlaceholderNote, Screen, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 
@@ -121,6 +121,26 @@ export default function Adventure() {
           ))}
         </View>
       </Card>
+      <H2>Was davor geschah</H2>
+      <P dim>Wie sind Lyra und Kael überhaupt in den Zauberwald gekommen? Ylva erzählt es dir – jeden Tag ein Stück.</P>
+      <Grid cols={tablet ? 2 : 1}>
+        {BACKSTORY.map((x, i) => {
+          const open = ruleMet(state, x.rule, today);
+          const prevOpen = i === 0 || ruleMet(state, BACKSTORY[i - 1].rule, today);
+          if (!open && !prevOpen) return null;
+          return (
+            <Card key={'b' + i} style={{ flex: 1, padding: 0, overflow: 'hidden', gap: 0 }}>
+              <Image source={BACKSTORY_IMG[i]} style={{ width: '100%', aspectRatio: 16 / 9, opacity: open ? 1 : 0.2 }} contentFit="cover" accessibilityLabel={x.title} />
+              <View style={{ padding: 14, gap: 6 }}>
+                <Text style={s.charName}>{`Rückblick ${i + 1}: ${open ? x.title : '???'}`}</Text>
+                {open ? <P>{x.text}</P> : <P dim>Morgen erzählt Ylva weiter.</P>}
+                {open && BACKSTORY_IMG_MISSING[i] ? <PlaceholderNote text="Übergang – eigenes Bild folgt" /> : null}
+              </View>
+            </Card>
+          );
+        })}
+      </Grid>
+
       <H2>Die Geschichte</H2>
       <Grid cols={tablet ? 2 : 1}>
         {STORY_CHAPTERS.map((x, i) => {

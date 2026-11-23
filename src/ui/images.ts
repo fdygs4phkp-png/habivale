@@ -232,13 +232,16 @@ export const DECOR_IMG: Record<string, number> = {
 export const DECOR_REDO = new Set(['bookshelf']);
 
 /** Kapitelbilder der Geschichte (Index wie STORY_CHAPTERS). Fehlende Bilder (Prompts „Alle offenen Bild-Prompts 24.11.2026“, Teil F) = Übergang. */
-export const STORY_IMG = [
+export const BACKSTORY_IMG = [
   require('../../assets/img/scene/story-1-aufbruch.webp'),
   require('../../assets/img/scene/story-1-aufbruch.webp'),
   require('../../assets/img/scene/story-1-aufbruch.webp'),
   require('../../assets/img/scene/story-1-aufbruch.webp'),
   require('../../assets/img/scene/story-2-ankunft-hexenhaus.webp'),
   require('../../assets/img/scene/story-3-welpe.webp'),
+];
+export const BACKSTORY_IMG_MISSING = [true, true, true, false, false, false];
+export const STORY_IMG = [
   require('../../assets/img/scene/story-4-einzug.webp'),
   require('../../assets/img/scene/story-4-einzug.webp'),
   require('../../assets/img/refuge/out-summer-2.webp'),
@@ -250,7 +253,7 @@ export const STORY_IMG = [
   require('../../assets/img/scene/key-3.webp'),
   require('../../assets/img/scene/key-4.webp'),
 ];
-export const STORY_IMG_MISSING = [true, true, true, false, false, false, false, true, false, true, true, false, true, false, false, true];
+export const STORY_IMG_MISSING = [false, true, false, true, true, false, true, false, false, true];
 
 /** Leisten-Symbole (goldene Bilder der Nutzer, Prompts Teil 2 Nr. 13). */
 export const NAV_IMG: Record<string, number> = {

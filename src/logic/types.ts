@@ -96,6 +96,8 @@ export interface AppState {
   celebrated: Record<string, number>;
   /** Besuche im Hexenhaus: Tag → erster Besuch an dem Tag (je Besuchstag öffnet sich eine Geschichte der Mentorin) */
   visits: Record<DayKey, number>;
+  /** Erster Start der App (für „Was davor geschah“: jeden Tag ein Stück) */
+  startedAt?: number;
 }
 
 export interface InboxItem {

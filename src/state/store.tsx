@@ -80,6 +80,7 @@ function normalize(raw: unknown): AppState {
     // Beim ersten Start mit dieser Version: alles schon Erreichte gilt als verkündet (keine Flut von Meldungen)
     ...wolfV5(r.firsts || {}, r.celebrated || { ...(r.firsts || {}) }),
     visits: r.visits || {},
+    startedAt: r.startedAt ?? (Object.values(r.firsts || {}).filter((v) => v > 1e12).sort((a, b) => a - b)[0] || Date.now()),
   } as AppState;
 }
 
