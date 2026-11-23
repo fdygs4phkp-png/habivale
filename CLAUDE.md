@@ -98,6 +98,7 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   Geschichte, Geschichtenbuch (aufklappbar), Erinnerungen. Refugium-Karte sagt „Heute wartet eine neue Geschichte“. Besuche zählen nicht als aktive Tage.
   Test `HABIVALE/Habivale-Skripte/t10hexenhaus.py`.
 - **Sommer neu (0.13.1, 23.11.2026):** `out-summer-1/2` = eigene 16:9-Bilder der Nutzerin (Sommernacht Waldhäuschen/Cottage, je ein Nest, kein Kranz); Stufe 3 Sommer noch das alte quadratische Bild. Innen Stufe 2: Fenster außen = Rundbogen oben, unten gerade, mit Läden (Prompt korrigiert). Probe Einrichtung im Raum: `Ausgang/Ausgang 23.11.2026/Einrichtung im Raum – Probe`.
+- **Innenräume passend zu außen (0.13.2, 23.11.2026):** Regel: innen schaut man auf die Vorderwand, Tür und Fenster wie außen, aber seitenverkehrt, Tür zu. `in-1` Hütte (Ofen mit Rohr gerade durchs Dach, rechts neben der Tür ein Wandbrett mit 2 Kerzen), `in-2` Steinhaus (Rundbogenfenster mit Blumenkasten links, Kamin rechts), `in-3` großes Haus (Wohnraum ohne Betten, Treppe links, Kamin rechts = außen links). Sommer: `out-summer-1` mit Ofenrohr, `out-summer-3` großes Haus. Die anderen Jahreszeiten der Hütte haben außen noch kein Ofenrohr (Hinweis in der App). Räume sind leer genug für die Einrichtung; Einrichtungsteile müssen dafür neu in derselben Perspektive (gerade, Augenhöhe) gemalt werden.
 - Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle

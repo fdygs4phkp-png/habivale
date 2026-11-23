@@ -17,10 +17,11 @@ type Where = 'out' | 'in' | 'lyra' | 'kael';
 /** Bild für außen; Winter ohne Schmuck fehlt noch → Weihnachtsbild mit Hinweis. */
 function outImage(scene: Scene, n: number): { src: number; missing?: string } {
   if (scene === 'winter') {
-    if (REFUGE_WINTER_PLAIN) return { src: REFUGE_WINTER_PLAIN[n - 1] };
+    if (REFUGE_WINTER_PLAIN) return { src: REFUGE_WINTER_PLAIN[n - 1], missing: n === 1 ? 'Übergang: Ofenrohr auf dem Dach folgt' : undefined };
     return { src: REFUGE_OUT.xmas[n - 1], missing: 'Übergang: Winter ohne Kranz und Weihnachtsschmuck folgt' };
   }
-  return { src: REFUGE_OUT[scene][n - 1] };
+  // Die Hütte hat innen einen Ofen mit Rohr durchs Dach; außen hat es bisher nur das Sommerbild.
+  return { src: REFUGE_OUT[scene][n - 1], missing: n === 1 && scene !== 'summer' ? 'Übergang: Ofenrohr auf dem Dach folgt' : undefined };
 }
 
 export default function Refuge() {
@@ -45,7 +46,6 @@ export default function Refuge() {
   else if (where === 'in')
     pic = {
       src: REFUGE_IN[shown - 1],
-      missing: shown === 2 ? 'Übergang: Das Fenster ist innen noch rund, außen eckig – neues Bild folgt' : shown === 3 ? 'Übergang: Im großen Haus kommen die Betten nach oben – neues Bild folgt' : undefined,
     };
   else pic = { src: ROOM_IMG[where], missing: (where === 'lyra' ? 'Lyras' : 'Kaels') + ' Zimmer wird noch gezeichnet' };
 
