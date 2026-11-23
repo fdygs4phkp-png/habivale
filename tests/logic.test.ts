@@ -246,8 +246,8 @@ ok('Phase 5: Jahreszeiten, Kranz nur in der Weihnachtszeit, Ausbaustufen mit Bes
   assert.equal(refugeStage({ ...st, done: {} }).n, 2);
   assert.ok(unlockedDecor(st, T).has('windowbench'));
   assert.ok(!unlockedDecor(st, T).has('wisteria'));
-  assert.equal(ruleMet(st, STORY_CHAPTERS[4].rule, T), true);
-  assert.equal(ruleMet(st, STORY_CHAPTERS[6].rule, T), false);
+  assert.equal(ruleMet(st, STORY_CHAPTERS[8].rule, T), true); // Ein Schornstein raucht
+  assert.equal(ruleMet(st, STORY_CHAPTERS[13].rule, T), false); // Das große Haus
 });
 
 ok('Hexenhaus: eine Geschichte je Besuchstag, Rat passt zur Lage, Besuche werden zusammengeführt', () => {

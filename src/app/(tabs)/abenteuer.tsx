@@ -5,7 +5,7 @@ import { levelInfo, wolfStage, WOLF_STAGES } from '../../logic/progress.ts';
 import { keptWolf, xpOf } from '../../logic/trophies.ts';
 import { OUTFITS, RARITY_COLOR, RARITY_NAME, ruleMet, ruleText, STORY_CHAPTERS } from '../../logic/world.ts';
 import { useStore } from '../../state/store';
-import { IMG, OUTFIT_IMG, STORY_IMG } from '../../ui/images';
+import { IMG, OUTFIT_IMG, STORY_IMG, STORY_IMG_MISSING } from '../../ui/images';
 import { Bar, Button, Card, Grid, H2, Icon, P, PlaceholderNote, Screen, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 
@@ -131,6 +131,7 @@ export default function Adventure() {
               <View style={{ padding: 14, gap: 6 }}>
                 <Text style={s.charName}>{`Kapitel ${i + 1}: ${open ? x.title : '???'}`}</Text>
                 {open ? <P>{x.text}</P> : <P dim>{`Noch verschlossen – ${ruleText(x.rule)}.`}</P>}
+                {open && STORY_IMG_MISSING[i] ? <PlaceholderNote text="Übergang – eigenes Bild folgt" /> : null}
               </View>
             </Card>
           );
