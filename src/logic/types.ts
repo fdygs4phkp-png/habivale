@@ -121,6 +121,8 @@ export interface ChildProfile {
   birthYear: number;
   avatar: Avatar;
   addedAt: number;
+  /** Wiederherstellungs-Code des Kindes, vom Kindergerät verschlüsselt übermittelt (für neue Geräte ohne Code-Eingabe) */
+  rc?: string;
 }
 
 export interface Shares {

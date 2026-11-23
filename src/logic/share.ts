@@ -13,6 +13,9 @@ export interface Snapshot {
   habits?: { name: string; icon: string; streak: number; days: (0 | 1 | null)[] }[]; // letzte 14 Tage, null = nicht fällig
   goals?: { title: string; area: LifeArea; progress: number; reached: boolean }[];
   money?: { balances: Record<Jar, number>; goals: { name: string; cents: number; saved: number }[] };
+  /** Wiederherstellungs-Code des Kindes (die Eltern haben ihn ohnehin auf ihrer Karte). Damit kann ein neues Kindergerät
+   *  sich allein mit dem Einladungscode entsperren. Nur verschlüsselt für die Eltern. */
+  rc?: string;
 }
 
 export function buildSnapshot(s: AppState, today: DayKey, shares: Shares, now = Date.now()): Snapshot {

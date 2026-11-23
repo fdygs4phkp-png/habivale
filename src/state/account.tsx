@@ -207,9 +207,13 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
     if (!f || f.role !== 'child') return;
     const on = f.shares.habits || f.shares.goals || f.shares.money;
     const snap = buildSnapshot(stateRef.current, dayKey(), f.shares);
-    const key = on ? snapshotKey(snap) + JSON.stringify(f.parents.map((p) => p.id)) : 'off';
+    // Der Wiederherstellungs-Code reist immer mit (auch wenn sonst nichts geteilt wird), damit die Eltern ein neues Gerät ohne Code-Eingabe verbinden können
+    const env = envRef.current;
+    if (env && keyRef.current) snap.rc = await cr.openCode(env, keyRef.current).catch(() => undefined);
+    const send = on || !!snap.rc;
+    const key = send ? snapshotKey(snap) + JSON.stringify(f.parents.map((p) => p.id)) : 'off';
     if (key === lastShare.current) return;
-    if (!on) await api.deleteShares(s, f.memberId);
+    if (!send) await api.deleteShares(s, f.memberId);
     else for (const p of f.parents) await api.putShare(s, f.memberId, p.id, await cr.sealFor(p.pub, JSON.stringify(snap)));
     lastShare.current = key;
   }, []);
@@ -323,7 +327,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
 
   const inviteFor = async (s: api.Session, child: ChildProfile) => {
     const code = cr.newInviteCode();
-    const payload = await cr.sealWithCode(code, JSON.stringify({ name: child.name, birthYear: child.birthYear, avatar: child.avatar }));
+    const f = stateRef.current.family;
+    const rc = (f?.role === 'parent' ? f.children.find((c) => c.memberId === child.memberId)?.rc : undefined) ?? child.rc;
+    const payload = await cr.sealWithCode(code, JSON.stringify({ name: child.name, birthYear: child.birthYear, avatar: child.avatar, ...(rc ? { rc } : {}) }));
     const expires = await api.rpc<string>(s, 'family_invite', { p_member: child.memberId, p_code_hash: await cr.hashInvite(code), p_payload: payload });
     return { code, expires };
   };
@@ -443,6 +449,14 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
           }
           out.push({ profile: c, connected: !!m.user_id, pub: m.pub, snapshot, updatedAt: sh?.updated_at ?? null });
         }
+        // Wiederherstellungs-Codes der Kinder in den eigenen (verschlüsselten) Daten merken
+        const codes = new Map(out.filter((v) => v.snapshot?.rc && v.snapshot.rc !== v.profile.rc).map((v) => [v.profile.memberId, v.snapshot!.rc!]));
+        const cur = stateRef.current;
+        if (codes.size && cur.family?.role === 'parent') {
+          const next: AppState = { ...cur, family: { ...cur.family, children: cur.family.children.map((c) => (codes.has(c.memberId) ? { ...c, rc: codes.get(c.memberId) } : c)) }, fMt: Date.now() };
+          applyRef.current(next);
+          stateRef.current = next;
+        }
         return out;
       },
       removeChild: async (child) => {
@@ -477,7 +491,7 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
           p_code_hash: await cr.hashInvite(code),
           p_pub: kp.pub,
         });
-        const info = JSON.parse(await cr.openWithCode(code, res.payload)) as { name: string; birthYear: number; avatar: Avatar };
+        const info = JSON.parse(await cr.openWithCode(code, res.payload)) as { name: string; birthYear: number; avatar: Avatar; rc?: string };
         await saveTarget({ kind: 'child', memberId: res.member_id });
         const fam: FamilyInfo = {
           role: 'child',
@@ -497,7 +511,18 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         applyRef.current(next);
         stateRef.current = next;
         if (existing) {
-          // Dieses Profil hatte schon ein Gerät: Daten mit dem Wiederherstellungs-Code öffnen
+          // Dieses Profil hatte schon ein Gerät. Haben die Eltern den Wiederherstellungs-Code mitgeschickt, öffnet es sich von selbst.
+          if (info.rc && cr.isEnvelope(existing.data)) {
+            try {
+              await saveKey(await cr.unlockWithCode(existing.data, info.rc));
+              envRef.current = existing.data;
+              setStatus('idle');
+              await syncNow();
+              return { recovery: null, needsRecovery: false };
+            } catch {
+              // Code passt nicht (mehr) – dann wie bisher von Hand
+            }
+          }
           setStatus('locked');
           return { recovery: null, needsRecovery: true };
         }

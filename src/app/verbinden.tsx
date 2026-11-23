@@ -13,6 +13,7 @@ export default function Connect() {
   const [msg, setMsg] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<string | null>(null);
   const [needsRecovery, setNeedsRecovery] = useState(false);
+  const [moved, setMoved] = useState(false);
   const [rc, setRc] = useState('');
 
   const run = async (f: () => Promise<void>) => {
@@ -37,7 +38,13 @@ export default function Connect() {
         </Pressable>
       }
     >
-      {recovery ? (
+      {moved ? (
+        <Card style={{ borderColor: C.gold }}>
+          <H2>Geschafft!</H2>
+          <P>Dein neues Gerät ist verbunden, und alle deine Sachen sind wieder da.</P>
+          <Button title="Fertig" onPress={home} />
+        </Card>
+      ) : recovery ? (
         <Card style={{ borderColor: C.gold }}>
           <H2>Geschafft!</H2>
           <P>Dein Gerät ist jetzt mit deiner Familie verbunden.</P>
@@ -68,7 +75,8 @@ export default function Connect() {
               run(async () => {
                 const r = await a.joinFamily(code);
                 if (r.needsRecovery) setNeedsRecovery(true);
-                else setRecovery(r.recovery);
+                else if (r.recovery) setRecovery(r.recovery);
+                else setMoved(true);
               })
             }
           />

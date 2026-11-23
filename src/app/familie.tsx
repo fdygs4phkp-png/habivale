@@ -112,7 +112,7 @@ function ChildCard({ v, onInvite, onRemove, onAct }: { v: ChildView; onInvite: (
         </View>
       ) : null}
 
-      {v.connected && !snap ? <P dim>{v.profile.name} teilt gerade nichts mit dir.</P> : null}
+      {v.connected && !(snap?.habits || snap?.goals || snap?.money) ? <P dim>{v.profile.name} teilt gerade nichts mit dir.</P> : null}
       {snap ? <P dim>Stand: {new Date(snap.at).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })} · Das Tagebuch bleibt immer privat.</P> : null}
 
       {!v.left && v.connected && v.pub ? (
