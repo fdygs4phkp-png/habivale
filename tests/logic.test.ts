@@ -1,3 +1,4 @@
+import { lessonsFor, lessonsOpen } from '../src/logic/lessons.ts';
 // Prüfungen der Logik ohne App: `npm test`
 import assert from 'node:assert/strict';
 import { addDays, dayKey, weekday } from '../src/logic/date.ts';
@@ -81,8 +82,8 @@ ok('Wolf: aktive Tage, nie zurück', () => {
   for (let i = 0; i < 30; i++) d = toggleDone(d, 'a', addDays(T, -i));
   assert.equal(activeDays(a, d).length, 30);
   assert.equal(wolfStage(a, d).index, 0); // seit 0.16.0 nach 30 Tagen noch ein Welpe
-  for (let i = 30; i < 60; i++) d = toggleDone(d, 'a', addDays(T, -i));
-  assert.equal(wolfStage(a, d).index, 1); // großer Welpe ab 60
+  for (let i = 30; i < 45; i++) d = toggleDone(d, 'a', addDays(T, -i));
+  assert.equal(wolfStage(a, d).index, 1); // großer Welpe ab 45
   assert.equal(wolfStage(a, {}, 2).index, 2);
 });
 
@@ -95,11 +96,11 @@ ok('Taschengeld: Aufteilung, Rest ins Sparglas', () => {
     { id: '3', kind: 'move', cents: 50, day: T, note: '', from: 'save', to: 'share', at: 3 },
   ];
   assert.deepEqual(balances(e), { save: 200, spend: 80, share: 100 });
-  assert.equal(fillLevel('save', e, 800), 1);
-  assert.equal(fillLevel('save', e, 200), 4);
+  assert.equal(fillLevel('save', e, 800), 2); // 25 % vom Ziel
+  assert.equal(fillLevel('save', e, 200), 6);
   // Langsam füllen: 1–2 Taschengelder Stufe 1, 3–5 Stufe 2, 6–9 Stufe 3, ab 10 voll
   const n = (k: number): MoneyEntry[] => Array.from({ length: k }, (_, i) => ({ id: 'a' + i, kind: 'allowance' as const, cents: 500, day: T, note: '', parts: splitCents(500, DEFAULT_SPLIT), at: i }));
-  assert.deepEqual([1, 2, 3, 5, 6, 9, 10].map((k) => fillLevel('spend', n(k), null)), [1, 1, 2, 2, 3, 3, 4]);
+  assert.deepEqual([1, 2, 3, 4, 5, 7, 8, 10, 11, 15, 16].map((k) => fillLevel('spend', n(k), null)), [1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6]);
 });
 
 ok('Euro lesen und schreiben', () => {
@@ -208,7 +209,7 @@ ok('Sparziele der Reihe nach, Monatsübersicht, Geld-XP', () => {
 ok('Phase 4: Level/Wolf als Ereignisse, nur höchstes Level, Bestandsschutz, Kleidung freischalten', () => {
   let st = { ...base(), habits: [h('a', { start: '2025-01-01' })] } as AppState;
   let d = {};
-  for (let i = 0; i < 61; i++) d = toggleDone(d, 'a', addDays(T, -i));
+  for (let i = 0; i < 46; i++) d = toggleDone(d, 'a', addDays(T, -i));
   st = { ...st, done: d };
   const f = updateFirsts(st, 1000, T)!;
   assert.ok(f['t:first-step'] && f['t:days-30'] && f['wolf:1'] && f['lv:2']);
@@ -270,3 +271,14 @@ ok('Hexenhaus: eine Geschichte je Besuchstag, Rat passt zur Lage, Besuche werden
 });
 
 console.log(n + ' Prüfungen bestanden');
+
+ok('Geld-Lektionen: jeden Tag eine neue, gelesene bleiben offen', () => {
+  const list = lessonsFor('kind');
+  const day = (ts: number) => (ts < 1000 ? '2026-11-22' : '2026-11-23');
+  let r = lessonsOpen(list, {}, '2026-11-23', day);
+  assert.equal(r.open.size, 1);
+  r = lessonsOpen(list, { [list[0].id]: 2000 }, '2026-11-23', day);
+  assert.equal(r.open.size, 1); assert.equal(r.readToday, true);
+  r = lessonsOpen(list, { [list[0].id]: 500 }, '2026-11-23', day);
+  assert.equal(r.open.size, 2); assert.ok(r.open.has(list[1].id));
+});

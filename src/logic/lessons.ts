@@ -139,3 +139,15 @@ export function lessonsFor(stage: AgeStage): Lesson[] {
   const i = order.indexOf(stage);
   return [...LESSONS.filter((l) => l.stage === stage), ...LESSONS.filter((l) => order.indexOf(l.stage) < i)];
 }
+
+/** Jeden Tag geht höchstens eine neue Lektion auf (Wunsch der Nutzerin), gelesene bleiben offen.
+ *  Liefert die Ids, die man antippen kann, und ob heute schon eine neue gelesen wurde. */
+export function lessonsOpen(list: Lesson[], read: Record<string, number>, today: string, dayOf: (ts: number) => string): { open: Set<string>; readToday: boolean } {
+  const open = new Set(list.filter((l) => read[l.id] !== undefined).map((l) => l.id));
+  const readToday = Object.values(read).some((ts) => dayOf(ts) === today);
+  if (!readToday) {
+    const next = list.find((l) => read[l.id] === undefined);
+    if (next) open.add(next.id);
+  }
+  return { open, readToday };
+}

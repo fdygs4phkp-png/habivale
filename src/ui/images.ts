@@ -280,3 +280,10 @@ export const DIARY_STICKERS: Record<string, number> = {
   shell: require('../../assets/img/items/shell.webp'),
   potion: require('../../assets/img/items/potion.webp'),
 };
+
+/** Bild für Füllstand 0–6. Solange es je Glas nur fünf Bilder gibt, teilen sich Stufen ein Bild. */
+export function jarPic(jar: 'save' | 'spend' | 'share', level: number): number {
+  const imgs = JAR_IMG[jar];
+  if (imgs.length >= 7) return imgs[Math.max(0, Math.min(6, level))];
+  return imgs[[0, 1, 1, 2, 2, 3, 4][Math.max(0, Math.min(6, level))]];
+}

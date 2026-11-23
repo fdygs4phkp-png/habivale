@@ -2,7 +2,8 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { shortDateDe } from '../logic/date.ts';
-import { lessonsFor, type Lesson } from '../logic/lessons.ts';
+import { lessonsFor, lessonsOpen, type Lesson } from '../logic/lessons.ts';
+import { dayKey } from '../logic/date.ts';
 import { allocate, balances, fillLevel, formatEuro, isValidSplit, JARS, monthSummary, openGoals, parseEuro, splitCents, wishDaysLeft, wishDue } from '../logic/money.ts';
 import { FREE_SAVINGS_GOALS, MAX_SAVINGS_GOALS, type Jar, type MoneyEntry, type SavingsGoal } from '../logic/types.ts';
 import { useMode } from '../ui/mode';
@@ -11,7 +12,7 @@ import { GOAL_IMG } from '../ui/images';
 import { useStore } from '../state/store';
 import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, PlaceholderNote, Screen, Sheet, tell, useLayout } from '../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../ui/theme';
-import { JAR_IMG } from '../ui/images';
+import { jarPic } from '../ui/images';
 
 type Mode = null | 'allowance' | 'spend' | 'share' | 'move' | 'goal' | 'split';
 
@@ -33,6 +34,7 @@ export default function Money() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [month, setMonth] = useState(store.today.slice(0, 7));
   const { stage } = useMode();
+  const lo = lessonsOpen(lessonsFor(stage), state.lessons, dayKey(), (ts) => dayKey(new Date(ts)));
   const [split, setSplitDraft] = useState(m.split);
 
   const open = (md: Mode) => {
@@ -109,7 +111,7 @@ export default function Money() {
         <View style={s.jars}>
           {JARS.map((j) => (
             <View key={j} style={s.jar}>
-              <Image source={JAR_IMG[j][fillLevel(j, m.entries, goal?.cents ?? null)]} style={{ width: tablet ? 140 : 84, height: (tablet ? 140 : 84) * 1.2 }} contentFit="contain" accessibilityLabel={JAR_NAME[j]} />
+              <Image source={jarPic(j, fillLevel(j, m.entries, goal?.cents ?? null))} style={{ width: tablet ? 140 : 84, height: (tablet ? 140 : 84) * 1.2 }} contentFit="contain" accessibilityLabel={JAR_NAME[j]} />
               <Text style={[s.jarName, { color: JAR_COLOR[j] }]}>{JAR_NAME[j]}</Text>
               <Text style={s.jarVal}>{formatEuro(b[j])}</Text>
             </View>
@@ -206,14 +208,22 @@ export default function Money() {
 
           <H2>Ylva erklärt</H2>
           <Grid cols={tablet ? 2 : 1} gap={10}>
-            {lessonsFor(stage).map((l) => (
-              <Card key={l.id} onPress={() => { setLesson(l); store.markLesson(l.id); }} label={'Lektion ' + l.title} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Icon name={state.lessons[l.id] ? 'check-circle' : 'book-open-page-variant-outline'} color={state.lessons[l.id] ? C.mint : C.gold} />
-                <Text style={[s.entryText, { flex: 1 }]}>{l.title}</Text>
-                <Icon name="chevron-right" color={C.dim} />
-              </Card>
-            ))}
+            {lessonsFor(stage).map((l) =>
+              lo.open.has(l.id) ? (
+                <Card key={l.id} onPress={() => { setLesson(l); store.markLesson(l.id); }} label={'Lektion ' + l.title} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Icon name={state.lessons[l.id] ? 'check-circle' : 'book-open-page-variant-outline'} color={state.lessons[l.id] ? C.mint : C.gold} />
+                  <Text style={[s.entryText, { flex: 1 }]}>{state.lessons[l.id] ? l.title : 'Neu: ' + l.title}</Text>
+                  <Icon name="chevron-right" color={C.dim} />
+                </Card>
+              ) : (
+                <View key={l.id} accessibilityLabel={'Lektion ' + l.title + ', noch verschlossen'} style={[s.lessonLocked, { flex: 1 }]}>
+                  <Icon name="lock-outline" color={C.dim} />
+                  <Text style={[s.entryText, { flex: 1, color: C.dim }]}>{l.title}</Text>
+                </View>
+              ),
+            )}
           </Grid>
+          <P dim>{lo.readToday ? 'Morgen erzählt Ylva dir die nächste Lektion.' : 'Jeden Tag erzählt Ylva dir eine neue Lektion.'}</P>
         </>
       ) : (
         <Card>
@@ -363,6 +373,7 @@ function EntryRow({ e, onDelete }: { e: MoneyEntry; onDelete: () => void }) {
 const GOAL_ICONS = ['piggy-bank-outline', 'bike', 'book-open-variant', 'gamepad-variant-outline', 'teddy-bear', 'music', 'soccer', 'palette-outline', 'headphones', 'gift-outline'];
 
 const s = StyleSheet.create({
+  lessonLocked: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 16, borderRadius: 16, borderWidth: 1, borderColor: C.line, opacity: 0.6 },
   goalName: { fontFamily: F.bold, fontSize: 17, color: C.text },
   icon: { width: 48, height: 48, borderRadius: 12, borderWidth: 1, borderColor: C.line, alignItems: 'center', justifyContent: 'center' },
   back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },

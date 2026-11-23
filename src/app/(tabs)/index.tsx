@@ -13,7 +13,7 @@ import { useAccount } from '../../state/account';
 import { useMode } from '../../ui/mode';
 import { useUpdate } from '../../ui/update';
 import { MentorEvents } from '../../ui/mentorEvent';
-import { HABIT_IMG, IMG, JAR_IMG, STICKERS } from '../../ui/images';
+import { HABIT_IMG, IMG, jarPic, STICKERS } from '../../ui/images';
 import { formatEuro as fmtEuro } from '../../logic/money.ts';
 import { ask as askUser, tell } from '../../ui/kit';
 import { APP_VERSION } from '../../version';
@@ -192,7 +192,7 @@ export default function Today() {
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {JARS.map((j) => (
             <View key={j} style={s.jarMini}>
-              <Image source={JAR_IMG[j][fillLevel(j, state.money.entries, j === 'save' ? (openGoals(state.money.goals)[0]?.cents ?? null) : null)]} style={{ width: 44, height: 52 }} contentFit="contain" />
+              <Image source={jarPic(j, fillLevel(j, state.money.entries, j === 'save' ? (openGoals(state.money.goals)[0]?.cents ?? null) : null))} style={{ width: 44, height: 52 }} contentFit="contain" />
               <Text style={s.jarLabel}>{JAR_NAME[j]}</Text>
               <Text style={s.jarVal}>{formatEuro(b[j])}</Text>
             </View>

@@ -29,22 +29,22 @@ export function balances(entries: MoneyEntry[]): Record<Jar, number> {
 }
 
 /**
- * Füllstand 0–4 (leer … voll). Gezählt wird, wie viele „Portionen“ im Glas sind – eine Portion = was im Schnitt von
+ * Füllstand 0–6 (leer … voll). Gezählt wird, wie viele „Portionen“ im Glas sind – eine Portion = was im Schnitt von
  * einem Taschengeld in dieses Glas geht (so sieht ein Glas bei 2 € genauso aus wie bei 20 €).
- * Wunsch der Nutzerin: langsam füllen – 1–2 Portionen = Stufe 1, 3–5 = Stufe 2, 6–9 = Stufe 3, ab 10 voll.
- * Sparglas mit Ziel: am Ziel gemessen (unter 35 % Stufe 1, unter 65 % Stufe 2, bis zum Ziel Stufe 3, erreicht = voll).
+ * Wunsch der Nutzerin: langsam füllen – 1–2 Portionen = Stufe 1, 3–4 = 2, 5–7 = 3, 8–10 = 4, 11–15 = 5, ab 16 voll (6).
+ * Sparglas mit Ziel: am Ziel gemessen (in Fünfteln, erst beim erreichten Ziel voll).
  */
 export function fillLevel(jar: Jar, entries: MoneyEntry[], goalCents: number | null): number {
   const bal = balances(entries)[jar];
   if (bal <= 0) return 0;
   if (jar === 'save' && goalCents && goalCents > 0) {
     const r = bal / goalCents;
-    return r >= 1 ? 4 : r >= 0.65 ? 3 : r >= 0.35 ? 2 : 1;
+    return r >= 1 ? 6 : r >= 0.8 ? 5 : r >= 0.6 ? 4 : r >= 0.4 ? 3 : r >= 0.2 ? 2 : 1;
   }
   const parts = entries.filter((e) => e.kind === 'allowance').map((e) => (e.kind === 'allowance' ? e.parts[jar] : 0)).filter((c) => c > 0).slice(-8);
   const portion = parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : bal;
   const n = bal / portion;
-  return n < 2.5 ? 1 : n < 5.5 ? 2 : n < 9.5 ? 3 : 4;
+  return n < 2.5 ? 1 : n < 4.5 ? 2 : n < 7.5 ? 3 : n < 10.5 ? 4 : n < 15.5 ? 5 : 6;
 }
 
 /** „2,50“, „2.5“, „3“ → Cent. Ungültig → null. */

@@ -41,8 +41,8 @@ export const WOLF_STAGES = [
   // Seit 0.16.0 wächst er langsamer und bleibt länger ein Welpe (Wunsch der Nutzerin); neue Stufe „Großer Welpe“
   // nom = „ein …“, dat = „bis zum …“
   { key: 'pup', days: 0, name: 'Wolfswelpe', nom: 'Wolfswelpe', dat: 'Wolfswelpen' },
-  { key: 'bigpup', days: 60, name: 'Großer Welpe', nom: 'großer Welpe', dat: 'großen Welpen' },
-  { key: 'young', days: 150, name: 'Jungwolf', nom: 'Jungwolf', dat: 'Jungwolf' },
+  { key: 'bigpup', days: 45, name: 'Großer Welpe', nom: 'großer Welpe', dat: 'großen Welpen' },
+  { key: 'young', days: 120, name: 'Jungwolf', nom: 'Jungwolf', dat: 'Jungwolf' },
   { key: 'adult', days: 300, name: 'Erwachsener Wolf', nom: 'erwachsener Wolf', dat: 'erwachsenen Wolf' },
   { key: 'legend', days: 500, name: 'Legendärer Wolf', nom: 'legendärer Wolf', dat: 'legendären Wolf' },
 ] as const;
