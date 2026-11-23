@@ -8,8 +8,8 @@ import { toggleDone } from '../logic/habits.ts';
 import { DEFAULT_SPLIT, allocate, balances, newWaitUntil, splitCents } from '../logic/money.ts';
 import { updateFirsts } from '../logic/trophies.ts';
 import { emptyEntry, looksLikeBackup } from '../logic/journal.ts';
-import { FREE_HABIT_LIMIT } from '../logic/types.ts';
-import type { AppState, Goal, Habit, Jar, JournalEntry, MoneyEntry, Split } from '../logic/types.ts';
+import { habitLimit } from '../logic/types.ts';
+import type { AppState, DiaryInfo, Goal, Habit, Jar, JournalEntry, MoneyEntry, Split } from '../logic/types.ts';
 
 const KEY = 'habivale_state_v1';
 
@@ -28,7 +28,7 @@ function migrateMoney(m: AppState['money'] & { goal?: { name: string; icon: stri
 }
 
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {}, visits: {} };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: false, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {}, visits: {} };
 }
 
 function normalize(raw: unknown): AppState {
@@ -47,6 +47,7 @@ function normalize(raw: unknown): AppState {
     weeks: r.weeks || {},
     premium: r.premium ?? true,
     kidPreview: r.kidPreview ?? false,
+    diary: r.diary ?? null,
     sMt: r.sMt ?? 0,
     deleted: r.deleted || {},
     family: r.family ?? null,
@@ -94,6 +95,7 @@ type Store = {
   setWeekNote: (monday: string, proud: string) => void;
   setPremium: (on: boolean) => void;
   setKidPreview: (on: boolean) => void;
+  setDiary: (d: DiaryInfo | null) => void;
   exportJson: () => string;
   importJson: (json: string) => boolean;
   /** Abgleich: zusammengeführten Stand übernehmen (ohne Änderungsstempel zu setzen) */
@@ -259,13 +261,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setWeekNote: (monday, proud) => update((s) => ({ ...s, weeks: { ...s.weeks, [monday]: { proud, mt: Date.now() } } })),
       setPremium: (on) => update((s) => ({ ...s, premium: on, sMt: Date.now() })),
       setKidPreview: (on) => update((s) => ({ ...s, kidPreview: on, sMt: Date.now() })),
+      setDiary: (d) => update((s) => ({ ...s, diary: d, sMt: Date.now() })),
       applyMerged: (next) => update(() => next),
       setFamily: (f) => update((s) => ({ ...s, family: f, fMt: Date.now() })),
       inboxDone: (id) => update((s) => ({ ...s, inbox: s.inbox.filter((x) => x.id !== id), deleted: { ...s.deleted, ['i:' + id]: Date.now() } })),
       acceptSuggestion: (id) => {
         const it = state.inbox.find((x) => x.id === id);
         if (!it?.habit) return false;
-        if (state.habits.filter((h) => !h.archived && !h.paused).length >= FREE_HABIT_LIMIT && !state.premium) return false;
+        if (state.habits.filter((h) => !h.archived && !h.paused).length >= habitLimit(state.premium)) return false;
         const now = Date.now();
         const days = it.habit.days.length ? it.habit.days : [0, 1, 2, 3, 4, 5, 6];
         update((s) => ({

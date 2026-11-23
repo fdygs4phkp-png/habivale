@@ -184,7 +184,10 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       let item: InboxItem | null = null;
       if (msg.type === 'suggest') item = { id, at, from, kind: 'suggest', habit: { name: String(msg.habit.name).slice(0, 40), icon: String(msg.habit.icon), days: (msg.habit.days || []).filter((d) => d >= 0 && d <= 6) } };
       else if (msg.type === 'praise') item = { id, at, from, kind: 'praise', sticker: String(msg.sticker), text: String(msg.text).slice(0, 120) };
-      else if (msg.type === 'allowance' && Number.isInteger(msg.cents) && msg.cents > 0 && msg.cents <= 100000) {
+      else if (msg.type === 'premium') {
+        // Premium der Eltern gilt für die ganze Familie (keine Meldung im Eingang)
+        if (next.premium !== !!msg.on) next = { ...next, premium: !!msg.on, sMt: Date.now() };
+      } else if (msg.type === 'allowance' && Number.isInteger(msg.cents) && msg.cents > 0 && msg.cents <= 100000) {
         const eid = 'in-' + r.id;
         if (!next.money.entries.some((e) => e.id === eid) && next.deleted['m:' + eid] === undefined) {
           const note = String(msg.note || 'von ' + from).slice(0, 60);
@@ -199,6 +202,31 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       stateRef.current = next;
     }
     for (const r of rows) await api.deleteInbox(s, r.id).catch(() => {});
+  }, []);
+
+  /** Eltern: Premium-Stand an alle verbundenen Kinder schicken, wenn er sich geändert hat. */
+  const pushPremium = useCallback(async (s: api.Session) => {
+    const f = stateRef.current.family;
+    if (!f || f.role !== 'parent' || !f.children.length) return;
+    const on = !!stateRef.current.premium;
+    if (f.children.every((c) => c.prem === on)) return;
+    const members = await api.familyMembers(s);
+    const me = members.find((m) => m.user_id === s.user.id && m.role === 'parent');
+    if (!me) return;
+    const sent = new Set<string>();
+    for (const c of f.children) {
+      if (c.prem === on) continue;
+      const m = members.find((x) => x.id === c.memberId);
+      if (!m?.pub || !m.user_id) continue; // noch kein Gerät verbunden – beim nächsten Mal
+      await api.sendInbox(s, c.memberId, me.id, await cr.sealFor(m.pub, JSON.stringify({ type: 'premium', from: 'Eltern', on })));
+      sent.add(c.memberId);
+    }
+    if (!sent.size) return;
+    const cur = stateRef.current;
+    if (cur.family?.role !== 'parent') return;
+    const next: AppState = { ...cur, family: { ...cur.family, children: cur.family.children.map((c) => (sent.has(c.memberId) ? { ...c, prem: on } : c)) }, fMt: Date.now() };
+    applyRef.current(next);
+    stateRef.current = next;
   }, []);
 
   /** Kind: Freigaben für jeden Elternteil verschlüsselt hochladen (nur bei Änderung). */
@@ -242,11 +270,12 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       lastUploaded.current = mergedJson;
       await pushShares(s);
       await pullInbox(s);
+      await pushPremium(s).catch(() => {});
       return;
     }
     throw new Error('Abgleich gerade nicht möglich. Bitte später noch einmal.');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fresh, pushShares, pullInbox]);
+  }, [fresh, pushShares, pullInbox, pushPremium]);
 
   const syncNow = useCallback(async () => {
     if (!keyRef.current || !sessionRef.current) return;

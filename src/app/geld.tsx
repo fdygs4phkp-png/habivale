@@ -9,8 +9,9 @@ import { useMode } from '../ui/mode';
 import { Image } from 'expo-image';
 import { GOAL_IMG } from '../ui/images';
 import { useStore } from '../state/store';
-import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, JarPicture, P, PlaceholderNote, Screen, Sheet, tell, useLayout } from '../ui/kit';
+import { ask, Bar, Button, Card, Chip, Field, Grid, H2, Icon, P, PlaceholderNote, Screen, Sheet, tell, useLayout } from '../ui/kit';
 import { C, F, JAR_COLOR, JAR_NAME } from '../ui/theme';
+import { JAR_IMG } from '../ui/images';
 
 type Mode = null | 'allowance' | 'spend' | 'share' | 'move' | 'goal' | 'split';
 
@@ -108,13 +109,12 @@ export default function Money() {
         <View style={s.jars}>
           {JARS.map((j) => (
             <View key={j} style={s.jar}>
-              <JarPicture size={tablet ? 140 : 84} color={JAR_COLOR[j]} level={fillLevel(j, m.entries, goal?.cents ?? null)} />
+              <Image source={JAR_IMG[j][fillLevel(j, m.entries, goal?.cents ?? null)]} style={{ width: tablet ? 140 : 84, height: (tablet ? 140 : 84) * 1.2 }} contentFit="contain" accessibilityLabel={JAR_NAME[j]} />
               <Text style={[s.jarName, { color: JAR_COLOR[j] }]}>{JAR_NAME[j]}</Text>
               <Text style={s.jarVal}>{formatEuro(b[j])}</Text>
             </View>
           ))}
         </View>
-        <PlaceholderNote text="Platzhalter – die gemalten Gläser folgen" />
       </Card>
 
       <Button title="Taschengeld eintragen" icon="plus" onPress={() => open('allowance')} />

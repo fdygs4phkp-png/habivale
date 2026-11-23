@@ -2,7 +2,8 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { pendingEvents } from '../logic/trophies.ts';
+import { dayKey } from '../logic/date.ts';
+import { eventForToday } from '../logic/trophies.ts';
 import { useStore } from '../state/store';
 import { CHEER, MENTOR_POSE, REFUGE_OUT, TROPHY_IMG, WOLF_HAPPY } from './images';
 import { Button } from './kit';
@@ -10,10 +11,10 @@ import { useMode } from './mode';
 import { C, F } from './theme';
 
 export function MentorEvents() {
-  const { state, ready, celebrate } = useStore();
+  const { state, ready, celebrate, today } = useStore();
   const { kid } = useMode();
   if (!ready) return null;
-  const ev = pendingEvents(state)[0];
+  const ev = eventForToday(state, today, (ts) => dayKey(new Date(ts)));
   if (!ev) return null;
   const pic = ev.trophyId ? TROPHY_IMG[ev.trophyId] : ev.wolf !== undefined ? WOLF_HAPPY[ev.wolf] : ev.refuge ? REFUGE_OUT.summer[ev.refuge - 1] : CHEER;
   const pose = ev.kind === 'trophy' ? MENTOR_POSE.gift : MENTOR_POSE.joy;

@@ -123,6 +123,17 @@ export function eventFor(key: string, at: number): WorldEvent | null {
 }
 
 /** Was die Mentorin noch verkünden möchte: erstes Erreichen, das noch nicht gefeiert wurde (älteste zuerst). */
+/** Die Mentorin verkündet höchstens eine Sache am Tag: am ersten Tag nur den ersten Schritt, alles Weitere
+ *  frühestens beim Öffnen an einem späteren Tag – eine nach der anderen, die älteste zuerst. */
+export function eventForToday(s: AppState, today: string, dayOf: (ts: number) => string): WorldEvent | null {
+  const list = pendingEvents(s);
+  if (!list.length) return null;
+  const firstStep = list.find((e) => e.key === 't:first-step');
+  const todays = Object.values(s.celebrated).some((at) => dayOf(at) === today);
+  if (todays) return null;
+  return firstStep ?? list[0];
+}
+
 export function pendingEvents(s: AppState): WorldEvent[] {
   const out: WorldEvent[] = [];
   for (const [key, at] of Object.entries(s.firsts)) {

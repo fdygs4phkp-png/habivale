@@ -248,3 +248,31 @@ export const NAV_IMG: Record<string, number> = {
   tagebuch: require('../../assets/img/nav/tagebuch.webp'),
   sammlung: require('../../assets/img/nav/sammlung.webp'),
 };
+
+/** Die drei Gläser (Bilder der Nutzer, je fünf Füllstände 0–4). */
+export const JAR_IMG: Record<'save' | 'spend' | 'share', number[]> = {
+  save: [require('../../assets/img/jars/jar-save-0.webp'), require('../../assets/img/jars/jar-save-1.webp'), require('../../assets/img/jars/jar-save-2.webp'), require('../../assets/img/jars/jar-save-3.webp'), require('../../assets/img/jars/jar-save-4.webp')],
+  spend: [require('../../assets/img/jars/jar-spend-0.webp'), require('../../assets/img/jars/jar-spend-1.webp'), require('../../assets/img/jars/jar-spend-2.webp'), require('../../assets/img/jars/jar-spend-3.webp'), require('../../assets/img/jars/jar-spend-4.webp')],
+  share: [require('../../assets/img/jars/jar-share-0.webp'), require('../../assets/img/jars/jar-share-1.webp'), require('../../assets/img/jars/jar-share-2.webp'), require('../../assets/img/jars/jar-share-3.webp'), require('../../assets/img/jars/jar-share-4.webp')],
+};
+
+/** Tagebuch-Cover (vorerst aus A Mystery World der Lebensrad-App geliehen: blau-lila Low-Poly mit Lotus). */
+export const DIARY_COVER = {
+  p: require('../../assets/img/leih/covers-navy-p.webp'),
+  l: require('../../assets/img/leih/covers-navy-l.webp'),
+};
+
+/** Sticker fürs Tagebuch. */
+export const DIARY_STICKERS: Record<string, number> = {
+  ...STICKERS,
+  leaf: require('../../assets/img/leih/stickers-leaf.webp'),
+  treasure: require('../../assets/img/leih/stickers-treasure.webp'),
+  crystal: require('../../assets/img/items/crystal.webp'),
+  lantern: require('../../assets/img/items/lantern.webp'),
+  key: require('../../assets/img/items/key.webp'),
+  compass: require('../../assets/img/items/compass.webp'),
+  quill: require('../../assets/img/items/quill.webp'),
+  lavender: require('../../assets/img/items/lavender.webp'),
+  shell: require('../../assets/img/items/shell.webp'),
+  potion: require('../../assets/img/items/potion.webp'),
+};

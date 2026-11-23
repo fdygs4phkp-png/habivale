@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { dayKey, WD_SHORT_DE } from '../logic/date.ts';
 import { activeHabits, currentStreak, longestStreak, successRate } from '../logic/habits.ts';
-import { FREE_HABIT_LIMIT, type Rhythm } from '../logic/types.ts';
+import { FREE_HABIT_LIMIT, habitLimit, type Rhythm } from '../logic/types.ts';
 import { useStore } from '../state/store';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen } from '../ui/kit';
 import { C } from '../ui/theme';
@@ -29,7 +29,8 @@ export default function HabitEdit() {
   const { kid } = useMode();
   const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
   const activeOthers = activeHabits(state.habits).filter((h) => h.id !== id).length;
-  const limitHit = !paused && activeOthers >= FREE_HABIT_LIMIT;
+  const limit = habitLimit(state.premium);
+  const limitHit = !paused && activeOthers >= limit;
   const valid = name.trim().length > 0 && days.length > 0 && !limitHit;
 
   const save = () => {
@@ -108,7 +109,7 @@ export default function HabitEdit() {
       {old ? (
         <>
           <Chip title={paused ? 'Pausiert – antippen zum Fortsetzen' : 'Pausieren'} on={paused} onPress={() => setPaused(!paused)} />
-          <P dim>Eine Pause bricht keine Serie. Pausierte Gewohnheiten zählen nicht zu den {FREE_HABIT_LIMIT} aktiven.</P>
+          <P dim>Eine Pause bricht keine Serie. Pausierte Gewohnheiten zählen nicht zu den {limit} aktiven.</P>
           <Card>
             <H2>Dein Verlauf</H2>
             <P>Gerade in Folge: {currentStreak(old, state.done, today)} · Längste Serie: {longestStreak(old, state.done, today)}</P>
@@ -117,7 +118,7 @@ export default function HabitEdit() {
         </>
       ) : null}
 
-      {limitHit ? <P dim>Du hast schon {FREE_HABIT_LIMIT} aktive Gewohnheiten. Pausiere eine, um eine neue anzulegen.</P> : null}
+      {limitHit ? <P dim>Du hast schon {limit} aktive Gewohnheiten. Pausiere eine, um eine neue anzulegen.{!state.premium ? ` Mit Premium gehen bis zu 12 (kostenlos ${FREE_HABIT_LIMIT}).` : ''}</P> : null}
 
       <Button title="Speichern" onPress={save} disabled={!valid} />
       {old ? <Button title="Gewohnheit löschen" kind="danger" icon="trash-can-outline" onPress={remove} /> : null}

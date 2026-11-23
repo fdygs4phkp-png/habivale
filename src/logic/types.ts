@@ -76,6 +76,8 @@ export interface AppState {
   premium: boolean;
   /** Testphase: Kinder-Modus ansehen, ohne ein Kinderprofil zu sein */
   kidPreview: boolean;
+  /** Das eigene Tagebuch: geführt (Fragen) oder leer (freie Seiten), Hoch- oder Querformat (Einstellungs-Block, `sMt`) */
+  diary?: DiaryInfo | null;
   /** Änderungszeit des Einstellungs-Blocks (Name, Premium, Aufteilung, Sparziel) */
   sMt: number;
   /** Grabsteine: 'h:'/'g:'/'m:' + id, 'd:' + Haken-Schlüssel → Zeitpunkt des Löschens */
@@ -111,7 +113,9 @@ export interface InboxItem {
 export type ParentMessage =
   | { type: 'suggest'; from: string; habit: { name: string; icon: string; days: number[] } }
   | { type: 'praise'; from: string; sticker: string; text: string }
-  | { type: 'allowance'; from: string; cents: number; note: string };
+  | { type: 'allowance'; from: string; cents: number; note: string }
+  /** Premium gilt für die ganze Familie: die Eltern schicken ihren Stand an die Kindergeräte */
+  | { type: 'premium'; from: string; on: boolean };
 
 export type Avatar = 'lyra' | 'kael';
 
@@ -121,6 +125,8 @@ export interface ChildProfile {
   birthYear: number;
   avatar: Avatar;
   addedAt: number;
+  /** Premium-Stand, der diesem Kind zuletzt geschickt wurde */
+  prem?: boolean;
   /** Wiederherstellungs-Code des Kindes, vom Kindergerät verschlüsselt übermittelt (für neue Geräte ohne Code-Eingabe) */
   rc?: string;
 }
@@ -158,7 +164,15 @@ export interface JournalEntry {
   thanks: string; // Dafür bin ich dankbar
   tomorrow: string; // Was möchte ich morgen besser machen?
   free: string; // Freier Text
+  /** Sticker auf der Seite, Lage in Prozent der Seite */
+  stickers?: { id: string; k: string; x: number; y: number }[];
   mt: number;
+}
+
+export interface DiaryInfo {
+  kind: 'guided' | 'free';
+  format: 'p' | 'l';
+  since: number;
 }
 
 export const LIFE_AREAS = ['school', 'friends', 'family', 'health', 'joy', 'money'] as const;
@@ -188,5 +202,12 @@ export interface WeekNote {
 }
 
 export const FREE_HABIT_LIMIT = 3;
+export const PREMIUM_HABIT_LIMIT = 12;
+/** Wie viele aktive Gewohnheiten gehen (kostenlos 3, mit Premium 12). */
+export function habitLimit(premium: boolean): number {
+  return premium ? PREMIUM_HABIT_LIMIT : FREE_HABIT_LIMIT;
+}
+/** Test-Code für Premium (Testphase, bis das Abo kommt). */
+export const PREMIUM_TEST_CODE = 'HABIVALE-PRO';
 export const FREE_SAVINGS_GOALS = 1;
 export const MAX_SAVINGS_GOALS = 5;

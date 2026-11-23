@@ -3,9 +3,9 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { addDays, longDateDe } from '../../logic/date.ts';
 import { activeHabits, currentStreak, dueHabits, isDone } from '../../logic/habits.ts';
-import { balances, formatEuro, JARS } from '../../logic/money.ts';
+import { balances, fillLevel, formatEuro, JARS, openGoals } from '../../logic/money.ts';
 import { levelInfo, totalXp, xpToday } from '../../logic/progress.ts';
-import { FREE_HABIT_LIMIT } from '../../logic/types.ts';
+import { FREE_HABIT_LIMIT, habitLimit, PREMIUM_HABIT_LIMIT } from '../../logic/types.ts';
 import { Image } from 'expo-image';
 import { moneyXp } from '../../logic/money.ts';
 import { useStore } from '../../state/store';
@@ -13,7 +13,7 @@ import { useAccount } from '../../state/account';
 import { useMode } from '../../ui/mode';
 import { useUpdate } from '../../ui/update';
 import { MentorEvents } from '../../ui/mentorEvent';
-import { HABIT_IMG, IMG, STICKERS } from '../../ui/images';
+import { HABIT_IMG, IMG, JAR_IMG, STICKERS } from '../../ui/images';
 import { formatEuro as fmtEuro } from '../../logic/money.ts';
 import { ask as askUser, tell } from '../../ui/kit';
 import { APP_VERSION } from '../../version';
@@ -49,7 +49,7 @@ export default function Today() {
   const xp = totalXp(state.habits, state.done) + moneyXp(state);
   const lv = levelInfo(xp);
   const notDue = activeHabits(state.habits).filter((h) => !due.includes(h));
-  const canAdd = activeHabits(state.habits).length < FREE_HABIT_LIMIT;
+  const canAdd = activeHabits(state.habits).length < habitLimit(state.premium);
   const b = balances(state.money.entries);
 
   return (
@@ -114,7 +114,7 @@ export default function Today() {
                 <Button
                   title="Annehmen"
                   onPress={() => {
-                    if (!acceptSuggestion(it.id)) tell('Kein Platz mehr', 'Du hast schon drei aktive Gewohnheiten. Pausiere eine, dann kannst du den Vorschlag annehmen.');
+                    if (!acceptSuggestion(it.id)) tell('Kein Platz mehr', state.premium ? `Du hast schon ${PREMIUM_HABIT_LIMIT} aktive Gewohnheiten. Pausiere eine, dann kannst du den Vorschlag annehmen.` : `In der kostenlosen Version gibt es ${FREE_HABIT_LIMIT} aktive Gewohnheiten. Pausiere eine – oder frag deine Eltern nach Premium, dann gehen bis zu ${PREMIUM_HABIT_LIMIT}.`);
                   }}
                 />
               </View>
@@ -177,7 +177,15 @@ export default function Today() {
       {canAdd ? (
         <Button title="Gewohnheit hinzufügen" icon="plus" kind="ghost" onPress={() => router.push('/habit')} />
       ) : (
-        <P dim>In der kostenlosen Version gibt es {FREE_HABIT_LIMIT} aktive Gewohnheiten. Mit Premium werden es mehr (kommt später).</P>
+        state.premium ? (
+          <P dim>Du hast schon {PREMIUM_HABIT_LIMIT} aktive Gewohnheiten. Pausiere eine, um eine neue anzulegen.</P>
+        ) : (
+          <Card style={{ borderColor: C.gold }}>
+            <H2>Mehr Gewohnheiten mit Premium</H2>
+            <P dim>In der kostenlosen Version gibt es {FREE_HABIT_LIMIT} aktive Gewohnheiten. Mit Premium sind es bis zu {PREMIUM_HABIT_LIMIT}{state.family?.role === 'child' ? ' – frag deine Eltern.' : '.'}</P>
+            {state.family?.role === 'child' ? null : <Button title="Premium freischalten" kind="ghost" icon="star-outline" onPress={() => router.push('/einstellungen')} />}
+          </Card>
+        )
       )}
 
       <Card onPress={() => router.push('/geld')} label="Taschengeld öffnen">
@@ -189,7 +197,7 @@ export default function Today() {
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {JARS.map((j) => (
             <View key={j} style={s.jarMini}>
-              <View style={[s.dot, { backgroundColor: JAR_COLOR[j] }]} />
+              <Image source={JAR_IMG[j][fillLevel(j, state.money.entries, j === 'save' ? (openGoals(state.money.goals)[0]?.cents ?? null) : null)]} style={{ width: 44, height: 52 }} contentFit="contain" />
               <Text style={s.jarLabel}>{JAR_NAME[j]}</Text>
               <Text style={s.jarVal}>{formatEuro(b[j])}</Text>
             </View>

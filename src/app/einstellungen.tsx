@@ -5,6 +5,7 @@ import { dayKey } from '../logic/date.ts';
 import { useAccount } from '../state/account';
 import { ParentGate } from '../ui/gate';
 import { useStore } from '../state/store';
+import { PREMIUM_TEST_CODE } from '../logic/types.ts';
 import { APP_VERSION } from '../version';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen, tell } from '../ui/kit';
 import { C } from '../ui/theme';
@@ -40,6 +41,7 @@ export default function Settings() {
   const { state } = store;
   const account = useAccount();
   const [name, setName] = useState(state.profileName);
+  const [pro, setPro] = useState('');
 
   const exportNow = async () => {
     const json = store.exportJson();
@@ -104,12 +106,32 @@ export default function Settings() {
     return (
       <>
       <Card>
-        <H2>Premium (Testversion)</H2>
-        <P dim>Später gehört Premium zum Abo. In der Testversion kannst du es hier ein- und ausschalten, um beide Fassungen auszuprobieren. Deine Daten bleiben dabei immer erhalten.</P>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Chip title="Premium an" on={state.premium} onPress={() => store.setPremium(true)} />
-          <Chip title="Kostenlos" on={!state.premium} onPress={() => store.setPremium(false)} />
-        </View>
+        <H2>Premium</H2>
+        {state.family?.role === 'child' ? (
+          <P dim>{state.premium ? 'Premium ist an – das gehört zum Premium deiner Eltern.' : 'Premium gilt für die ganze Familie. Wenn deine Eltern Premium haben, ist es hier von selbst an.'}</P>
+        ) : state.premium ? (
+          <>
+            <P dim>Premium ist an.{state.family?.role === 'parent' ? ' Es gilt auch für eure Kinderprofile.' : ''} Später gehört Premium zum Abo. Deine Daten bleiben immer erhalten, auch wenn du es ausschaltest.</P>
+            <Chip title="Zurück zu Kostenlos (zum Ausprobieren)" on={false} onPress={() => store.setPremium(false)} />
+          </>
+        ) : (
+          <>
+            <P dim>Mit Premium: bis zu 12 Gewohnheiten, das Tagebuch, der wachsende Wolf, das Refugium, Kleidung und Sammlung – für die ganze Familie. Später gehört Premium zum Abo. In der Testphase schaltest du es mit dem Test-Code frei.</P>
+            <Field label="Premium-Code" value={pro} onChangeText={setPro} autoCapitalize="characters" placeholder="Code eingeben" />
+            <Button
+              title="Freischalten"
+              icon="star-outline"
+              disabled={!pro.trim()}
+              onPress={() => {
+                if (pro.trim().toUpperCase().replace(/\s+/g, '') === PREMIUM_TEST_CODE) {
+                  store.setPremium(true);
+                  setPro('');
+                  tell('Premium ist an', 'Viel Freude mit allem, was jetzt dazukommt!');
+                } else tell('Code stimmt nicht', 'Bitte prüf den Code noch einmal.');
+              }}
+            />
+          </>
+        )}
       </Card>
 
       {!account.isChild ? (

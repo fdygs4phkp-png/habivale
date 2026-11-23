@@ -57,6 +57,7 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     profileName: s.profileName,
     premium: s.premium,
     kidPreview: s.kidPreview ?? false,
+    diary: s.diary ?? local.diary ?? remote.diary ?? null,
     hero: s.hero ?? 'lyra',
     outfits: s.outfits ?? { lyra: 'lyra-start', kael: 'kael-start' },
     celebrated: { ...(remote.celebrated || {}), ...(local.celebrated || {}) },
