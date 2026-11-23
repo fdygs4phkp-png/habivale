@@ -161,7 +161,7 @@ export interface Chapter {
 
 export const STORY_CHAPTERS: Chapter[] = [
   { title: 'Der Aufbruch', rule: { kind: 'start' }, text: 'Lyra und Kael haben große Träume. Aber im Alltag geht vieles durcheinander: Sie fangen ständig Neues an und bleiben selten dran. Darum machen sie sich auf den Weg zu einer weisen Frau, die tief im Zauberwald lebt.' },
-  { title: 'Bei Ylva', rule: { kind: 'start' }, text: 'Nach einer langen Reise öffnet Ylva, Ylva, ihnen die Tür. „Ein großer Traum ist wie ein ferner Berg“, sagt sie. „Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
+  { title: 'Bei Ylva', rule: { kind: 'start' }, text: 'Nach einer langen Reise öffnet Ylva, die Mentorin, ihnen die Tür. „Ein großer Traum ist wie ein ferner Berg“, sagt sie. „Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
   { title: 'Der kleine Wolf', rule: { kind: 'start' }, text: 'In einem Korb liegt ein Wolfswelpe. Er hat keine Mutter mehr. „Zieht ihn auf“, sagt Ylva. „Er braucht euch – jeden Tag. So lernt ihr, Verantwortung zu tragen und an einer Sache dranzubleiben.“' },
   { title: 'Ein neues Zuhause', rule: { kind: 'start' }, text: 'In einer kleinen, alten Hütte beginnt ihr neues Leben. Jeden Tag kümmern sie sich um den Welpen – und mit jeder Gewohnheit, die sie pflegen, wird er größer und stärker.' },
   { title: 'Ein Schornstein raucht', rule: { kind: 'refuge', n: 2 }, text: 'Drei Wochen sind vergangen. Lyra und Kael haben die Hütte geflickt, einen Schornstein gemauert und ein kleines Gärtchen angelegt. „Seht ihr?“, sagt Ylva bei ihrem Besuch. „Ein Zuhause wächst wie ihr – Stein für Stein.“' },

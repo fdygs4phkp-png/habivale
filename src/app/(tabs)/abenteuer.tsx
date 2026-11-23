@@ -98,7 +98,7 @@ export default function Adventure() {
         {[
           { img: IMG.lyra, name: 'Lyra', text: 'Neugierig, mutig, kreativ' },
           { img: IMG.kael, name: 'Kael', text: 'Entschlossen und treu' },
-          { img: IMG.mentor, name: 'Ylva', text: 'Ylva – deine weise Lehrerin' },
+          { img: IMG.mentor, name: 'Ylva', text: 'Die Mentorin – deine weise Lehrerin' },
         ].map((c) => (
           <View key={c.name} style={s.char}>
             <Image source={c.img} style={{ width: '100%', height: tablet ? 300 : 170 }} contentFit="contain" accessibilityLabel={c.name} />
