@@ -5,19 +5,22 @@
 export const IMG = {
   keyArt: [
     require('../../assets/img/scene/key-1.webp'), // Welpe
+    require('../../assets/img/scene/key-1.webp'), // Großer Welpe – eigenes Bild folgt
     require('../../assets/img/scene/hauptbild-2-jungwolf.webp'),
     require('../../assets/img/scene/key-3.webp'),
     require('../../assets/img/scene/key-4.webp'),
   ],
-  keyArtMissing: [false, false, false, false],
+  keyArtMissing: [false, true, false, false, false],
   wolfSit: [
     require('../../assets/img/wolf/sit-1.webp'),
+    require('../../assets/img/wolf/sit-1.webp'), // Großer Welpe – eigenes Bild folgt
     require('../../assets/img/wolf/sit-2.webp'),
     require('../../assets/img/wolf/sit-3.webp'),
     require('../../assets/img/wolf/sit-4.webp'),
   ],
   wolfHead: [
     require('../../assets/img/wolf/head-1.webp'),
+    require('../../assets/img/wolf/head-1.webp'), // Großer Welpe – eigenes Bild folgt
     require('../../assets/img/wolf/head-2.webp'),
     require('../../assets/img/wolf/head-3.webp'),
     require('../../assets/img/wolf/head-4.webp'),
@@ -140,6 +143,7 @@ export const MENTOR_POSE = {
 export const CHEER = require('../../assets/img/chars/cheer.webp');
 export const WOLF_HAPPY = [
   require('../../assets/img/wolf/happy-1.webp'),
+  require('../../assets/img/wolf/happy-1.webp'), // Großer Welpe – eigenes Bild folgt
   require('../../assets/img/wolf/happy-2.webp'),
   require('../../assets/img/wolf/happy-3.webp'),
   require('../../assets/img/wolf/happy-4.webp'),

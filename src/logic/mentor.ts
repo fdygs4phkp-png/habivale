@@ -34,7 +34,7 @@ export const TALES: Tale[] = [
   {
     title: 'Die Laterne im Nebel',
     text: 'Einmal verirrte ich mich im Nebel. Ich konnte den Weg nach Hause nicht sehen, nur die drei Steine vor meinen Füßen im Licht meiner kleinen Laterne. Also ging ich drei Steine weit. Dann wieder drei. Und irgendwann stand ich vor meiner Tür.',
-    moral: 'Ihr müsst nicht den ganzen Weg sehen. Es reicht, den nächsten Schritt zu sehen.',
+    moral: 'Du musst nicht den ganzen Weg sehen. Es reicht, den nächsten Schritt zu sehen.',
   },
   {
     title: 'Das Geschenk der Spinne',
@@ -49,7 +49,7 @@ export const TALES: Tale[] = [
   {
     title: 'Der Samen, der nicht wuchs',
     text: 'Kael hat mir einmal einen Samen gezeigt. „Er wächst nicht“, sagte er. „Ich gieße ihn seit zehn Tagen.“ Wir gruben vorsichtig nach. Unter der Erde hatte der Samen schon lange Wurzeln geschlagen – man konnte sie nur nicht sehen. Drei Tage später kam das erste Blatt.',
-    moral: 'Auch wenn ihr noch nichts seht: Es wächst schon.',
+    moral: 'Auch wenn du noch nichts siehst: Es wächst schon.',
   },
   {
     title: 'Die müde Eule',
@@ -64,7 +64,7 @@ export const TALES: Tale[] = [
   {
     title: 'Der Wolf und die Spur',
     text: 'Ein Wolf findet seinen Weg im Winter, indem er in seine eigene Spur vom Vortag tritt. Der Schnee ist dort schon fest, und das Laufen wird leichter. Jeden Tag ein bisschen leichter.',
-    moral: 'Was ihr jeden Tag tut, wird von selbst leichter – wie ein Weg, den man oft geht.',
+    moral: 'Was du jeden Tag tust, wird von selbst leichter – wie ein Weg, den man oft geht.',
   },
   {
     title: 'Die zwei Gärten',
@@ -73,24 +73,24 @@ export const TALES: Tale[] = [
   },
   {
     title: 'Der Stern über dem Haus',
-    text: 'In der Nacht, in der ihr den Welpen zu euch genommen habt, stand ein heller Stern über eurer Hütte. Ich sehe ihn jeden Abend noch. Er leuchtet nicht stärker, wenn ihr etwas Großes schafft, und nicht schwächer, wenn ein Tag nicht gelingt. Er ist einfach da – wie ich.',
-    moral: 'Ihr müsst nicht perfekt sein. Kommt einfach wieder, ich bin da.',
+    text: 'In der Nacht, in der du den Welpen zu dir genommen hast, stand ein heller Stern über deiner Hütte. Ich sehe ihn jeden Abend noch. Er leuchtet nicht stärker, wenn du etwas Großes schaffst, und nicht schwächer, wenn ein Tag nicht gelingt. Er ist einfach da – wie ich.',
+    moral: 'Du musst nicht perfekt sein. Komm einfach wieder, ich bin da.',
   },
 ];
 
 export const ADVICE_POOL: string[] = [
-  'Ein großer Traum ist wie ein ferner Berg. Ihr erreicht ihn mit vielen kleinen Schritten.',
-  'Schreibt euch heute auf, was gut gelaufen ist. Auch Kleinigkeiten zählen.',
+  'Ein großer Traum ist wie ein ferner Berg. Du erreichst ihn mit vielen kleinen Schritten.',
+  'Schreib dir heute auf, was gut gelaufen ist. Auch Kleinigkeiten zählen.',
   'Wenn ein Tag schwer ist, macht nur die kleinste Gewohnheit. Das reicht.',
-  'Euer Wolf merkt sich nicht, wie viel ihr schafft, sondern dass ihr da seid.',
-  'Vergleicht euch nicht mit anderen. Vergleicht euch mit euch von letzter Woche.',
+  'Dein Wolf merkt sich nicht, wie viel du schaffst, sondern dass du da bist.',
+  'Vergleich dich nicht mit anderen. Vergleich dich mit dir von letzter Woche.',
   'Eine Gewohnheit wächst am besten an derselben Stelle im Tag – wie eine Pflanze am selben Fenster.',
   'Wer teilt, hat am Ende oft mehr: Freunde, Dank und ein warmes Herz.',
-  'Sparen heißt nicht verzichten. Es heißt: später etwas haben, das euch wirklich wichtig ist.',
+  'Sparen heißt nicht verzichten. Es heißt: später etwas haben, das dir wirklich wichtig ist.',
   'Ein Fehler ist ein Wegweiser, kein Stoppschild.',
-  'Freut euch über jeden Haken. Ihr habt ihn euch verdient.',
+  'Freu dich über jeden Haken. Du hast ihn dir verdient.',
   'Pausen sind kein Aufgeben. Auch die Bäume ruhen im Winter.',
-  'Fragt euch abends: Was hat mir heute Mut gemacht?',
+  'Frag dich abends: Was hat mir heute Mut gemacht?',
   'Hilfe annehmen ist auch eine Stärke.',
   'Die beste Zeit für einen Neuanfang ist heute.',
 ];
@@ -98,9 +98,9 @@ export const ADVICE_POOL: string[] = [
 const SEASON_ADVICE: Record<string, string> = {
   spring: 'Draußen wächst alles wieder. Vielleicht ist jetzt eine gute Zeit für eine neue kleine Gewohnheit?',
   summer: 'Die Tage sind lang. Nutzt das Licht – aber vergesst nicht, genug zu trinken und zu schlafen.',
-  autumn: 'Im Herbst sammeln die Tiere Vorräte. Was sammelt ihr gerade – Nüsse, Mut oder Taler im Sparglas?',
+  autumn: 'Im Herbst sammeln die Tiere Vorräte. Was sammelst du gerade – Nüsse, Mut oder Taler im Sparglas?',
   winter: 'Im Winter wird es früh dunkel. Ein warmes Getränk und ein gutes Buch sind jetzt die beste Gewohnheit.',
-  xmas: 'Die Weihnachtszeit ist eine Zeit zum Teilen. Wem könntet ihr heute eine kleine Freude machen?',
+  xmas: 'Die Weihnachtszeit ist eine Zeit zum Teilen. Wem könntest du heute eine kleine Freude machen?',
 };
 
 function dayIndex(today: DayKey): number {
@@ -113,19 +113,19 @@ export function adviceFor(s: AppState, today: DayKey): { title: string; text: st
   const last = days[days.length - 1];
   const due = dueHabits(s.habits, today);
   if (s.habits.filter((h) => !h.archived).length === 0)
-    return { title: 'Fangt klein an', text: 'Sucht euch eine einzige, kleine Gewohnheit aus – so klein, dass ihr sie gar nicht vergessen könnt. Morgen erzähle ich euch, wie es weitergeht.' };
+    return { title: 'Fang klein an', text: 'Such dir eine einzige, kleine Gewohnheit aus – so klein, dass du sie gar nicht vergessen kannst. Morgen erzähle ich dir, wie es weitergeht.' };
   if (due.length > 0 && due.every((h) => isDone(s.done, h.id, today)))
-    return { title: 'Heute alles geschafft!', text: 'Ihr habt heute alles erledigt. Setzt euch zu mir ans Feuer – ihr habt euch eine Pause verdient.' };
+    return { title: 'Heute alles geschafft!', text: 'Du hast heute alles erledigt. Setz dich zu mir ans Feuer – du hast dir eine Pause verdient.' };
   if (last && daysBetween(last, today) >= 3)
-    return { title: 'Schön, dass ihr wieder da seid', text: 'Ein paar Tage sind vergangen. Das macht nichts. Euer Wolf hat auf euch gewartet. Fangt heute mit einer einzigen Gewohnheit wieder an.' };
+    return { title: 'Schön, dass du wieder da bist', text: 'Ein paar Tage sind vergangen. Das macht nichts. Dein Wolf hat auf dich gewartet. Fang heute mit einer einzigen Gewohnheit wieder an.' };
   if (s.money.wishes.some((w) => w.answer === null && wishDue(w, today)))
-    return { title: 'Eine Woche ist um', text: 'Auf eurer Wunschliste wartet ein Wunsch. Fragt euch ehrlich: Wollt ihr ihn noch? Schaut bei den drei Gläsern nach.' };
+    return { title: 'Eine Woche ist um', text: 'Auf deiner Wunschliste wartet ein Wunsch. Frag dich ehrlich: Willst du ihn noch? Schau bei den drei Gläsern nach.' };
   const r = refugeStage(s);
   if (r.next && r.toNext > 0 && r.toNext <= 3)
-    return { title: 'Bald wächst euer Haus', text: `Noch ${r.toNext} aktive ${r.toNext === 1 ? 'Tag' : 'Tage'}, dann wird aus eurem Zuhause „${r.next.name}“. Ich bin gespannt!` };
+    return { title: 'Bald wächst dein Haus', text: `Noch ${r.toNext} aktive ${r.toNext === 1 ? 'Tag' : 'Tage'}, dann wird aus deinem Zuhause „${r.next.name}“. Ich bin gespannt!` };
   const w = wolfStage(s.habits, s.done);
   if (w.next && w.toNext > 0 && w.toNext <= 5)
-    return { title: 'Euer Wolf wird größer', text: `Noch ${w.toNext} aktive ${w.toNext === 1 ? 'Tag' : 'Tage'}, dann ist er ein ${w.next.name}. Er spürt schon, dass etwas passiert.` };
+    return { title: 'Dein Wolf wird größer', text: `Noch ${w.toNext} aktive ${w.toNext === 1 ? 'Tag' : 'Tage'}, dann ist er ein ${w.next.nom}. Er spürt schon, dass etwas passiert.` };
   const i = dayIndex(today);
   if (i % 3 === 0) return { title: 'Ein Gedanke zur Jahreszeit', text: SEASON_ADVICE[sceneOf(today)] };
   return { title: 'Rat des Tages', text: ADVICE_POOL[i % ADVICE_POOL.length] };

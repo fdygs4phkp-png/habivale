@@ -31,6 +31,28 @@ export function emptyState(): AppState {
   return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: false, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {}, visits: {} };
 }
 
+/** 0.16.0: der Wolf hat fünf Stufen (neu: „Großer Welpe“ an Stelle 1). Alte Schlüssel wolf:1–3 rücken eine Stelle auf;
+ *  wer schon größer war, hat den großen Welpen damit auch hinter sich. Merker `wolf5` in `firsts`. */
+function wolfV5(firsts: Record<string, number>, celebrated: Record<string, number>): { firsts: Record<string, number>; celebrated: Record<string, number> } {
+  if (firsts['wolf5'] !== undefined) return { firsts, celebrated };
+  const f: Record<string, number> = {};
+  const c: Record<string, number> = {};
+  for (const [k, v] of Object.entries(firsts)) if (!/^wolf:\d+$/.test(k)) f[k] = v;
+  for (const [k, v] of Object.entries(celebrated)) if (!/^wolf:\d+$/.test(k)) c[k] = v;
+  for (const i of [3, 2, 1]) {
+    if (firsts['wolf:' + i] !== undefined) {
+      f['wolf:' + (i + 1)] = firsts['wolf:' + i];
+      if (f['wolf:1'] === undefined || firsts['wolf:' + i] < f['wolf:1']) f['wolf:1'] = firsts['wolf:' + i];
+    }
+    if (celebrated['wolf:' + i] !== undefined) {
+      c['wolf:' + (i + 1)] = celebrated['wolf:' + i];
+      c['wolf:1'] = Math.min(c['wolf:1'] ?? Infinity, celebrated['wolf:' + i]);
+    }
+  }
+  f['wolf5'] = 0;
+  return { firsts: f, celebrated: c };
+}
+
 function normalize(raw: unknown): AppState {
   const s = emptyState();
   if (!raw || typeof raw !== 'object') return s;
@@ -41,7 +63,6 @@ function normalize(raw: unknown): AppState {
     money: migrateMoney({ ...s.money, ...(r.money || {}) }),
     done: r.done || {},
     habits: r.habits || [],
-    firsts: r.firsts || {},
     journal: r.journal || {},
     goals: r.goals || [],
     weeks: r.weeks || {},
@@ -57,7 +78,7 @@ function normalize(raw: unknown): AppState {
     hero: r.hero === 'kael' ? 'kael' : 'lyra',
     outfits: { lyra: r.outfits?.lyra || 'lyra-start', kael: r.outfits?.kael || 'kael-start' },
     // Beim ersten Start mit dieser Version: alles schon Erreichte gilt als verkündet (keine Flut von Meldungen)
-    celebrated: r.celebrated || { ...(r.firsts || {}) },
+    ...wolfV5(r.firsts || {}, r.celebrated || { ...(r.firsts || {}) }),
     visits: r.visits || {},
   } as AppState;
 }

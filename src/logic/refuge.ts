@@ -6,8 +6,8 @@ import { fromKey, type DayKey } from './date.ts';
 import type { AppState } from './types.ts';
 
 export const REFUGE_STAGES = [
-  { n: 1, days: 0, name: 'Die alte Hütte', text: 'Klein und einfach – aber euer erstes eigenes Zuhause im Zauberwald.' },
-  { n: 2, days: 21, name: 'Das Häuschen', text: 'Ein Schornstein, ein Gärtchen, mehr Platz für euch und den Wolf.' },
+  { n: 1, days: 0, name: 'Die alte Hütte', text: 'Klein und einfach – aber dein erstes eigenes Zuhause im Zauberwald.' },
+  { n: 2, days: 21, name: 'Das Häuschen', text: 'Ein Schornstein, ein Gärtchen, mehr Platz für dich, Lyra, Kael und den Wolf.' },
   { n: 3, days: 90, name: 'Das große Haus', text: 'Zwei Stockwerke, ein Balkon und eine eigene Hütte für den Wolf. Oben hat jeder ein eigenes Zimmer.' },
 ] as const;
 

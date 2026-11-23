@@ -31,7 +31,7 @@ export default function Collection() {
   const itemsOk = unlockedItems(state, today);
 
   return (
-    <Screen title="Sammlung" sub={view === 'trophies' ? `Trophäen: ${got} von ${visible.length}` : view === 'outfits' ? 'Kleidung für Lyra und Kael' : `Gegenstände: ${itemsOk.size} von ${ITEMS.length}`}>
+    <Screen gear title="Sammlung" sub={view === 'trophies' ? `Trophäen: ${got} von ${visible.length}` : view === 'outfits' ? 'Kleidung für Lyra und Kael' : `Gegenstände: ${itemsOk.size} von ${ITEMS.length}`}>
       <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
         <Chip title="Trophäen" on={view === 'trophies'} onPress={() => setView('trophies')} />
         <Chip title="Kleidung" on={view === 'outfits'} onPress={() => setView('outfits')} />
@@ -58,7 +58,7 @@ export default function Collection() {
       ) : !premium ? (
         <Card style={{ borderColor: C.gold }}>
           <H2>Kleidung und Gegenstände</H2>
-          <P dim>Mit Premium bekommen Lyra und Kael neue Kleidung, und ihr sammelt magische Gegenstände – alles verdient durch deinen Fortschritt, nie gekauft.</P>
+          <P dim>Mit Premium bekommen Lyra und Kael neue Kleidung, und du sammelst magische Gegenstände – alles verdient durch deinen Fortschritt, nie gekauft.</P>
         </Card>
       ) : view === 'outfits' ? (
         <>

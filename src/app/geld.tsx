@@ -227,7 +227,7 @@ export default function Money() {
       <Card onPress={() => open('split')} label="Aufteilung ändern" style={{ flex: 1 }}>
         <H2>Aufteilung</H2>
         <P>Sparen {m.split.save} % · Ausgeben {m.split.spend} % · Teilen {m.split.share} %</P>
-        <P dim>Legt die Aufteilung gemeinsam mit euren Eltern fest. Antippen zum Ändern.</P>
+        <P dim>Leg die Aufteilung gemeinsam mit deinen Eltern fest. Antippen zum Ändern.</P>
       </Card>
       </Grid>
 

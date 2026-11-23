@@ -18,22 +18,22 @@ export default function Adventure() {
   const w0 = wolfStage(state.habits, state.done, keptWolf(state));
   const premium = state.premium;
   // Ohne Premium bleibt der Wolf ein Welpe (die Fortschritte zählen trotzdem weiter und sind mit Premium sofort da)
-  const w = premium ? w0 : { ...w0, index: 0, stage: WOLF_STAGES[0], next: WOLF_STAGES[1], toNext: Math.max(0, 30 - w0.activeDays) };
+  const w = premium ? w0 : { ...w0, index: 0, stage: WOLF_STAGES[0], next: WOLF_STAGES[1], toNext: Math.max(0, WOLF_STAGES[1].days - w0.activeDays) };
   const hero = state.hero;
   const outfit = OUTFITS.find((o) => o.id === state.outfits[hero]) ?? OUTFITS.find((o) => o.id === hero + '-start')!;
   const heroName = hero === 'lyra' ? 'Lyra' : 'Kael';
   const outfitImg = OUTFIT_IMG[outfit.id];
 
   return (
-    <Screen title="Abenteuer" sub="Lyra, Kael und euer Wolf">
+    <Screen gear title="Abenteuer" sub="Lyra, Kael und dein Wolf">
       <View style={s.key}>
-        <Image source={IMG.keyArt[w.index]} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel="Lyra, Kael, die Mentorin und euer Wolf im Zauberwald" />
+        <Image source={IMG.keyArt[w.index]} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel="Lyra, Kael, die Mentorin und dein Wolf im Zauberwald" />
       </View>
 
       {!premium ? (
         <Card style={{ borderColor: C.gold }}>
           <H2>Die ganze Welt mit Premium</H2>
-          <P dim>Mit Premium wächst euer Wolf in vier Stufen, Lyra und Kael bekommen neue Kleidung, ihr sammelt magische Gegenstände und baut euer Refugium aus. Dein Fortschritt zählt schon jetzt mit.</P>
+          <P dim>Mit Premium wächst dein Wolf in fünf Stufen, Lyra und Kael bekommen neue Kleidung, du sammelst magische Gegenstände und baust dein Refugium aus. Dein Fortschritt zählt schon jetzt mit.</P>
           <Button title="Zu den Einstellungen" kind="ghost" icon="cog-outline" onPress={() => router.push('/einstellungen')} />
         </Card>
       ) : null}
@@ -70,8 +70,9 @@ export default function Adventure() {
           <Image source={IMG.wolfSit[w.index]} style={{ width: tablet ? 130 : 100, height: tablet ? 160 : 124 }} contentFit="contain" accessibilityLabel={w.stage.name} />
           <View style={{ flex: 1, gap: 6 }}>
             <H2>{w.stage.name}</H2>
+            {w.index === 1 ? <PlaceholderNote text="Bild vom großen Welpen folgt" /> : null}
             <P>Aktive Tage: {w.activeDays}</P>
-            {!premium ? <P dim>Mit Premium wächst euer Wolf weiter.</P> : w.next ? <P dim>Noch {w.toNext} bis zum {w.next.name}.</P> : <P dim>Euer Wolf hat die höchste Stufe erreicht.</P>}
+            {!premium ? <P dim>Mit Premium wächst dein Wolf weiter.</P> : w.next ? <P dim>Noch {w.toNext} aktive Tage bis zum {w.next.dat}.</P> : <P dim>Dein Wolf hat die höchste Stufe erreicht.</P>}
             <Bar value={w.next ? (w.activeDays - w.stage.days) / (w.next.days - w.stage.days) : 1} color={C.lavender} height={12} />
           </View>
         </Card>
@@ -97,7 +98,7 @@ export default function Adventure() {
         {[
           { img: IMG.lyra, name: 'Lyra', text: 'Neugierig, mutig, kreativ' },
           { img: IMG.kael, name: 'Kael', text: 'Entschlossen und treu' },
-          { img: IMG.mentor, name: 'Die Mentorin', text: 'Eure weise Lehrerin' },
+          { img: IMG.mentor, name: 'Die Mentorin', text: 'Deine weise Lehrerin' },
         ].map((c) => (
           <View key={c.name} style={s.char}>
             <Image source={c.img} style={{ width: '100%', height: tablet ? 300 : 170 }} contentFit="contain" accessibilityLabel={c.name} />
@@ -108,7 +109,7 @@ export default function Adventure() {
       </Grid>
 
       <Card>
-        <H2>Die vier Stufen des Wolfs</H2>
+        <H2>Die fünf Stufen des Wolfs</H2>
         <View style={s.stages}>
           {WOLF_STAGES.map((st, i) => (
             <View key={st.key} style={[s.stage, i > w.index && { opacity: 0.35 }]}>

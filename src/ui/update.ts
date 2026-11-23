@@ -34,3 +34,16 @@ export function useUpdate(): { latest: string | null; reload: () => void } {
     },
   };
 }
+
+/** Sofort neu laden: Zwischenspeicher des Browsers leeren (falls vorhanden) und die Seite mit neuer Adresse holen. */
+export async function forceReload(): Promise<void> {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+  try {
+    const nav = navigator as Navigator & { serviceWorker?: ServiceWorkerContainer };
+    if (nav.serviceWorker?.getRegistrations) for (const r of await nav.serviceWorker.getRegistrations()) await r.unregister();
+    if (typeof caches !== 'undefined') for (const k of await caches.keys()) await caches.delete(k);
+  } catch {
+    // egal – neu laden geht trotzdem
+  }
+  window.location.replace(window.location.origin + '/habivale/?v=' + Date.now());
+}

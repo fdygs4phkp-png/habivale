@@ -80,8 +80,10 @@ ok('Wolf: aktive Tage, nie zurück', () => {
   let d = {};
   for (let i = 0; i < 30; i++) d = toggleDone(d, 'a', addDays(T, -i));
   assert.equal(activeDays(a, d).length, 30);
-  assert.equal(wolfStage(a, d).index, 1);
-  assert.equal(wolfStage(a, {}, 1).index, 1);
+  assert.equal(wolfStage(a, d).index, 0); // seit 0.16.0 nach 30 Tagen noch ein Welpe
+  for (let i = 30; i < 60; i++) d = toggleDone(d, 'a', addDays(T, -i));
+  assert.equal(wolfStage(a, d).index, 1); // großer Welpe ab 60
+  assert.equal(wolfStage(a, {}, 2).index, 2);
 });
 
 ok('Taschengeld: Aufteilung, Rest ins Sparglas', () => {
@@ -203,7 +205,7 @@ ok('Sparziele der Reihe nach, Monatsübersicht, Geld-XP', () => {
 ok('Phase 4: Level/Wolf als Ereignisse, nur höchstes Level, Bestandsschutz, Kleidung freischalten', () => {
   let st = { ...base(), habits: [h('a', { start: '2025-01-01' })] } as AppState;
   let d = {};
-  for (let i = 0; i < 31; i++) d = toggleDone(d, 'a', addDays(T, -i));
+  for (let i = 0; i < 61; i++) d = toggleDone(d, 'a', addDays(T, -i));
   st = { ...st, done: d };
   const f = updateFirsts(st, 1000, T)!;
   assert.ok(f['t:first-step'] && f['t:days-30'] && f['wolf:1'] && f['lv:2']);
@@ -246,12 +248,12 @@ ok('Phase 5: Jahreszeiten, Kranz nur in der Weihnachtszeit, Ausbaustufen mit Bes
 
 ok('Hexenhaus: eine Geschichte je Besuchstag, Rat passt zur Lage, Besuche werden zusammengeführt', () => {
   let st = { ...base(), visits: {} } as AppState;
-  assert.equal(adviceFor(st, T).title, 'Fangt klein an');
+  assert.equal(adviceFor(st, T).title, 'Fang klein an');
   st = { ...st, habits: [h('a')] };
   st = { ...st, done: toggleDone({}, 'a', T) };
   assert.equal(adviceFor(st, T).title, 'Heute alles geschafft!');
   st = { ...st, done: toggleDone({}, 'a', addDays(T, -4)) };
-  assert.equal(adviceFor(st, T).title, 'Schön, dass ihr wieder da seid');
+  assert.equal(adviceFor(st, T).title, 'Schön, dass du wieder da bist');
   // gleicher Tag = gleicher Rat
   assert.deepEqual(adviceFor(st, T), adviceFor(st, T));
   st = { ...st, visits: { [addDays(T, -2)]: 1, [T]: 2 } };

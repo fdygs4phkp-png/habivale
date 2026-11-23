@@ -35,7 +35,7 @@ export default function Journal() {
   if (!open) return <DiaryCover onOpen={() => setOpen(true)} />;
 
   return (
-    <Screen
+    <Screen gear
       title="Tagebuch"
       sub={state.diary.kind === 'free' ? 'Freie Seiten · nur für dich' : 'Nur für dich'}
       right={
@@ -64,7 +64,7 @@ function DiaryCover({ onOpen }: { onOpen: () => void }) {
   const h = land ? w * (752 / 1000) : w * (900 / 556);
   const year = new Date().getFullYear();
   return (
-    <Screen title="Tagebuch" sub="Antippen zum Aufschlagen">
+    <Screen gear title="Tagebuch" sub="Antippen zum Aufschlagen">
       <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel="Tagebuch aufschlagen" style={{ alignSelf: 'center', width: w, height: h }}>
         <Image source={DIARY_COVER[d.format]} style={{ width: w, height: h, borderRadius: 8 }} contentFit="contain" />
         <View style={[s.coverBand, land ? { top: h * 0.72, height: h * 0.16 } : { top: h * 0.74, height: h * 0.14 }]}>
@@ -95,7 +95,7 @@ function DiarySetup() {
   const [format, setFormat] = useState<'p' | 'l'>('p');
   const hP = tablet ? 240 : 150;
   return (
-    <Screen title="Dein Tagebuch" sub="Such dir aus, wie es sein soll">
+    <Screen gear title="Dein Tagebuch" sub="Such dir aus, wie es sein soll">
       <View style={{ flexDirection: 'row', gap: 16, justifyContent: 'center', alignItems: 'flex-end' }}>
         <Pressable onPress={() => setFormat('p')} accessibilityRole="radio" aria-checked={format === 'p'} style={[s.pickCover, format === 'p' && s.pickOn]}>
           <Image source={DIARY_COVER.p} style={{ width: hP * (556 / 900), height: hP }} contentFit="contain" />
@@ -191,7 +191,7 @@ function PremiumPreview() {
   const { tablet } = useLayout();
   const h = tablet ? 220 : 130;
   return (
-    <Screen title="Tagebuch" sub="Gehört zu Premium">
+    <Screen gear title="Tagebuch" sub="Gehört zu Premium">
       <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 12 }}>
         {IMG.covers.map((c, i) => (
           <Image key={i} source={c} style={{ width: h * 0.72, height: h, borderRadius: 6 }} contentFit="cover" accessibilityLabel="Tagebuch" />

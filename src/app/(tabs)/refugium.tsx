@@ -50,7 +50,7 @@ export default function Refuge() {
   else pic = { src: ROOM_IMG[where], missing: (where === 'lyra' ? 'Lyras' : 'Kaels') + ' Zimmer wird noch gezeichnet' };
 
   return (
-    <Screen title="Refugium" sub={REFUGE_STAGES[n - 1].name}>
+    <Screen gear title="Refugium" sub={REFUGE_STAGES[n - 1].name}>
       <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
         <Chip title="Außen" on={where === 'out'} onPress={() => setWhere('out')} />
         <Chip title="Innen" on={where === 'in'} onPress={() => setWhere('in')} />
@@ -118,7 +118,7 @@ export default function Refuge() {
           })}
         </View>
         {!premium ? (
-          <P dim>Mit Premium wächst euer Refugium mit: zum Häuschen und zum großen Haus. Eure aktiven Tage zählen schon jetzt ({r0.days}).</P>
+          <P dim>Mit Premium wächst dein Refugium mit: zum Häuschen und zum großen Haus. Deine aktiven Tage zählen schon jetzt ({r0.days}).</P>
         ) : r0.next ? (
           <View style={{ gap: 6 }}>
             <Bar value={(r0.days - r0.stage.days) / (r0.next.days - r0.stage.days)} />
@@ -127,7 +127,7 @@ export default function Refuge() {
             </P>
           </View>
         ) : (
-          <P dim>Euer Refugium ist ganz ausgebaut.</P>
+          <P dim>Dein Refugium ist ganz ausgebaut.</P>
         )}
       </Card>
 
@@ -138,7 +138,7 @@ export default function Refuge() {
 
       <H2>Einrichtung</H2>
       <P dim>
-        {premium ? `${decorOk.size} von ${DECOR.length} Teilen. ` : ''}Jedes Teil verdient ihr mit eurem Fortschritt. Bald könnt ihr sie selbst im Raum aufstellen.
+        {premium ? `${decorOk.size} von ${DECOR.length} Teilen. ` : ''}Jedes Teil verdienst du mit deinem Fortschritt. Bald kannst du sie selbst im Raum aufstellen.
       </P>
       <Grid cols={cols} gap={10}>
         {DECOR.map((d) => {
@@ -160,7 +160,7 @@ export default function Refuge() {
           <Icon name="weather-night" size={32} color={C.gold} />
           <View style={{ flex: 1 }}>
             <H2>Zum Hexenhaus</H2>
-            <P dim>{state.visits[today] === undefined && talesOpen(state) < TALES.length ? 'Heute wartet eine neue Geschichte auf euch.' : 'Besucht die Mentorin tief im Wald.'}</P>
+            <P dim>{state.visits[today] === undefined && talesOpen(state) < TALES.length ? 'Heute wartet eine neue Geschichte auf dich.' : 'Besuch die Mentorin tief im Wald.'}</P>
           </View>
           <Icon name="chevron-right" color={C.gold} />
         </View>

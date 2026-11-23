@@ -44,7 +44,7 @@ export const TROPHIES: TrophyDef[] = [
   { id: 'done-100', name: '100 erledigte Habits', text: 'Hundert Mal abgehakt.', how: 'Hake 100 Mal eine Gewohnheit ab.', icon: 'diamond-stone', reached: (s) => doneCount(s) >= 100 },
   { id: 'one-year', name: 'Ein Jahr auf dem Weg', text: 'Ein ganzes Jahr bist du schon unterwegs.', how: 'Bleib ein Jahr dabei (mindestens 100 aktive Tage).', icon: 'weather-sunset', reached: (s, t) => { const d = actDays(s); return d.length >= 100 && d[0] <= addDays(t, -365); } },
   { id: 'comeback', name: 'Rückkehr nach einer Pause', text: 'Du hast eine Pause gemacht und bist zurückgekommen. Das ist Stärke.', how: 'Komm nach einer Pause von einer Woche zurück.', icon: 'compass-outline', free: true, reached: (s) => cameBack(s) },
-  { id: 'legend', name: 'Der legendäre Begleiter', text: 'Euer Wolf ist legendär geworden.', how: 'Lass euren Wolf zur legendären Stufe wachsen.', icon: 'star-shooting', reached: (s) => wolfStage(s.habits, s.done).index >= 3 },
+  { id: 'legend', name: 'Der legendäre Begleiter', text: 'Dein Wolf ist legendär geworden.', how: 'Lass deinen Wolf zur legendären Stufe wachsen.', icon: 'star-shooting', reached: (s) => wolfStage(s.habits, s.done).index >= 4 },
   { id: 'money-first', name: 'Das erste Taschengeld', text: 'Du hast dein erstes Taschengeld in die Gläser verteilt.', how: 'Trage dein erstes Taschengeld ein.', icon: 'cup', free: true, reached: (s) => s.money.entries.some((e) => e.kind === 'allowance') },
   { id: 'goal-reached', name: 'Sparziel erreicht', text: 'Dein Sparglas hat dein Ziel erreicht.', how: 'Erreiche ein Sparziel.', icon: 'piggy-bank', free: true, reached: (s) => s.money.goals.some((g) => !!g.reachedAt) },
   { id: 'goals-3', name: 'Drei Sparziele', text: 'Du hast drei Sparziele erreicht.', how: 'Erreiche drei Sparziele.', icon: 'treasure-chest', reached: (s) => s.money.goals.filter((g) => !!g.reachedAt).length >= 3 },
@@ -112,12 +112,12 @@ export function eventFor(key: string, at: number): WorldEvent | null {
   if (key.startsWith('lv:')) return { key, at, kind: 'level', title: 'Level ' + key.slice(3) + '!', text: 'Lyra und Kael werden stärker – Schritt für Schritt. Weiter so!' };
   if (key.startsWith('wolf:')) {
     const i = Number(key.slice(5));
-    return { key, at, kind: 'wolf', title: 'Euer Wolf ist gewachsen!', text: 'Aus eurem Begleiter ist ein ' + WOLF_STAGES[i].name + ' geworden. Er wächst mit eurer Beständigkeit.', wolf: i };
+    return { key, at, kind: 'wolf', title: 'Dein Wolf ist gewachsen!', text: 'Aus deinem Begleiter ist ein ' + WOLF_STAGES[i].nom + ' geworden. Er wächst, weil du dranbleibst.', wolf: i };
   }
   if (key.startsWith('ref:')) {
     const n = Number(key.slice(4));
     const st = REFUGE_STAGES[n - 1];
-    return st ? { key, at, kind: 'refuge', title: 'Euer Refugium wächst!', text: 'Aus eurer Hütte ist ' + (n === 2 ? 'ein Häuschen' : 'ein großes Haus') + ' geworden. ' + st.text, refuge: n } : null;
+    return st ? { key, at, kind: 'refuge', title: 'Dein Refugium wächst!', text: 'Aus deiner Hütte ist ' + (n === 2 ? 'ein Häuschen' : 'ein großes Haus') + ' geworden. ' + st.text, refuge: n } : null;
   }
   return null;
 }

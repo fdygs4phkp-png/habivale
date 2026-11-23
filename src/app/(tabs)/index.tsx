@@ -30,7 +30,7 @@ function mentorLine(due: number, done: number, kid = false): string {
   if (due === 0) return 'Heute ist nichts fällig. Ruh dich aus – auch das gehört zum Weg.';
   if (done === 0) return 'Ein großer Traum ist wie ein ferner Berg. Fang mit einem kleinen Schritt an.';
   if (done < due) return due - done === 1 ? 'Noch einer – dann ist dein Tag geschafft.' : 'Gut so. Schritt für Schritt.';
-  return 'Alles geschafft! Euer Wolf ist stolz auf euch.';
+  return 'Alles geschafft! Dein Wolf ist stolz auf dich.';
 }
 
 export default function Today() {
@@ -53,14 +53,9 @@ export default function Today() {
   const b = balances(state.money.entries);
 
   return (
-    <Screen
+    <Screen gear
       title={state.profileName ? 'Hallo, ' + state.profileName + '!' : 'Heute'}
       sub={longDateDe(today)}
-      right={
-        <Pressable onPress={() => router.push('/einstellungen')} accessibilityRole="button" accessibilityLabel="Einstellungen" style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="cog-outline" size={28} color={C.gold} />
-        </Pressable>
-      }
     >
       {!state.profileName ? (
         <Card>

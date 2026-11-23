@@ -73,7 +73,7 @@ export default function WitchHouse() {
       <H2>Das Geschichtenbuch</H2>
       <P dim>
         {open < TALES.length
-          ? `${open} von ${TALES.length} Geschichten. Jeden Tag, an dem ihr die Mentorin besucht, erzählt sie euch eine neue.`
+          ? `${open} von ${TALES.length} Geschichten. Jeden Tag, an dem du die Mentorin besuchst, erzählt sie dir eine neue.`
           : `Alle ${TALES.length} Geschichten. Die Mentorin freut sich trotzdem über jeden Besuch.`}
       </P>
       {TALES.map((t, i) => {
@@ -106,7 +106,7 @@ export default function WitchHouse() {
 
       <H2>Erinnerungen</H2>
       {memories.length === 0 ? (
-        <P dim>Noch ist hier nichts. Sobald ihr etwas erreicht, erzählt euch die Mentorin davon – und hier könnt ihr es nachlesen.</P>
+        <P dim>Noch ist hier nichts. Sobald du etwas erreichst, erzählt dir die Mentorin davon – und hier kannst du es nachlesen.</P>
       ) : (
         memories.map((e) => (
           <Card key={e.key} style={{ gap: 4 }}>
@@ -117,7 +117,7 @@ export default function WitchHouse() {
         ))
       )}
       <Card onPress={() => router.push('/abenteuer')} label="Die Geschichte lesen">
-        <H2>Eure eigene Geschichte</H2>
+        <H2>Deine eigene Geschichte</H2>
         <P dim>Mit jedem großen Schritt öffnet sich auf „Abenteuer“ ein neues Kapitel.</P>
       </Card>
     </Screen>

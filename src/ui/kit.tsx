@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import React, { useState } from 'react';
 import { Alert, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View, type TextInputProps, type ViewStyle } from 'react-native';
@@ -33,7 +34,8 @@ export function Grid({ cols, gap = 12, children }: { cols: number; gap?: number;
   );
 }
 
-export function Screen({ title, sub, children, right }: { title: string; sub?: string; children: React.ReactNode; right?: React.ReactNode }) {
+/** `gear`: Zahnrad zu den Einstellungen oben rechts (auf jedem Reiter). */
+export function Screen({ title, sub, children, right, gear }: { title: string; sub?: string; children: React.ReactNode; right?: React.ReactNode; gear?: boolean }) {
   const { maxW, tablet } = useLayout();
   const { k } = useMode();
   return (
@@ -45,6 +47,11 @@ export function Screen({ title, sub, children, right }: { title: string; sub?: s
             {sub ? <Text style={[st.sub, { fontSize: 16 * k }]}>{sub}</Text> : null}
           </View>
           {right}
+          {gear ? (
+            <Pressable onPress={() => router.push('/einstellungen')} accessibilityRole="button" accessibilityLabel="Einstellungen" style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name="cog-outline" size={28} color={C.gold} />
+            </Pressable>
+          ) : null}
         </View>
         <View style={[st.body, { maxWidth: maxW }]}>{children}</View>
       </ScrollView>

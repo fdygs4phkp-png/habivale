@@ -32,7 +32,7 @@ export function ruleText(r: Rule): string {
     case 'start': return 'Von Anfang an dabei';
     case 'level': return `Erreiche Level ${r.n}`;
     case 'days': return `Sei an ${r.n} Tagen aktiv`;
-    case 'wolf': return ['', 'Euer Wolf wird ein Jungwolf', 'Euer Wolf wird erwachsen', 'Euer Wolf wird legendär'][r.n];
+    case 'wolf': return ['', 'Dein Wolf wird ein großer Welpe', 'Dein Wolf wird ein Jungwolf', 'Dein Wolf wird erwachsen', 'Dein Wolf wird legendär'][r.n];
     case 'streak': return `Schaffe eine Gewohnheit ${r.n} Tage in Folge`;
     case 'trophies': return `Sammle ${r.n} Trophäen`;
     case 'journal': return r.n === 1 ? 'Schreib zum ersten Mal ins Tagebuch' : `Schreib an ${r.n} Tagen ins Tagebuch`;
@@ -40,7 +40,7 @@ export function ruleText(r: Rule): string {
     case 'savings': return r.n === 1 ? 'Erreiche ein Sparziel' : `Erreiche ${r.n} Sparziele`;
     case 'lessons': return r.n === 1 ? 'Lies eine Lektion der Mentorin' : `Lies ${r.n} Lektionen der Mentorin`;
     case 'shared': return r.n === 1 ? 'Teile zum ersten Mal aus dem grünen Glas' : `Teile ${r.n}-mal aus dem grünen Glas`;
-    case 'refuge': return r.n === 2 ? 'Euer Refugium wird zum Häuschen' : 'Euer Refugium wird zum großen Haus';
+    case 'refuge': return r.n === 2 ? 'Dein Refugium wird zum Häuschen' : 'Dein Refugium wird zum großen Haus';
   }
 }
 
@@ -49,7 +49,7 @@ export function ruleMet(s: AppState, r: Rule, today: DayKey): boolean {
     case 'start': return true;
     case 'level': return levelInfo(xpOf(s)).level >= r.n;
     case 'days': return activeDays(s.habits, s.done).length >= r.n;
-    case 'wolf': return Math.max(wolfStage(s.habits, s.done).index, ...[1, 2, 3].filter((i) => s.firsts['wolf:' + i] !== undefined)) >= r.n;
+    case 'wolf': return Math.max(wolfStage(s.habits, s.done).index, ...[1, 2, 3, 4].filter((i) => s.firsts['wolf:' + i] !== undefined)) >= r.n;
     case 'streak': return s.habits.some((h) => longestStreak(h, s.done, today) >= r.n);
     case 'trophies': return Object.keys(s.firsts).filter((k) => k.startsWith('t:')).length >= r.n;
     case 'journal': return Object.values(s.journal).filter(entryHasContent).length >= r.n;
@@ -78,13 +78,13 @@ export const OUTFITS: Outfit[] = [
   { id: 'lyra-bluegold', hero: 'lyra', name: 'Blau und Gold', rarity: 'rare', rule: { kind: 'level', n: 5 }, text: 'Nachtblau mit grünem Unterrock und goldenen Ranken.' },
   { id: 'lyra-winter', hero: 'lyra', name: 'Wintermantel', rarity: 'rare', rule: { kind: 'days', n: 30 }, text: 'Warm, mit weichem Kragen und Schneeflocken-Spange.' },
   { id: 'lyra-festive', hero: 'lyra', name: 'Festtagskleid', rarity: 'epic', rule: { kind: 'level', n: 8 }, text: 'Violett und Gold, für besondere Tage.' },
-  { id: 'lyra-starnight', hero: 'lyra', name: 'Sternennacht', rarity: 'legendary', rule: { kind: 'wolf', n: 3 }, text: 'Ein Kleid wie der Nachthimmel, voller kleiner Sterne.' },
+  { id: 'lyra-starnight', hero: 'lyra', name: 'Sternennacht', rarity: 'legendary', rule: { kind: 'wolf', n: 4 }, text: 'Ein Kleid wie der Nachthimmel, voller kleiner Sterne.' },
   { id: 'kael-start', hero: 'kael', name: 'Reisegewand', rarity: 'common', rule: { kind: 'start' }, text: 'Kaels dunkelblaue Tunika mit Goldstickerei und Umhang.' },
   { id: 'kael-ranger', hero: 'kael', name: 'Waldläufer', rarity: 'common', rule: { kind: 'level', n: 3 }, text: 'Waldgrün mit Lederweste und Karte am Gürtel.' },
   { id: 'kael-scout', hero: 'kael', name: 'Kundschafter', rarity: 'rare', rule: { kind: 'level', n: 5 }, text: 'Lederweste, Kapuzenumhang und eine Schriftrolle für unterwegs.' },
   { id: 'kael-winter', hero: 'kael', name: 'Wintermantel', rarity: 'rare', rule: { kind: 'days', n: 30 }, text: 'Langer Wollmantel mit violettem Schal.' },
   { id: 'kael-festive', hero: 'kael', name: 'Festtagsgewand', rarity: 'epic', rule: { kind: 'level', n: 8 }, text: 'Navy und Gold mit Eichenlaub-Stickerei.' },
-  { id: 'kael-moonwarden', hero: 'kael', name: 'Mondwächter', rarity: 'legendary', rule: { kind: 'wolf', n: 3 }, text: 'Mitternachtsblau mit silbernen Monden.' },
+  { id: 'kael-moonwarden', hero: 'kael', name: 'Mondwächter', rarity: 'legendary', rule: { kind: 'wolf', n: 4 }, text: 'Mitternachtsblau mit silbernen Monden.' },
 ];
 
 export interface Item {
@@ -102,7 +102,7 @@ export const ITEMS: Item[] = [
   { id: 'lantern', name: 'Kleine Laterne', rarity: 'common', rule: { kind: 'level', n: 2 }, icon: 'lightbulb-on-outline', text: 'Sie zeigt den Weg, Schritt für Schritt.' },
   { id: 'map', name: 'Alte Karte', rarity: 'common', rule: { kind: 'goals', n: 1 }, icon: 'map-legend', text: 'Jedes Ziel ist ein Ort auf der Karte.' },
   { id: 'bracelet', name: 'Freundschaftsband', rarity: 'common', rule: { kind: 'shared', n: 1 }, icon: 'hand-heart-outline', text: 'Für alle, die gern teilen.' },
-  { id: 'figurine', name: 'Holzwolf', rarity: 'common', rule: { kind: 'wolf', n: 1 }, icon: 'dog-side', text: 'Ein kleiner geschnitzter Wolf – wie eurer.' },
+  { id: 'figurine', name: 'Holzwolf', rarity: 'common', rule: { kind: 'wolf', n: 1 }, icon: 'dog-side', text: 'Ein kleiner geschnitzter Wolf – wie deiner.' },
   { id: 'compass', name: 'Messingkompass', rarity: 'rare', rule: { kind: 'days', n: 14 }, icon: 'compass-outline', text: 'Er findet immer zurück auf den Weg.' },
   { id: 'hourglass', name: 'Sanduhr', rarity: 'rare', rule: { kind: 'savings', n: 1 }, icon: 'timer-sand', text: 'Geduld ist eine Zauberkraft.' },
   { id: 'book', name: 'Zauberbuch', rarity: 'rare', rule: { kind: 'lessons', n: 3 }, icon: 'book-open-page-variant', text: 'Mit den Lektionen der Mentorin.' },
@@ -112,8 +112,8 @@ export const ITEMS: Item[] = [
   { id: 'moon', name: 'Mondanhänger', rarity: 'epic', rule: { kind: 'level', n: 6 }, icon: 'moon-waning-crescent', text: 'Ein Geschenk der Mentorin.' },
   { id: 'ball', name: 'Kristallkugel', rarity: 'epic', rule: { kind: 'days', n: 60 }, icon: 'crystal-ball', text: 'Sie zeigt, wie weit du schon gekommen bist.' },
   { id: 'key', name: 'Sternenschlüssel', rarity: 'epic', rule: { kind: 'streak', n: 21 }, icon: 'key-star', text: 'Er öffnet Türen, die Geduld verlangen.' },
-  { id: 'rune', name: 'Pfotenrune', rarity: 'epic', rule: { kind: 'wolf', n: 2 }, icon: 'paw', text: 'Euer Wolf ist erwachsen geworden.' },
-  { id: 'stardust', name: 'Sternenstaub', rarity: 'legendary', rule: { kind: 'wolf', n: 3 }, icon: 'star-shooting', text: 'Aus dem Fell des legendären Wolfs.' },
+  { id: 'rune', name: 'Pfotenrune', rarity: 'epic', rule: { kind: 'wolf', n: 3 }, icon: 'paw', text: 'Dein Wolf ist erwachsen geworden.' },
+  { id: 'stardust', name: 'Sternenstaub', rarity: 'legendary', rule: { kind: 'wolf', n: 4 }, icon: 'star-shooting', text: 'Aus dem Fell des legendären Wolfs.' },
   { id: 'shell', name: 'Leuchtende Muschel', rarity: 'legendary', rule: { kind: 'days', n: 300 }, icon: 'shimmer', text: 'Für 300 Tage auf dem Weg.' },
 ];
 
@@ -136,16 +136,16 @@ export interface Decor {
 export const DECOR: Decor[] = [
   { id: 'rug', name: 'Gewebter Teppich', rule: { kind: 'start' }, text: 'Violett und Gold – das Erste, was ins neue Zuhause kommt.' },
   { id: 'firewood', name: 'Holzkorb', rule: { kind: 'days', n: 3 }, text: 'Damit das Feuer im Kamin nie ausgeht.' },
-  { id: 'wolfbed', name: 'Wolfsbett', rule: { kind: 'days', n: 7 }, text: 'Ein weiches Bett für euren Wolf, mit Fell und Decke.' },
+  { id: 'wolfbed', name: 'Wolfsbett', rule: { kind: 'days', n: 7 }, text: 'Ein weiches Bett für deinen Wolf, mit Fell und Decke.' },
   { id: 'lantern', name: 'Zauberlaterne', rule: { kind: 'level', n: 3 }, text: 'Ihr violettes Licht macht jeden Abend gemütlich.' },
   { id: 'ivy', name: 'Efeu-Ampel', rule: { kind: 'streak', n: 7 }, text: 'Wächst langsam, aber stetig – wie eine gute Gewohnheit.' },
   { id: 'painting', name: 'Bild vom Mondwald', rule: { kind: 'journal', n: 3 }, text: 'Der Wald bei Nacht, gemalt in Öl.' },
-  { id: 'desk', name: 'Schreibtisch', rule: { kind: 'goals', n: 1 }, text: 'Mit Armillarsphäre und Feder – hier plant ihr eure Ziele.' },
+  { id: 'desk', name: 'Schreibtisch', rule: { kind: 'goals', n: 1 }, text: 'Mit Armillarsphäre und Feder – hier planst du deine Ziele.' },
   { id: 'bookshelf', name: 'Bücherregal', rule: { kind: 'lessons', n: 2 }, text: 'Für die Bücher und Lektionen der Mentorin.' },
   { id: 'windowbench', name: 'Fensterbank mit Kissen', rule: { kind: 'refuge', n: 2 }, text: 'Der schönste Platz, um in den Mondwald zu schauen.' },
-  { id: 'crystals', name: 'Kristallschale', rule: { kind: 'trophies', n: 5 }, text: 'Die Kristalle leuchten für jede eurer Trophäen.' },
+  { id: 'crystals', name: 'Kristallschale', rule: { kind: 'trophies', n: 5 }, text: 'Die Kristalle leuchten für jede deiner Trophäen.' },
   { id: 'wisteria', name: 'Glyzinien-Girlande', rule: { kind: 'days', n: 45 }, text: 'Violette Blüten über dem Kamin.' },
-  { id: 'trophyshelf', name: 'Trophäen-Brett', rule: { kind: 'trophies', n: 10 }, text: 'Ein eigener Platz für eure schönsten Auszeichnungen.' },
+  { id: 'trophyshelf', name: 'Trophäen-Brett', rule: { kind: 'trophies', n: 10 }, text: 'Ein eigener Platz für deine schönsten Auszeichnungen.' },
 ];
 
 export function unlockedDecor(s: AppState, today: DayKey): Set<string> {
@@ -165,8 +165,8 @@ export const STORY_CHAPTERS: Chapter[] = [
   { title: 'Der kleine Wolf', rule: { kind: 'start' }, text: 'In einem Korb liegt ein Wolfswelpe. Er hat keine Mutter mehr. „Zieht ihn auf“, sagt die Mentorin. „Er braucht euch – jeden Tag. So lernt ihr, Verantwortung zu tragen und an einer Sache dranzubleiben.“' },
   { title: 'Ein neues Zuhause', rule: { kind: 'start' }, text: 'In einer kleinen, alten Hütte beginnt ihr neues Leben. Jeden Tag kümmern sie sich um den Welpen – und mit jeder Gewohnheit, die sie pflegen, wird er größer und stärker.' },
   { title: 'Ein Schornstein raucht', rule: { kind: 'refuge', n: 2 }, text: 'Drei Wochen sind vergangen. Lyra und Kael haben die Hütte geflickt, einen Schornstein gemauert und ein kleines Gärtchen angelegt. „Seht ihr?“, sagt die Mentorin bei ihrem Besuch. „Ein Zuhause wächst wie ihr – Stein für Stein.“' },
-  { title: 'Der Jungwolf', rule: { kind: 'wolf', n: 1 }, text: 'Eines Morgens stolpert der Welpe nicht mehr über seine Pfoten. Er rennt voraus, wartet am Waldrand und schaut sich um, ob ihr nachkommt. Er weiß jetzt: Auf euch ist Verlass.' },
+  { title: 'Der Jungwolf', rule: { kind: 'wolf', n: 2 }, text: 'Eines Morgens stolpert der Welpe nicht mehr über seine Pfoten. Er rennt voraus, wartet am Waldrand und schaut sich um, ob Lyra und Kael nachkommen. Er weiß jetzt: Auf die beiden ist Verlass.' },
   { title: 'Das große Haus', rule: { kind: 'refuge', n: 3 }, text: 'Aus dem Häuschen ist ein richtiges Haus geworden, mit Balkon, Glyzinien und einer eigenen Hütte für den Wolf. Oben hat jetzt jeder ein eigenes Zimmer. Die Mentorin lächelt: „Ihr habt nicht aufgegeben. Das sieht man.“' },
-  { title: 'Erwachsen', rule: { kind: 'wolf', n: 2 }, text: 'Euer Wolf ist erwachsen. Nachts hält er Wache vor dem Haus, tagsüber begleitet er euch auf jedem Weg. Er ist stark geworden – weil ihr jeden Tag für ihn da wart.' },
-  { title: 'Die Legende', rule: { kind: 'wolf', n: 3 }, text: 'Im Mondlicht schimmert sein Fell wie Sternenstaub. Im ganzen Zauberwald erzählt man sich von den beiden, die einen Welpen ohne Mutter aufgezogen haben – und davon, was Beständigkeit möglich macht.' },
+  { title: 'Erwachsen', rule: { kind: 'wolf', n: 3 }, text: 'Der Wolf ist erwachsen. Nachts hält er Wache vor dem Haus, tagsüber begleitet er Lyra und Kael auf jedem Weg. Er ist stark geworden – weil sie jeden Tag für ihn da waren.' },
+  { title: 'Die Legende', rule: { kind: 'wolf', n: 4 }, text: 'Im Mondlicht schimmert sein Fell wie Sternenstaub. Im ganzen Zauberwald erzählt man sich von den beiden, die einen Welpen ohne Mutter aufgezogen haben – und davon, was Beständigkeit möglich macht.' },
 ];

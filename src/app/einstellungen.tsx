@@ -7,6 +7,7 @@ import { ParentGate } from '../ui/gate';
 import { useStore } from '../state/store';
 import { PREMIUM_TEST_CODE } from '../logic/types.ts';
 import { APP_VERSION } from '../version';
+import { forceReload, useUpdate } from '../ui/update';
 import { ask, Button, Card, Chip, Field, H2, Icon, P, Screen, tell } from '../ui/kit';
 import { C } from '../ui/theme';
 
@@ -42,6 +43,7 @@ export default function Settings() {
   const account = useAccount();
   const [name, setName] = useState(state.profileName);
   const [pro, setPro] = useState('');
+  const upd = useUpdate();
 
   const exportNow = async () => {
     const json = store.exportJson();
@@ -96,6 +98,12 @@ export default function Settings() {
         <H2>Dein Name</H2>
         <Field label="Vorname oder Spitzname" value={name} onChangeText={setName} maxLength={30} />
         <Button title="Speichern" kind="ghost" onPress={() => store.setName(name)} disabled={!name.trim() || name.trim() === state.profileName} />
+      </Card>
+
+      <Card>
+        <H2>App aktualisieren</H2>
+        <P dim>{upd.latest ? `Eine neue Version ist da: ${upd.latest} (du hast ${APP_VERSION}).` : `Du hast Version ${APP_VERSION}.`} Wenn etwas Neues noch nicht zu sehen ist, lädt dieser Knopf die App frisch. Deine Daten bleiben dabei erhalten.</P>
+        <Button title="Jetzt aktualisieren" icon="refresh" kind={upd.latest ? 'main' : 'ghost'} onPress={() => void forceReload()} />
       </Card>
 
       {account.isChild ? <ParentGate what="Premium, Backup und Löschen sind für Eltern.">{grown()}</ParentGate> : grown()}
