@@ -112,7 +112,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     AsyncStorage.getItem(KEY)
       .then((j) => {
-        if (j) setState(normalize(JSON.parse(j)));
+        if (!j) return;
+        // Beim Öffnen nachtragen, was schon erreicht ist (z. B. eine neue Refugium-Stufe nach einem Update)
+        const st = normalize(JSON.parse(j));
+        const f = updateFirsts(st);
+        setState(f ? { ...st, firsts: f } : st);
       })
       .catch(() => {})
       .finally(() => {

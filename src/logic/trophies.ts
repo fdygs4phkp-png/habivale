@@ -5,6 +5,7 @@ import { addDays, daysBetween, type DayKey } from './date.ts';
 import { activeDays, doneByDay, longestStreak } from './habits.ts';
 import { entryHasContent } from './journal.ts';
 import { moneyXp } from './money.ts';
+import { REFUGE_STAGES, refugeStageByDays } from './refuge.ts';
 import { levelInfo, totalXp, wolfStage, WOLF_STAGES } from './progress.ts';
 import type { AppState } from './types.ts';
 
@@ -73,6 +74,8 @@ export function updateFirsts(s: AppState, now = Date.now(), today: DayKey = dayK
   for (let n = 2; n <= lv; n++) set('lv:' + n);
   const w = wolfStage(s.habits, s.done).index;
   for (let i = 1; i <= w; i++) set('wolf:' + i);
+  const r = refugeStageByDays(s);
+  for (let n = 2; n <= r; n++) set('ref:' + n);
   return changed ? f : null;
 }
 
@@ -92,11 +95,31 @@ export function keptWolf(s: AppState): number {
 export interface WorldEvent {
   key: string;
   at: number;
-  kind: 'trophy' | 'level' | 'wolf';
+  kind: 'trophy' | 'level' | 'wolf' | 'refuge';
   title: string;
   text: string;
   trophyId?: string;
   wolf?: number;
+  refuge?: number;
+}
+
+/** Beschreibung eines Ereignisses (für die Mentorin und die Erinnerungen im Hexenhaus). */
+export function eventFor(key: string, at: number): WorldEvent | null {
+  if (key.startsWith('t:')) {
+    const t = TROPHIES.find((x) => x.id === key.slice(2));
+    return t ? { key, at, kind: 'trophy', title: 'Eine neue Trophäe: ' + t.name, text: t.text, trophyId: t.id } : null;
+  }
+  if (key.startsWith('lv:')) return { key, at, kind: 'level', title: 'Level ' + key.slice(3) + '!', text: 'Lyra und Kael werden stärker – Schritt für Schritt. Weiter so!' };
+  if (key.startsWith('wolf:')) {
+    const i = Number(key.slice(5));
+    return { key, at, kind: 'wolf', title: 'Euer Wolf ist gewachsen!', text: 'Aus eurem Begleiter ist ein ' + WOLF_STAGES[i].name + ' geworden. Er wächst mit eurer Beständigkeit.', wolf: i };
+  }
+  if (key.startsWith('ref:')) {
+    const n = Number(key.slice(4));
+    const st = REFUGE_STAGES[n - 1];
+    return st ? { key, at, kind: 'refuge', title: 'Euer Refugium wächst!', text: 'Aus eurer Hütte ist ' + (n === 2 ? 'ein Häuschen' : 'ein großes Haus') + ' geworden. ' + st.text, refuge: n } : null;
+  }
+  return null;
 }
 
 /** Was die Mentorin noch verkünden möchte: erstes Erreichen, das noch nicht gefeiert wurde (älteste zuerst). */
@@ -104,15 +127,8 @@ export function pendingEvents(s: AppState): WorldEvent[] {
   const out: WorldEvent[] = [];
   for (const [key, at] of Object.entries(s.firsts)) {
     if (s.celebrated[key] !== undefined) continue;
-    if (key.startsWith('t:')) {
-      const t = TROPHIES.find((x) => x.id === key.slice(2));
-      if (t) out.push({ key, at, kind: 'trophy', title: 'Eine neue Trophäe: ' + t.name, text: t.text, trophyId: t.id });
-    } else if (key.startsWith('lv:')) {
-      out.push({ key, at, kind: 'level', title: 'Level ' + key.slice(3) + '!', text: 'Lyra und Kael werden stärker – Schritt für Schritt. Weiter so!' });
-    } else if (key.startsWith('wolf:')) {
-      const i = Number(key.slice(5));
-      out.push({ key, at, kind: 'wolf', title: 'Euer Wolf ist gewachsen!', text: 'Aus eurem Begleiter ist ein ' + WOLF_STAGES[i].name + ' geworden. Er wächst mit eurer Beständigkeit.', wolf: i });
-    }
+    const e = eventFor(key, at);
+    if (e) out.push(e);
   }
   // Mehrere Level auf einmal: nur das höchste zeigen
   const levels = out.filter((e) => e.kind === 'level').sort((a, b) => Number(b.key.slice(3)) - Number(a.key.slice(3)));

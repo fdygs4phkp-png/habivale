@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { pendingEvents } from '../logic/trophies.ts';
 import { useStore } from '../state/store';
-import { CHEER, MENTOR_POSE, TROPHY_IMG, WOLF_HAPPY } from './images';
+import { CHEER, MENTOR_POSE, REFUGE_OUT, TROPHY_IMG, WOLF_HAPPY } from './images';
 import { Button } from './kit';
 import { useMode } from './mode';
 import { C, F } from './theme';
@@ -15,7 +15,7 @@ export function MentorEvents() {
   if (!ready) return null;
   const ev = pendingEvents(state)[0];
   if (!ev) return null;
-  const pic = ev.trophyId ? TROPHY_IMG[ev.trophyId] : ev.wolf !== undefined ? WOLF_HAPPY[ev.wolf] : CHEER;
+  const pic = ev.trophyId ? TROPHY_IMG[ev.trophyId] : ev.wolf !== undefined ? WOLF_HAPPY[ev.wolf] : ev.refuge ? REFUGE_OUT.summer[ev.refuge - 1] : CHEER;
   const pose = ev.kind === 'trophy' ? MENTOR_POSE.gift : MENTOR_POSE.joy;
   return (
     <Modal visible transparent animationType="fade" onRequestClose={() => celebrate(ev.key)}>
@@ -30,6 +30,11 @@ export function MentorEvents() {
             <Text style={[s.title, kid && { fontSize: 26 }]}>{ev.title}</Text>
             <Text style={[s.text, kid && { fontSize: 19, lineHeight: 26 }]}>{ev.text}</Text>
             <Button title="Danke!" icon="heart-outline" onPress={() => celebrate(ev.key)} />
+            {ev.kind === 'refuge' ? (
+              <Pressable onPress={() => { celebrate(ev.key); router.push('/refugium'); }} accessibilityRole="button" style={s.link}>
+                <Text style={s.linkText}>Zum Refugium</Text>
+              </Pressable>
+            ) : null}
             {ev.kind === 'trophy' ? (
               <Pressable onPress={() => { celebrate(ev.key); router.push('/sammlung'); }} accessibilityRole="button" style={s.link}>
                 <Text style={s.linkText}>In der Sammlung ansehen</Text>

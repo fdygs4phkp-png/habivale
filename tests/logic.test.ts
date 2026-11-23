@@ -7,7 +7,8 @@ import { splitCents, balances, parseEuro, formatEuro, fillLevel, DEFAULT_SPLIT, 
 import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
 import { mergeState, hasContent } from '../src/logic/merge.ts';
 import { updateFirsts, pendingEvents, keptWolf } from '../src/logic/trophies.ts';
-import { ruleMet, unlockedOutfits } from '../src/logic/world.ts';
+import { ruleMet, unlockedOutfits, unlockedDecor, STORY_CHAPTERS } from '../src/logic/world.ts';
+import { refugeStage, seasonOf, sceneOf, isChristmasTime } from '../src/logic/refuge.ts';
 import { buildSnapshot } from '../src/logic/share.ts';
 import { ageStage, defaultShares } from '../src/logic/types.ts';
 import { weekStart, weekSummary, goalProgress, looksLikeBackup, entryHasContent, emptyEntry } from '../src/logic/journal.ts';
@@ -214,6 +215,32 @@ ok('Phase 4: Level/Wolf als Ereignisse, nur höchstes Level, Bestandsschutz, Kle
   assert.equal(ruleMet(st, { kind: 'days', n: 30 }, T), true);
   assert.ok(unlockedOutfits(st, T).has('lyra-winter'));
   assert.ok(!unlockedOutfits(st, T).has('lyra-starnight'));
+});
+
+ok('Phase 5: Jahreszeiten, Kranz nur in der Weihnachtszeit, Ausbaustufen mit Bestandsschutz', () => {
+  assert.equal(seasonOf('2026-03-01'), 'spring'); assert.equal(seasonOf('2026-05-31'), 'spring');
+  assert.equal(seasonOf('2026-06-01'), 'summer'); assert.equal(seasonOf('2026-11-30'), 'autumn');
+  assert.equal(seasonOf('2027-02-28'), 'winter');
+  assert.equal(sceneOf('2026-11-30'), 'autumn'); assert.equal(sceneOf('2026-12-01'), 'xmas');
+  assert.equal(sceneOf('2027-01-06'), 'xmas'); assert.equal(sceneOf('2027-01-07'), 'winter');
+  assert.equal(isChristmasTime('2027-02-14'), false);
+  let st = { ...base(), habits: [h('a', { start: '2025-01-01' })] } as AppState;
+  assert.equal(refugeStage(st).n, 1);
+  let d = {};
+  for (let i = 0; i < 21; i++) d = toggleDone(d, 'a', addDays(T, -i));
+  st = { ...st, done: d };
+  const r = refugeStage(st);
+  assert.equal(r.n, 2); assert.equal(r.toNext, 69);
+  const f = updateFirsts(st, 1000, T)!;
+  assert.ok(f['ref:2'] && !f['ref:3']);
+  st = { ...st, firsts: f };
+  assert.ok(pendingEvents(st).some((e) => e.kind === 'refuge' && e.refuge === 2));
+  // Haken weg: das Haus bleibt
+  assert.equal(refugeStage({ ...st, done: {} }).n, 2);
+  assert.ok(unlockedDecor(st, T).has('windowbench'));
+  assert.ok(!unlockedDecor(st, T).has('wisteria'));
+  assert.equal(ruleMet(st, STORY_CHAPTERS[4].rule, T), true);
+  assert.equal(ruleMet(st, STORY_CHAPTERS[6].rule, T), false);
 });
 
 console.log(n + ' Prüfungen bestanden');

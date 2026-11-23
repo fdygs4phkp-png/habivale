@@ -1,4 +1,6 @@
+import { Image } from 'expo-image';
 import { Tabs } from 'expo-router';
+import { NAV_IMG } from '../../ui/images';
 import { Icon, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 import { useMode } from '../../ui/mode';
@@ -26,7 +28,12 @@ export default function TabLayout() {
       }}
     >
       {TABS.map((t) => (
-        <Tabs.Screen key={t.name} name={t.name} options={{ title: t.title, tabBarIcon: ({ color }) => <Icon name={t.icon} size={26} color={String(color)} /> }} />
+        <Tabs.Screen key={t.name} name={t.name} options={{ title: t.title, tabBarIcon: ({ color, focused }) =>
+              NAV_IMG[t.name] ? (
+                <Image source={NAV_IMG[t.name]} style={{ width: 30, height: 30, opacity: focused ? 1 : 0.5 }} contentFit="contain" accessibilityElementsHidden />
+              ) : (
+                <Icon name={t.icon} size={26} color={String(color)} />
+              ) }} />
       ))}
     </Tabs>
   );

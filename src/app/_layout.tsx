@@ -28,6 +28,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="habit" options={{ presentation: 'modal' }} />
           <Stack.Screen name="geld" />
+          <Stack.Screen name="hexenhaus" />
           <Stack.Screen name="einstellungen" />
           <Stack.Screen name="konto" />
           <Stack.Screen name="familie" />

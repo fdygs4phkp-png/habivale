@@ -4,6 +4,7 @@
 import { activeDays, longestStreak } from './habits.ts';
 import { entryHasContent } from './journal.ts';
 import { levelInfo, wolfStage } from './progress.ts';
+import { refugeStage } from './refuge.ts';
 import { xpOf } from './trophies.ts';
 import type { DayKey } from './date.ts';
 import type { AppState } from './types.ts';
@@ -23,7 +24,8 @@ export type Rule =
   | { kind: 'goals'; n: number }
   | { kind: 'savings'; n: number }
   | { kind: 'lessons'; n: number }
-  | { kind: 'shared'; n: number };
+  | { kind: 'shared'; n: number }
+  | { kind: 'refuge'; n: number };
 
 export function ruleText(r: Rule): string {
   switch (r.kind) {
@@ -38,6 +40,7 @@ export function ruleText(r: Rule): string {
     case 'savings': return r.n === 1 ? 'Erreiche ein Sparziel' : `Erreiche ${r.n} Sparziele`;
     case 'lessons': return r.n === 1 ? 'Lies eine Lektion der Mentorin' : `Lies ${r.n} Lektionen der Mentorin`;
     case 'shared': return r.n === 1 ? 'Teile zum ersten Mal aus dem grünen Glas' : `Teile ${r.n}-mal aus dem grünen Glas`;
+    case 'refuge': return r.n === 2 ? 'Euer Refugium wird zum Häuschen' : 'Euer Refugium wird zum großen Haus';
   }
 }
 
@@ -54,6 +57,7 @@ export function ruleMet(s: AppState, r: Rule, today: DayKey): boolean {
     case 'savings': return s.money.goals.filter((g) => g.reachedAt).length >= r.n;
     case 'lessons': return Object.keys(s.lessons).length >= r.n;
     case 'shared': return s.money.entries.filter((e) => e.kind === 'share').length >= r.n;
+    case 'refuge': return refugeStage(s).n >= r.n;
   }
 }
 
@@ -120,3 +124,49 @@ export function unlockedOutfits(s: AppState, today: DayKey): Set<string> {
 export function unlockedItems(s: AppState, today: DayKey): Set<string> {
   return new Set(ITEMS.filter((i) => ruleMet(s, i.rule, today)).map((i) => i.id));
 }
+
+/** Einrichtung des Refugiums (Phase 5). Erst einmal eine Sammlung; aufstellen im Raum, sobald es leere Räume gibt (Prompts Teil 4). */
+export interface Decor {
+  id: string;
+  name: string;
+  rule: Rule;
+  text: string;
+}
+
+export const DECOR: Decor[] = [
+  { id: 'rug', name: 'Gewebter Teppich', rule: { kind: 'start' }, text: 'Violett und Gold – das Erste, was ins neue Zuhause kommt.' },
+  { id: 'firewood', name: 'Holzkorb', rule: { kind: 'days', n: 3 }, text: 'Damit das Feuer im Kamin nie ausgeht.' },
+  { id: 'wolfbed', name: 'Wolfsbett', rule: { kind: 'days', n: 7 }, text: 'Ein weiches Bett für euren Wolf, mit Fell und Decke.' },
+  { id: 'lantern', name: 'Zauberlaterne', rule: { kind: 'level', n: 3 }, text: 'Ihr violettes Licht macht jeden Abend gemütlich.' },
+  { id: 'ivy', name: 'Efeu-Ampel', rule: { kind: 'streak', n: 7 }, text: 'Wächst langsam, aber stetig – wie eine gute Gewohnheit.' },
+  { id: 'painting', name: 'Bild vom Mondwald', rule: { kind: 'journal', n: 3 }, text: 'Der Wald bei Nacht, gemalt in Öl.' },
+  { id: 'desk', name: 'Schreibtisch', rule: { kind: 'goals', n: 1 }, text: 'Mit Armillarsphäre und Feder – hier plant ihr eure Ziele.' },
+  { id: 'bookshelf', name: 'Bücherregal', rule: { kind: 'lessons', n: 2 }, text: 'Für die Bücher und Lektionen der Mentorin.' },
+  { id: 'windowbench', name: 'Fensterbank mit Kissen', rule: { kind: 'refuge', n: 2 }, text: 'Der schönste Platz, um in den Mondwald zu schauen.' },
+  { id: 'crystals', name: 'Kristallschale', rule: { kind: 'trophies', n: 5 }, text: 'Die Kristalle leuchten für jede eurer Trophäen.' },
+  { id: 'wisteria', name: 'Glyzinien-Girlande', rule: { kind: 'days', n: 45 }, text: 'Violette Blüten über dem Kamin.' },
+  { id: 'trophyshelf', name: 'Trophäen-Brett', rule: { kind: 'trophies', n: 10 }, text: 'Ein eigener Platz für eure schönsten Auszeichnungen.' },
+];
+
+export function unlockedDecor(s: AppState, today: DayKey): Set<string> {
+  return new Set(DECOR.filter((d) => ruleMet(s, d.rule, today)).map((d) => d.id));
+}
+
+/** Kapitel der Geschichte. Die ersten vier sind die Einführung, die weiteren öffnen sich mit dem Fortschritt. */
+export interface Chapter {
+  title: string;
+  text: string;
+  rule: Rule;
+}
+
+export const STORY_CHAPTERS: Chapter[] = [
+  { title: 'Der Aufbruch', rule: { kind: 'start' }, text: 'Lyra und Kael haben große Träume. Aber im Alltag geht vieles durcheinander: Sie fangen ständig Neues an und bleiben selten dran. Darum machen sie sich auf den Weg zu einer weisen Frau, die tief im Zauberwald lebt.' },
+  { title: 'Bei der Mentorin', rule: { kind: 'start' }, text: 'Nach einer langen Reise öffnet die Mentorin ihnen die Tür. „Ein großer Traum ist wie ein ferner Berg“, sagt sie. „Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
+  { title: 'Der kleine Wolf', rule: { kind: 'start' }, text: 'In einem Korb liegt ein Wolfswelpe. Er hat keine Mutter mehr. „Zieht ihn auf“, sagt die Mentorin. „Er braucht euch – jeden Tag. So lernt ihr, Verantwortung zu tragen und an einer Sache dranzubleiben.“' },
+  { title: 'Ein neues Zuhause', rule: { kind: 'start' }, text: 'In einer kleinen, alten Hütte beginnt ihr neues Leben. Jeden Tag kümmern sie sich um den Welpen – und mit jeder Gewohnheit, die sie pflegen, wird er größer und stärker.' },
+  { title: 'Ein Schornstein raucht', rule: { kind: 'refuge', n: 2 }, text: 'Drei Wochen sind vergangen. Lyra und Kael haben die Hütte geflickt, einen Schornstein gemauert und ein kleines Gärtchen angelegt. „Seht ihr?“, sagt die Mentorin bei ihrem Besuch. „Ein Zuhause wächst wie ihr – Stein für Stein.“' },
+  { title: 'Der Jungwolf', rule: { kind: 'wolf', n: 1 }, text: 'Eines Morgens stolpert der Welpe nicht mehr über seine Pfoten. Er rennt voraus, wartet am Waldrand und schaut sich um, ob ihr nachkommt. Er weiß jetzt: Auf euch ist Verlass.' },
+  { title: 'Das große Haus', rule: { kind: 'refuge', n: 3 }, text: 'Aus dem Häuschen ist ein richtiges Haus geworden, mit Balkon, Glyzinien und einer eigenen Hütte für den Wolf. Oben hat jetzt jeder ein eigenes Zimmer. Die Mentorin lächelt: „Ihr habt nicht aufgegeben. Das sieht man.“' },
+  { title: 'Erwachsen', rule: { kind: 'wolf', n: 2 }, text: 'Euer Wolf ist erwachsen. Nachts hält er Wache vor dem Haus, tagsüber begleitet er euch auf jedem Weg. Er ist stark geworden – weil ihr jeden Tag für ihn da wart.' },
+  { title: 'Die Legende', rule: { kind: 'wolf', n: 3 }, text: 'Im Mondlicht schimmert sein Fell wie Sternenstaub. Im ganzen Zauberwald erzählt man sich von den beiden, die einen Welpen ohne Mutter aufgezogen haben – und davon, was Beständigkeit möglich macht.' },
+];

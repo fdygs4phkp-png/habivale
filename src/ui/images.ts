@@ -184,3 +184,67 @@ export const HABIT_IMG: Record<string, number> = {
   bike: require('../../assets/img/habits/bike.webp'),
   'hand-heart-outline': require('../../assets/img/habits/heart.webp'),
 };
+
+/** Refugium außen je Bild-Jahreszeit und Stufe (1–3). Winter ohne Kranz fehlt noch – bis dahin das Weihnachtsbild mit Hinweis. */
+export const REFUGE_OUT: Record<'spring' | 'summer' | 'autumn' | 'xmas', number[]> = {
+  spring: [require('../../assets/img/refuge/out-spring-1.webp'), require('../../assets/img/refuge/out-spring-2.webp'), require('../../assets/img/refuge/out-spring-3.webp')],
+  summer: [require('../../assets/img/refuge/out-summer-1.webp'), require('../../assets/img/refuge/out-summer-2.webp'), require('../../assets/img/refuge/out-summer-3.webp')],
+  autumn: [require('../../assets/img/refuge/out-autumn-1.webp'), require('../../assets/img/refuge/out-autumn-2.webp'), require('../../assets/img/refuge/out-autumn-3.webp')],
+  xmas: [require('../../assets/img/refuge/out-xmas-1.webp'), require('../../assets/img/refuge/out-xmas-2.webp'), require('../../assets/img/refuge/out-xmas-3.webp')],
+};
+/** Fehlende Bilder: Winter ohne Weihnachtsschmuck (Prompts Teil 4). Sobald da: Dateien `out-winter-1…3` und hier eintragen. */
+export const REFUGE_WINTER_PLAIN: number[] | null = null;
+/** Innenräume je Stufe. Stufe 2 hat innen noch ein rundes Fenster (außen eckig) – neues Bild bestellt. */
+export const REFUGE_IN = [
+  require('../../assets/img/refuge/in-1.webp'),
+  require('../../assets/img/refuge/in-2.webp'),
+  require('../../assets/img/refuge/in-3.webp'),
+];
+/** Eigene Zimmer im großen Haus (Stufe 3, oben). Noch nicht gezeichnet (Prompts Teil 4). */
+export const ROOM_IMG: { lyra: number | null; kael: number | null } = { lyra: null, kael: null };
+
+export const WITCH_IMG = {
+  outside: require('../../assets/img/refuge/witch-aussen.webp'),
+  garden: require('../../assets/img/refuge/witch-aussen-b.webp'),
+  inside: require('../../assets/img/refuge/witch-innen.webp'),
+};
+
+/** Einrichtung des Refugiums (Ids wie in DECOR). */
+export const DECOR_IMG: Record<string, number> = {
+  rug: require('../../assets/img/decor/rug.webp'),
+  wolfbed: require('../../assets/img/decor/wolfbed.webp'),
+  bookshelf: require('../../assets/img/decor/bookshelf.webp'),
+  ivy: require('../../assets/img/decor/ivy.webp'),
+  lantern: require('../../assets/img/decor/lantern.webp'),
+  desk: require('../../assets/img/decor/desk.webp'),
+  windowbench: require('../../assets/img/decor/windowbench.webp'),
+  firewood: require('../../assets/img/decor/firewood.webp'),
+  crystals: require('../../assets/img/decor/crystals.webp'),
+  painting: require('../../assets/img/decor/painting.webp'),
+  wisteria: require('../../assets/img/decor/wisteria.webp'),
+  trophyshelf: require('../../assets/img/decor/trophyshelf.webp'),
+};
+/** Übergang: im Bücherregal steht eine Kerze (soll weg, Prompts Teil 4). */
+export const DECOR_REDO = new Set(['bookshelf']);
+
+/** Kapitelbilder der Geschichte (Index wie STORY_CHAPTERS). */
+export const STORY_IMG = [
+  require('../../assets/img/scene/story-1-aufbruch.webp'),
+  require('../../assets/img/scene/story-2-ankunft-hexenhaus.webp'),
+  require('../../assets/img/scene/story-3-welpe.webp'),
+  require('../../assets/img/scene/story-4-einzug.webp'),
+  require('../../assets/img/refuge/out-summer-2.webp'),
+  require('../../assets/img/scene/hauptbild-2-jungwolf.webp'),
+  require('../../assets/img/refuge/out-summer-3.webp'),
+  require('../../assets/img/scene/key-3.webp'),
+  require('../../assets/img/scene/key-4.webp'),
+];
+
+/** Leisten-Symbole (goldene Bilder der Nutzer, Prompts Teil 2 Nr. 13). */
+export const NAV_IMG: Record<string, number> = {
+  index: require('../../assets/img/nav/heute.webp'),
+  abenteuer: require('../../assets/img/nav/abenteuer.webp'),
+  refugium: require('../../assets/img/nav/refugium.webp'),
+  tagebuch: require('../../assets/img/nav/tagebuch.webp'),
+  sammlung: require('../../assets/img/nav/sammlung.webp'),
+};

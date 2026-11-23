@@ -77,6 +77,20 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   und Jubel/Wolf-freut-sich in den Ereignissen, Wolfsgesichter im Kinder-Tagebuch (`MOOD_IMG`), Sparziel-Bilder (`GOAL_IMG`), Gewohnheits-Bilder
   (`HABIT_IMG`, nach Symbolname), App-Symbol (Wolf vor Sichelmond), Outfits als **Übergang** (`assets/img/outfits/`, werden ersetzt), Geschichte auf
   „Abenteuer“ (Welpe ohne Mutter → Verantwortung, dranbleiben). Raster schneiden: `HABIVALE/Habivale-Skripte/raster.py`.
+- **Phase 5, Teil 1 (0.12.0): Refugium und Hexenhaus.** `src/logic/refuge.ts`: Ausbaustufen nach aktiven Tagen (1 alte Hütte, 2 Häuschen ab 21,
+  3 großes Haus ab 90), erreichte Stufe als 'ref:N' in `firsts` (nie kleiner, `keptRefuge`), Mentorin verkündet sie (`eventFor`, Art 'refuge').
+  Jahreszeit nach Datum (`seasonOf`: Frühling 3–5, Sommer 6–8, Herbst 9–11, Winter 12–2), **Weihnachtszeit 1.12.–6.1.** (`sceneOf` → 'xmas'): nur dann
+  das Bild mit Kranz; Winter ohne Schmuck fehlt noch (`REFUGE_WINTER_PLAIN` = null → Weihnachtsbild mit rotem Hinweis). Bilder `assets/img/refuge/`
+  (`out-<spring|summer|autumn|xmas>-1…3`, `in-1…3`, `witch-*`; Sommer aus dem Drei-Stufen-Bild geschnitten, fast quadratisch). Seite `refugium.tsx`:
+  Außen/Innen, Jahreszeiten zum Ansehen (● = jetzt), Stufen mit Vorschau, im großen Haus „Lyras Zimmer“/„Kaels Zimmer“ (Bilder fehlen, `ROOM_IMG`),
+  Einrichtung als Sammlung (`DECOR` in `world.ts`, 12 Teile, Regel-Art 'refuge', Bilder `assets/img/decor/`, Bücherregal = Übergang wegen Kerze),
+  Kaminsims, Weg zum Hexenhaus (`src/app/hexenhaus.tsx`: außen/innen, Mentorin, Erinnerungen aus `celebrated`). Ohne Premium bleibt es die alte Hütte.
+  Geschichte in 9 Kapiteln (`STORY_CHAPTERS`, Bilder `STORY_IMG`), 5–9 öffnen sich mit Refugium-Stufe und Wolf. Leiste mit den goldenen Symbolen der
+  Nutzer (`NAV_IMG`, `assets/img/nav/`). Beim Öffnen trägt der Speicher fehlende `firsts` nach (vorher erst nach der nächsten Änderung).
+  **Bildregeln Haus:** Kranz nur Weihnachtszeit, höchstens ein Nest pro Baum, Kerzen nie im Regal / auf der Fensterbank am Vorhang / unter Pflanzen,
+  Fenster innen = außen, im großen Haus Betten oben (eigene Zimmer). Prompts: `HABIVALE/Ausgang/Ausgang 23.11.2026/Bild-Prompts Teil 4 …`.
+  Browser-Test `HABIVALE/Habivale-Skripte/t09refugium.py` + `testserver.py` (Server wie GitHub Pages, Port 8790; Zustand vollständig in localStorage legen,
+  Haken-Schlüssel `habitId|Tag`; Mentorin per Schleife wegklicken, nicht mit `add_locator_handler`).
 - Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
