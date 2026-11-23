@@ -97,6 +97,9 @@ ok('Taschengeld: Aufteilung, Rest ins Sparglas', () => {
   assert.deepEqual(balances(e), { save: 200, spend: 80, share: 100 });
   assert.equal(fillLevel('save', e, 800), 1);
   assert.equal(fillLevel('save', e, 200), 4);
+  // Langsam füllen: 1–2 Taschengelder Stufe 1, 3–5 Stufe 2, 6–9 Stufe 3, ab 10 voll
+  const n = (k: number): MoneyEntry[] => Array.from({ length: k }, (_, i) => ({ id: 'a' + i, kind: 'allowance' as const, cents: 500, day: T, note: '', parts: splitCents(500, DEFAULT_SPLIT), at: i }));
+  assert.deepEqual([1, 2, 3, 5, 6, 9, 10].map((k) => fillLevel('spend', n(k), null)), [1, 1, 2, 2, 3, 3, 4]);
 });
 
 ok('Euro lesen und schreiben', () => {
