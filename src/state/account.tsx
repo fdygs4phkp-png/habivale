@@ -29,6 +29,8 @@ export interface ChildView {
   pub: JsonWebKey | null;
   snapshot: Snapshot | null;
   updatedAt: string | null;
+  /** Das Profil gibt es auf dem Server nicht mehr (eigenes Konto ab 16 oder auf einem anderen Gerät entfernt). */
+  left?: boolean;
 }
 
 type Account = {
@@ -54,6 +56,8 @@ type Account = {
   sendToChild: (child: ChildView, msg: ParentMessage) => Promise<void>;
   // Familie – Kind
   joinFamily: (code: string) => Promise<{ recovery: string | null; needsRecovery: boolean }>;
+  /** Kind ab 16: eigenes Konto mit E-Mail und Passwort, alle Daten kommen mit, die Eltern sehen danach nichts mehr. */
+  becomeOwn: (email: string, password: string) => Promise<{ code: string; leftOk: boolean }>;
 };
 
 const Ctx = createContext<Account | null>(null);
@@ -424,7 +428,10 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         const out: ChildView[] = [];
         for (const c of f.children) {
           const m = members.find((x) => x.id === c.memberId);
-          if (!m) continue; // auf einem anderen Gerät entfernt
+          if (!m) {
+            out.push({ profile: c, connected: false, pub: null, snapshot: null, updatedAt: null, left: true });
+            continue;
+          }
           const sh = shares.find((x) => x.child_id === c.memberId);
           let snapshot: Snapshot | null = null;
           if (sh) {
@@ -440,7 +447,9 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
       },
       removeChild: async (child) => {
         const s = await fresh();
-        await api.rpc(s, 'family_remove_child', { p_member: child.memberId });
+        const members = await api.familyMembers(s);
+        // Gibt es das Profil auf dem Server noch, dort löschen; sonst nur aus der eigenen Liste nehmen
+        if (members.some((m) => m.id === child.memberId)) await api.rpc(s, 'family_remove_child', { p_member: child.memberId });
         const cur = stateRef.current;
         const f = cur.family;
         if (f?.role === 'parent') {
@@ -497,6 +506,52 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
         setLastSync(Date.now());
         await pushShares(s);
         return { recovery, needsRecovery: false };
+      },
+
+      becomeOwn: async (email, password) => {
+        const f = stateRef.current.family;
+        if (!f || f.role !== 'child' || targetRef.current.kind !== 'child') throw new Error('Dieses Gerät ist kein Kinderprofil.');
+        if (ageStage(f.birthYear) !== 'erwachsen') throw new Error('Ein eigenes Konto gibt es ab 16 Jahren.');
+        if (!keyRef.current) throw new Error('Bitte zuerst die Daten entsperren.');
+        // Solange umgezogen wird, gleicht dieses Gerät nichts ab
+        while (busy.current) await new Promise((r) => setTimeout(r, 200));
+        busy.current = true;
+        try {
+          const old = await fresh();
+          // 1. Neues Konto anlegen und alle Daten (ohne Familie) verschlüsselt hineinlegen – erst dann wird das Kinderprofil gelöst
+          const s2 = await api.signUp(email.trim(), password);
+          if (!s2) throw new Error('Bitte bestätige zuerst deine E-Mail-Adresse (Link in der E-Mail) und versuche es dann noch einmal.');
+          if (await api.getRowIn(s2, api.adultStore(s2))) throw new Error('Mit dieser E-Mail gibt es schon ein Konto mit Daten. Bitte nimm eine andere E-Mail-Adresse.');
+          const now = Date.now();
+          const next: AppState = { ...stateRef.current, family: null, fMt: now, sMt: now };
+          const key = cr.newDataKey();
+          const code = cr.newRecoveryCode();
+          const json = JSON.stringify(next);
+          const env = await cr.createEnvelope(key, password, code, json);
+          await api.insertRowIn(s2, api.adultStore(s2), env);
+          // 2. Kinderprofil, Freigaben und Nachrichten auf dem Server löschen, das anonyme Kindergerät-Konto ebenso
+          let leftOk = true;
+          try {
+            await api.rpc(old, 'family_child_leave', {});
+          } catch {
+            leftOk = false;
+          }
+          // 3. Dieses Gerät auf das neue Konto umstellen
+          applyRef.current(next);
+          stateRef.current = next;
+          await saveSession(s2);
+          await saveTarget({ kind: 'adult' });
+          await saveKey(key);
+          envRef.current = env;
+          lastUploaded.current = json;
+          lastShare.current = '';
+          setStatus('idle');
+          setError(null);
+          setLastSync(now);
+          return { code, leftOk };
+        } finally {
+          busy.current = false;
+        }
       },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

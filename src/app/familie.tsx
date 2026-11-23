@@ -53,9 +53,15 @@ function ChildCard({ v, onInvite, onRemove, onAct }: { v: ChildView; onInvite: (
         <View style={{ flex: 1 }}>
           <Text style={s.name}>{v.profile.name}</Text>
           <Text style={s.small}>{STAGE_NAME[stage]} · Jahrgang {v.profile.birthYear}</Text>
-          <Text style={[s.small, { color: v.connected ? C.mint : C.gold }]}>{v.connected ? 'Gerät verbunden' : 'Noch kein Gerät verbunden'}</Text>
+          <Text style={[s.small, { color: v.left ? C.dim : v.connected ? C.mint : C.gold }]}>{v.left ? 'Eigenes Konto' : v.connected ? 'Gerät verbunden' : 'Noch kein Gerät verbunden'}</Text>
         </View>
       </View>
+      {v.left ? (
+        <>
+          <P>{v.profile.name} hat jetzt ein eigenes Konto (oder das Profil wurde auf einem anderen Gerät entfernt). Ihr seht hier nichts mehr – das ist ab 16 so gewollt. Wenn {v.profile.name} mag, kann sie oder er euch später selbst etwas zeigen.</P>
+          <Chip title="Aus der Liste nehmen" on={false} onPress={onRemove} />
+        </>
+      ) : null}
 
       {snap?.habits ? (
         <View style={{ gap: 6 }}>
@@ -109,17 +115,17 @@ function ChildCard({ v, onInvite, onRemove, onAct }: { v: ChildView; onInvite: (
       {v.connected && !snap ? <P dim>{v.profile.name} teilt gerade nichts mit dir.</P> : null}
       {snap ? <P dim>Stand: {new Date(snap.at).toLocaleString('de-DE', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' })} · Das Tagebuch bleibt immer privat.</P> : null}
 
-      {v.connected && v.pub ? (
+      {!v.left && v.connected && v.pub ? (
         <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
           <Button title="Gewohnheit vorschlagen" kind="ghost" icon="lightbulb-on-outline" onPress={() => onAct('suggest')} />
           <Button title="Taschengeld" kind="ghost" icon="cash-plus" onPress={() => onAct('allowance')} />
           <Button title="Lob schicken" kind="ghost" icon="star-outline" onPress={() => onAct('praise')} />
         </View>
       ) : null}
-      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+      {v.left ? null : <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
         <Chip title={v.connected ? 'Neues Gerät verbinden' : 'Neuer Code'} on={false} onPress={onInvite} />
         <Chip title="Profil entfernen" on={false} onPress={onRemove} />
-      </View>
+      </View>}
     </Card>
   );
 }
@@ -236,7 +242,7 @@ export default function Family() {
                 onAct={(x) => openAct(x, v)}
                 onInvite={() => run(async () => setInvite({ name: v.profile.name, ...(await a.newInvite(v.profile)) }))}
                 onRemove={async () => {
-                  if (!(await ask('Profil entfernen?', `Das Profil von ${v.profile.name} und alle Daten darin werden gelöscht. Das Gerät deines Kindes ist danach nicht mehr verbunden.`, 'Entfernen'))) return;
+                  if (!v.left && !(await ask('Profil entfernen?', `Das Profil von ${v.profile.name} und alle Daten darin werden gelöscht. Das Gerät deines Kindes ist danach nicht mehr verbunden.`, 'Entfernen'))) return;
                   await run(async () => {
                     await a.removeChild(v.profile as ChildProfile);
                     setInvite(null);

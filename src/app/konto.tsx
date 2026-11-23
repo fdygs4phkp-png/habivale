@@ -41,6 +41,8 @@ export default function AccountScreen() {
   const [newCode, setNewCode] = useState<string | null>(null);
   const [shownCode, setShownCode] = useState<string | null>(null);
   const [rc, setRc] = useState('');
+  const [ownOpen, setOwnOpen] = useState(false);
+  const [ownDone, setOwnDone] = useState<string | null>(null);
 
   const close = () => (router.canGoBack() ? router.back() : router.replace('/'));
   const run = async (f: () => Promise<void>) => {
@@ -75,6 +77,12 @@ export default function AccountScreen() {
         </Card>
       ) : null}
 
+      {ownDone ? (
+        <Card style={{ borderColor: C.mint }}>
+          <H2>Dein eigenes Konto</H2>
+          <P>{ownDone}</P>
+        </Card>
+      ) : null}
       {newCode ? <CodeCard code={newCode} onDone={() => setNewCode(null)} /> : null}
 
       {a.status === 'none' && a.available ? (
@@ -149,6 +157,47 @@ export default function AccountScreen() {
               <Text style={s.checkText}>Dein Tagebuch sieht niemand außer dir.</Text>
             </View>
           </Card>
+          {ageStage(fam.birthYear) === 'erwachsen' ? (
+            <Card style={{ borderColor: C.gold }}>
+              <H2>Dein eigenes Konto</H2>
+              {!ownOpen ? (
+                <>
+                  <P>Du bist jetzt 16 oder älter. Wenn du magst, machst du aus deinem Profil ein eigenes Konto mit E-Mail und Passwort. Alles kommt mit: Gewohnheiten, Trophäen, Tagebuch, Gläser und Ziele.</P>
+                  <P dim>Danach gehört das Konto nur dir. Deine Eltern sehen nichts mehr und können dir keine Nachrichten oder Taschengeld mehr über die App schicken – außer du teilst später selbst etwas mit ihnen. Am besten sprichst du vorher mit ihnen.</P>
+                  <Button title="Eigenes Konto einrichten" icon="account-arrow-right-outline" onPress={() => setOwnOpen(true)} />
+                </>
+              ) : (
+                <>
+                  <Field label="E-Mail" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" autoComplete="email" />
+                  <Field label="Passwort" value={pw} onChangeText={setPw} secureTextEntry autoComplete="new-password" />
+                  <View style={{ gap: 4 }}>
+                    {RULES.map(([t, f]) => (
+                      <View key={t} style={s.rule}>
+                        <Icon name={f(pw) ? 'check-circle' : 'circle-outline'} size={18} color={f(pw) ? C.mint : C.dim} />
+                        <Text style={[s.ruleText, f(pw) && { color: C.text }]}>{t}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <Check on={age} onPress={() => setAge(!age)} text="Ich bin mindestens 16 Jahre alt." />
+                  <Check on={consent} onPress={() => setConsent(!consent)} text="Ich bin mit der Speicherung meiner verschlüsselten Daten bei Supabase (Server in Frankfurt) einverstanden. (Datenschutzerklärung folgt – Testversion.)" />
+                  <Button
+                    title={busy ? 'Einen Moment …' : 'Eigenes Konto erstellen'}
+                    disabled={!canRegister || busy}
+                    onPress={async () => {
+                      if (!(await ask('Eigenes Konto erstellen?', 'Deine Daten ziehen in dein neues Konto um. Das Kinderprofil in der Familie wird gelöscht, und deine Eltern sehen danach nichts mehr. Das lässt sich nicht rückgängig machen.', 'Umziehen'))) return;
+                      await run(async () => {
+                        const r = await a.becomeOwn(email, pw);
+                        setNewCode(r.code);
+                        setOwnDone(r.leftOk ? 'Geschafft! Das ist jetzt dein eigenes Konto.' : 'Dein Konto ist fertig. Das alte Kinderprofil konnte gerade nicht gelöscht werden – deine Eltern können es in der Familie entfernen.');
+                        setOwnOpen(false);
+                      });
+                    }}
+                  />
+                  <Button title="Abbrechen" kind="ghost" onPress={() => setOwnOpen(false)} />
+                </>
+              )}
+            </Card>
+          ) : null}
           <ParentGate what="Wiederherstellungs-Code und Abmelden sind für Eltern.">
             {shownCode ? <CodeCard code={shownCode} /> : <Button title="Wiederherstellungs-Code anzeigen" kind="ghost" icon="key-outline" onPress={() => run(async () => setShownCode(await a.recoveryCode()))} />}
             <Button
