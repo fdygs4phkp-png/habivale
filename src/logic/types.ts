@@ -92,6 +92,8 @@ export interface AppState {
   outfits: { lyra: string; kael: string };
   /** Von der Mentorin schon verkündete Ereignisse (Schlüssel wie in `firsts`) */
   celebrated: Record<string, number>;
+  /** Besuche im Hexenhaus: Tag → erster Besuch an dem Tag (je Besuchstag öffnet sich eine Geschichte der Mentorin) */
+  visits: Record<DayKey, number>;
 }
 
 export interface InboxItem {

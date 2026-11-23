@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { REFUGE_STAGES, refugeStage, SCENE_NAME, SCENES, sceneOf, type Scene } from '../../logic/refuge.ts';
 import { DECOR, ruleText, unlockedDecor } from '../../logic/world.ts';
+import { TALES, talesOpen } from '../../logic/mentor.ts';
 import { useStore } from '../../state/store';
 import { DECOR_IMG, DECOR_REDO, REFUGE_IN, REFUGE_OUT, REFUGE_WINTER_PLAIN, ROOM_IMG } from '../../ui/images';
 import { Bar, Card, Chip, Grid, H2, Icon, P, PlaceholderNote, Screen, useLayout } from '../../ui/kit';
@@ -159,7 +160,7 @@ export default function Refuge() {
           <Icon name="weather-night" size={32} color={C.gold} />
           <View style={{ flex: 1 }}>
             <H2>Zum Hexenhaus</H2>
-            <P dim>Besucht die Mentorin tief im Wald.</P>
+            <P dim>{state.visits[today] === undefined && talesOpen(state) < TALES.length ? 'Heute wartet eine neue Geschichte auf euch.' : 'Besucht die Mentorin tief im Wald.'}</P>
           </View>
           <Icon name="chevron-right" color={C.gold} />
         </View>

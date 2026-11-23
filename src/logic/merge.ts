@@ -60,6 +60,7 @@ export function mergeState(local: AppState, remote: AppState): AppState {
     hero: s.hero ?? 'lyra',
     outfits: s.outfits ?? { lyra: 'lyra-start', kael: 'kael-start' },
     celebrated: { ...(remote.celebrated || {}), ...(local.celebrated || {}) },
+    visits: (() => { const o = { ...(remote.visits || {}) }; for (const [k, v] of Object.entries(local.visits || {})) if (o[k] === undefined || v < o[k]) o[k] = v; return o; })(),
     sMt: Math.max(local.sMt, remote.sMt),
     habits: byId(local.habits, remote.habits, deleted, 'h:'),
     goals: byId(local.goals, remote.goals, deleted, 'g:'),

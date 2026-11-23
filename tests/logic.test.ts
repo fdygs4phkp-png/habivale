@@ -8,6 +8,7 @@ import type { AppState, Habit, MoneyEntry } from '../src/logic/types.ts';
 import { mergeState, hasContent } from '../src/logic/merge.ts';
 import { updateFirsts, pendingEvents, keptWolf } from '../src/logic/trophies.ts';
 import { ruleMet, unlockedOutfits, unlockedDecor, STORY_CHAPTERS } from '../src/logic/world.ts';
+import { adviceFor, talesOpen, taleOfDay, TALES } from '../src/logic/mentor.ts';
 import { refugeStage, seasonOf, sceneOf, isChristmasTime } from '../src/logic/refuge.ts';
 import { buildSnapshot } from '../src/logic/share.ts';
 import { ageStage, defaultShares } from '../src/logic/types.ts';
@@ -130,7 +131,7 @@ ok('Tagebuch leer/gefüllt, Ziel-Fortschritt, Backup erkennen', () => {
   assert.equal(looksLikeBackup({ app: 'ewolfe', state: { habits: [], done: {} } }), false);
 });
 
-const base = (): AppState => ({ version: 1, profileName: '', habits: [], done: {}, money: { split: { save: 50, spend: 40, share: 10 }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {} });
+const base = (): AppState => ({ version: 1, profileName: '', habits: [], done: {}, money: { split: { save: 50, spend: 40, share: 10 }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: true, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {}, visits: {} });
 
 ok('Abgleich: Vereinigung, neuere Fassung gewinnt', () => {
   const a = { ...base(), habits: [h('x', { name: 'alt', mt: 1 })], done: { 'x|2026-11-20': 5 } };
@@ -241,6 +242,26 @@ ok('Phase 5: Jahreszeiten, Kranz nur in der Weihnachtszeit, Ausbaustufen mit Bes
   assert.ok(!unlockedDecor(st, T).has('wisteria'));
   assert.equal(ruleMet(st, STORY_CHAPTERS[4].rule, T), true);
   assert.equal(ruleMet(st, STORY_CHAPTERS[6].rule, T), false);
+});
+
+ok('Hexenhaus: eine Geschichte je Besuchstag, Rat passt zur Lage, Besuche werden zusammengeführt', () => {
+  let st = { ...base(), visits: {} } as AppState;
+  assert.equal(adviceFor(st, T).title, 'Fangt klein an');
+  st = { ...st, habits: [h('a')] };
+  st = { ...st, done: toggleDone({}, 'a', T) };
+  assert.equal(adviceFor(st, T).title, 'Heute alles geschafft!');
+  st = { ...st, done: toggleDone({}, 'a', addDays(T, -4)) };
+  assert.equal(adviceFor(st, T).title, 'Schön, dass ihr wieder da seid');
+  // gleicher Tag = gleicher Rat
+  assert.deepEqual(adviceFor(st, T), adviceFor(st, T));
+  st = { ...st, visits: { [addDays(T, -2)]: 1, [T]: 2 } };
+  assert.equal(talesOpen(st), 2); assert.equal(taleOfDay(st, T), 1); assert.equal(taleOfDay(st, addDays(T, -1)), null);
+  const many: Record<string, number> = {};
+  for (let i = 0; i < 20; i++) many[addDays(T, -i)] = i;
+  assert.equal(talesOpen({ ...st, visits: many }), TALES.length);
+  assert.equal(taleOfDay({ ...st, visits: many }, T), null); // nach Geschichte 12 kommt keine neue mehr
+  const m = mergeState({ ...st, visits: { [T]: 5 } }, { ...st, visits: { [T]: 3, [addDays(T, -9)]: 1 } });
+  assert.deepEqual(m.visits, { [T]: 3, [addDays(T, -9)]: 1 });
 });
 
 console.log(n + ' Prüfungen bestanden');

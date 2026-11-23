@@ -91,6 +91,12 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
   Fenster innen = außen, im großen Haus Betten oben (eigene Zimmer). Prompts: `HABIVALE/Ausgang/Ausgang 23.11.2026/Bild-Prompts Teil 4 …`.
   Browser-Test `HABIVALE/Habivale-Skripte/t09refugium.py` + `testserver.py` (Server wie GitHub Pages, Port 8790; Zustand vollständig in localStorage legen,
   Haken-Schlüssel `habitId|Tag`; Mentorin per Schleife wegklicken, nicht mit `add_locator_handler`).
+- **Besuche im Hexenhaus (0.13.0):** `src/logic/mentor.ts`: **Rat des Tages** (`adviceFor`: erst die Lage – keine Gewohnheit, heute alles geschafft,
+  3+ Tage Pause, Wunsch nach 7 Tagen fällig, Haus/Wolf wachsen bald –, sonst jeder dritte Tag ein Gedanke zur Jahreszeit, sonst `ADVICE_POOL`; am selben Tag
+  immer gleich) und **12 Geschichten** (`TALES`, eigene Texte mit einem Satz als Lehre): je Besuchstag öffnet sich die nächste (`state.visits`: Tag → erster
+  Besuch, gesetzt beim Öffnen von `/hexenhaus` über `visit(today)`, beim Abgleich vereinigt mit frühestem Zeitpunkt). Seite zeigt Besuch des Tages, neue
+  Geschichte, Geschichtenbuch (aufklappbar), Erinnerungen. Refugium-Karte sagt „Heute wartet eine neue Geschichte“. Besuche zählen nicht als aktive Tage.
+  Test `HABIVALE/Habivale-Skripte/t10hexenhaus.py`.
 - Noch offen im Familienkonto: Profil ab 16 in eigenes Konto umwandeln; Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
