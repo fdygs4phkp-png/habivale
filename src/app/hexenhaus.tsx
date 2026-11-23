@@ -35,7 +35,7 @@ export default function WitchHouse() {
   return (
     <Screen
       title="Das Hexenhaus"
-      sub="Bei der Mentorin, tief im Zauberwald"
+      sub="Bei Ylva, tief im Zauberwald"
       right={
         <Pressable onPress={() => (router.canGoBack() ? router.back() : router.replace('/refugium'))} accessibilityRole="button" accessibilityLabel="Zurück" style={s.back}>
           <Icon name="close" color={C.dim} />
@@ -47,14 +47,14 @@ export default function WitchHouse() {
         <Chip title="Innen" on={inside} onPress={() => setInside(true)} />
       </View>
       <View style={s.frame}>
-        <Image source={inside ? WITCH_IMG.inside : WITCH_IMG.outside} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={inside ? 'Die Stube der Mentorin' : 'Das Hexenhaus im Mondlicht'} />
+        <Image source={inside ? WITCH_IMG.inside : WITCH_IMG.outside} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel={inside ? 'Ylvas Stube' : 'Das Hexenhaus im Mondlicht'} />
       </View>
 
       <Card style={{ borderColor: C.gold }}>
         <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-start' }}>
-          <Image source={MENTOR_POSE.explain} style={{ width: 80, height: 130 }} contentFit="contain" accessibilityLabel="Die Mentorin" />
+          <Image source={MENTOR_POSE.explain} style={{ width: 80, height: 130 }} contentFit="contain" accessibilityLabel="Ylva" />
           <View style={{ flex: 1, gap: 6 }}>
-            <Text style={s.who}>Die Mentorin · Besuch vom {shortDateDe(today)}</Text>
+            <Text style={s.who}>Ylva · Besuch vom {shortDateDe(today)}</Text>
             <Text style={[s.title, kid && { fontSize: 20 }]}>{advice.title}</Text>
             <P>{advice.text}</P>
           </View>
@@ -73,8 +73,8 @@ export default function WitchHouse() {
       <H2>Das Geschichtenbuch</H2>
       <P dim>
         {open < TALES.length
-          ? `${open} von ${TALES.length} Geschichten. Jeden Tag, an dem du die Mentorin besuchst, erzählt sie dir eine neue.`
-          : `Alle ${TALES.length} Geschichten. Die Mentorin freut sich trotzdem über jeden Besuch.`}
+          ? `${open} von ${TALES.length} Geschichten. Jeden Tag, an dem du Ylva besuchst, erzählt sie dir eine neue.`
+          : `Alle ${TALES.length} Geschichten. Ylva freut sich trotzdem über jeden Besuch.`}
       </P>
       {TALES.map((t, i) => {
         const has = i < open;
@@ -106,7 +106,7 @@ export default function WitchHouse() {
 
       <H2>Erinnerungen</H2>
       {memories.length === 0 ? (
-        <P dim>Noch ist hier nichts. Sobald du etwas erreichst, erzählt dir die Mentorin davon – und hier kannst du es nachlesen.</P>
+        <P dim>Noch ist hier nichts. Sobald du etwas erreichst, erzählt dir Ylva davon – und hier kannst du es nachlesen.</P>
       ) : (
         memories.map((e) => (
           <Card key={e.key} style={{ gap: 4 }}>

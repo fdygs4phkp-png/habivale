@@ -38,7 +38,7 @@ export function ruleText(r: Rule): string {
     case 'journal': return r.n === 1 ? 'Schreib zum ersten Mal ins Tagebuch' : `Schreib an ${r.n} Tagen ins Tagebuch`;
     case 'goals': return r.n === 1 ? 'Erreiche ein Ziel im Tagebuch' : `Erreiche ${r.n} Ziele im Tagebuch`;
     case 'savings': return r.n === 1 ? 'Erreiche ein Sparziel' : `Erreiche ${r.n} Sparziele`;
-    case 'lessons': return r.n === 1 ? 'Lies eine Lektion der Mentorin' : `Lies ${r.n} Lektionen der Mentorin`;
+    case 'lessons': return r.n === 1 ? 'Lies eine Lektion von Ylva' : `Lies ${r.n} Lektionen von Ylva`;
     case 'shared': return r.n === 1 ? 'Teile zum ersten Mal aus dem grünen Glas' : `Teile ${r.n}-mal aus dem grünen Glas`;
     case 'refuge': return r.n === 2 ? 'Dein Refugium wird zum Häuschen' : 'Dein Refugium wird zum großen Haus';
   }
@@ -105,11 +105,11 @@ export const ITEMS: Item[] = [
   { id: 'figurine', name: 'Holzwolf', rarity: 'common', rule: { kind: 'wolf', n: 1 }, icon: 'dog-side', text: 'Ein kleiner geschnitzter Wolf – wie deiner.' },
   { id: 'compass', name: 'Messingkompass', rarity: 'rare', rule: { kind: 'days', n: 14 }, icon: 'compass-outline', text: 'Er findet immer zurück auf den Weg.' },
   { id: 'hourglass', name: 'Sanduhr', rarity: 'rare', rule: { kind: 'savings', n: 1 }, icon: 'timer-sand', text: 'Geduld ist eine Zauberkraft.' },
-  { id: 'book', name: 'Zauberbuch', rarity: 'rare', rule: { kind: 'lessons', n: 3 }, icon: 'book-open-page-variant', text: 'Mit den Lektionen der Mentorin.' },
+  { id: 'book', name: 'Zauberbuch', rarity: 'rare', rule: { kind: 'lessons', n: 3 }, icon: 'book-open-page-variant', text: 'Mit Ylvas Lektionen.' },
   { id: 'potion', name: 'Grüner Trank', rarity: 'rare', rule: { kind: 'streak', n: 7 }, icon: 'bottle-tonic', text: 'Sieben Tage in Folge – das gibt Kraft.' },
   { id: 'ring', name: 'Amethystring', rarity: 'rare', rule: { kind: 'trophies', n: 5 }, icon: 'ring', text: 'Für fünf gesammelte Trophäen.' },
   { id: 'lavender', name: 'Leuchtender Lavendel', rarity: 'rare', rule: { kind: 'journal', n: 7 }, icon: 'flower', text: 'Er duftet nach ruhigen Abenden.' },
-  { id: 'moon', name: 'Mondanhänger', rarity: 'epic', rule: { kind: 'level', n: 6 }, icon: 'moon-waning-crescent', text: 'Ein Geschenk der Mentorin.' },
+  { id: 'moon', name: 'Mondanhänger', rarity: 'epic', rule: { kind: 'level', n: 6 }, icon: 'moon-waning-crescent', text: 'Ein Geschenk von Ylva.' },
   { id: 'ball', name: 'Kristallkugel', rarity: 'epic', rule: { kind: 'days', n: 60 }, icon: 'crystal-ball', text: 'Sie zeigt, wie weit du schon gekommen bist.' },
   { id: 'key', name: 'Sternenschlüssel', rarity: 'epic', rule: { kind: 'streak', n: 21 }, icon: 'key-star', text: 'Er öffnet Türen, die Geduld verlangen.' },
   { id: 'rune', name: 'Pfotenrune', rarity: 'epic', rule: { kind: 'wolf', n: 3 }, icon: 'paw', text: 'Dein Wolf ist erwachsen geworden.' },
@@ -141,7 +141,7 @@ export const DECOR: Decor[] = [
   { id: 'ivy', name: 'Efeu-Ampel', rule: { kind: 'streak', n: 7 }, text: 'Wächst langsam, aber stetig – wie eine gute Gewohnheit.' },
   { id: 'painting', name: 'Bild vom Mondwald', rule: { kind: 'journal', n: 3 }, text: 'Der Wald bei Nacht, gemalt in Öl.' },
   { id: 'desk', name: 'Schreibtisch', rule: { kind: 'goals', n: 1 }, text: 'Mit Armillarsphäre und Feder – hier planst du deine Ziele.' },
-  { id: 'bookshelf', name: 'Bücherregal', rule: { kind: 'lessons', n: 2 }, text: 'Für die Bücher und Lektionen der Mentorin.' },
+  { id: 'bookshelf', name: 'Bücherregal', rule: { kind: 'lessons', n: 2 }, text: 'Für die Bücher und Lektionen von Ylva.' },
   { id: 'windowbench', name: 'Fensterbank mit Kissen', rule: { kind: 'refuge', n: 2 }, text: 'Der schönste Platz, um in den Mondwald zu schauen.' },
   { id: 'crystals', name: 'Kristallschale', rule: { kind: 'trophies', n: 5 }, text: 'Die Kristalle leuchten für jede deiner Trophäen.' },
   { id: 'wisteria', name: 'Glyzinien-Girlande', rule: { kind: 'days', n: 45 }, text: 'Violette Blüten über dem Kamin.' },
@@ -161,12 +161,12 @@ export interface Chapter {
 
 export const STORY_CHAPTERS: Chapter[] = [
   { title: 'Der Aufbruch', rule: { kind: 'start' }, text: 'Lyra und Kael haben große Träume. Aber im Alltag geht vieles durcheinander: Sie fangen ständig Neues an und bleiben selten dran. Darum machen sie sich auf den Weg zu einer weisen Frau, die tief im Zauberwald lebt.' },
-  { title: 'Bei der Mentorin', rule: { kind: 'start' }, text: 'Nach einer langen Reise öffnet die Mentorin ihnen die Tür. „Ein großer Traum ist wie ein ferner Berg“, sagt sie. „Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
-  { title: 'Der kleine Wolf', rule: { kind: 'start' }, text: 'In einem Korb liegt ein Wolfswelpe. Er hat keine Mutter mehr. „Zieht ihn auf“, sagt die Mentorin. „Er braucht euch – jeden Tag. So lernt ihr, Verantwortung zu tragen und an einer Sache dranzubleiben.“' },
+  { title: 'Bei Ylva', rule: { kind: 'start' }, text: 'Nach einer langen Reise öffnet Ylva, Ylva, ihnen die Tür. „Ein großer Traum ist wie ein ferner Berg“, sagt sie. „Ihr erreicht ihn nicht mit einem Sprung, sondern mit vielen kleinen Schritten.“' },
+  { title: 'Der kleine Wolf', rule: { kind: 'start' }, text: 'In einem Korb liegt ein Wolfswelpe. Er hat keine Mutter mehr. „Zieht ihn auf“, sagt Ylva. „Er braucht euch – jeden Tag. So lernt ihr, Verantwortung zu tragen und an einer Sache dranzubleiben.“' },
   { title: 'Ein neues Zuhause', rule: { kind: 'start' }, text: 'In einer kleinen, alten Hütte beginnt ihr neues Leben. Jeden Tag kümmern sie sich um den Welpen – und mit jeder Gewohnheit, die sie pflegen, wird er größer und stärker.' },
-  { title: 'Ein Schornstein raucht', rule: { kind: 'refuge', n: 2 }, text: 'Drei Wochen sind vergangen. Lyra und Kael haben die Hütte geflickt, einen Schornstein gemauert und ein kleines Gärtchen angelegt. „Seht ihr?“, sagt die Mentorin bei ihrem Besuch. „Ein Zuhause wächst wie ihr – Stein für Stein.“' },
+  { title: 'Ein Schornstein raucht', rule: { kind: 'refuge', n: 2 }, text: 'Drei Wochen sind vergangen. Lyra und Kael haben die Hütte geflickt, einen Schornstein gemauert und ein kleines Gärtchen angelegt. „Seht ihr?“, sagt Ylva bei ihrem Besuch. „Ein Zuhause wächst wie ihr – Stein für Stein.“' },
   { title: 'Der Jungwolf', rule: { kind: 'wolf', n: 2 }, text: 'Eines Morgens stolpert der Welpe nicht mehr über seine Pfoten. Er rennt voraus, wartet am Waldrand und schaut sich um, ob Lyra und Kael nachkommen. Er weiß jetzt: Auf die beiden ist Verlass.' },
-  { title: 'Das große Haus', rule: { kind: 'refuge', n: 3 }, text: 'Aus dem Häuschen ist ein richtiges Haus geworden, mit Balkon, Glyzinien und einer eigenen Hütte für den Wolf. Oben hat jetzt jeder ein eigenes Zimmer. Die Mentorin lächelt: „Ihr habt nicht aufgegeben. Das sieht man.“' },
+  { title: 'Das große Haus', rule: { kind: 'refuge', n: 3 }, text: 'Aus dem Häuschen ist ein richtiges Haus geworden, mit Balkon, Glyzinien und einer eigenen Hütte für den Wolf. Oben hat jetzt jeder ein eigenes Zimmer. Ylva lächelt: „Ihr habt nicht aufgegeben. Das sieht man.“' },
   { title: 'Erwachsen', rule: { kind: 'wolf', n: 3 }, text: 'Der Wolf ist erwachsen. Nachts hält er Wache vor dem Haus, tagsüber begleitet er Lyra und Kael auf jedem Weg. Er ist stark geworden – weil sie jeden Tag für ihn da waren.' },
   { title: 'Die Legende', rule: { kind: 'wolf', n: 4 }, text: 'Im Mondlicht schimmert sein Fell wie Sternenstaub. Im ganzen Zauberwald erzählt man sich von den beiden, die einen Welpen ohne Mutter aufgezogen haben – und davon, was Beständigkeit möglich macht.' },
 ];

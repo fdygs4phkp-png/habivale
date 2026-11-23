@@ -27,7 +27,7 @@ export default function Adventure() {
   return (
     <Screen gear title="Abenteuer" sub="Lyra, Kael und dein Wolf">
       <View style={s.key}>
-        <Image source={IMG.keyArt[w.index]} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel="Lyra, Kael, die Mentorin und dein Wolf im Zauberwald" />
+        <Image source={IMG.keyArt[w.index]} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityLabel="Lyra, Kael, Ylva und dein Wolf im Zauberwald" />
       </View>
 
       {!premium ? (
@@ -98,7 +98,7 @@ export default function Adventure() {
         {[
           { img: IMG.lyra, name: 'Lyra', text: 'Neugierig, mutig, kreativ' },
           { img: IMG.kael, name: 'Kael', text: 'Entschlossen und treu' },
-          { img: IMG.mentor, name: 'Die Mentorin', text: 'Deine weise Lehrerin' },
+          { img: IMG.mentor, name: 'Ylva', text: 'Ylva – deine weise Lehrerin' },
         ].map((c) => (
           <View key={c.name} style={s.char}>
             <Image source={c.img} style={{ width: '100%', height: tablet ? 300 : 170 }} contentFit="contain" accessibilityLabel={c.name} />

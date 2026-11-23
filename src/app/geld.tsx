@@ -204,7 +204,7 @@ export default function Money() {
             )}
           </Card>
 
-          <H2>Die Mentorin erklärt</H2>
+          <H2>Ylva erklärt</H2>
           <Grid cols={tablet ? 2 : 1} gap={10}>
             {lessonsFor(stage).map((l) => (
               <Card key={l.id} onPress={() => { setLesson(l); store.markLesson(l.id); }} label={'Lektion ' + l.title} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -218,7 +218,7 @@ export default function Money() {
       ) : (
         <Card>
           <H2>Mehr mit Premium</H2>
-          <P dim>Mehrere Sparziele, eine Wunschliste mit „eine Woche warten“, die Monatsübersicht und kleine Geld-Lektionen der Mentorin.</P>
+          <P dim>Mehrere Sparziele, eine Wunschliste mit „eine Woche warten“, die Monatsübersicht und kleine Geld-Lektionen von Ylva.</P>
         </Card>
       )}
 

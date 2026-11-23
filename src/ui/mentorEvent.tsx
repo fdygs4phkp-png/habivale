@@ -23,11 +23,11 @@ export function MentorEvents() {
       <View style={s.back}>
         <View style={s.box} accessibilityRole="alert">
           <View style={s.top}>
-            <Image source={pose} style={s.pose} contentFit="contain" accessibilityLabel="Die Mentorin" />
+            <Image source={pose} style={s.pose} contentFit="contain" accessibilityLabel="Ylva" />
             {pic ? <Image source={pic} style={s.pic} contentFit="contain" /> : <Text style={s.big}>★</Text>}
           </View>
           <View style={s.body}>
-            <Text style={s.who}>Die Mentorin</Text>
+            <Text style={s.who}>Ylva</Text>
             <Text style={[s.title, kid && { fontSize: 26 }]}>{ev.title}</Text>
             <Text style={[s.text, kid && { fontSize: 19, lineHeight: 26 }]}>{ev.text}</Text>
             <Button title="Danke!" icon="heart-outline" onPress={() => celebrate(ev.key)} />

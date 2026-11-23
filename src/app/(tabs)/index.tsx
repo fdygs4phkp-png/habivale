@@ -60,7 +60,7 @@ export default function Today() {
       {!state.profileName ? (
         <Card>
           <H2>Willkommen in Habivale</H2>
-          <P>Wie sollen Lyra, Kael und die Mentorin dich nennen? Ein Vorname oder Spitzname reicht.</P>
+          <P>Wie sollen Lyra, Kael und Ylva dich nennen? Ein Vorname oder Spitzname reicht.</P>
           <Field label="Dein Name" value={nameDraft} onChangeText={setNameDraft} maxLength={30} returnKeyType="done" onSubmitEditing={() => nameDraft.trim() && setName(nameDraft)} />
           <Button title="Los geht’s" onPress={() => setName(nameDraft)} disabled={!nameDraft.trim()} />
           <Button title="Meine Eltern haben mir einen Code gegeben" kind="ghost" icon="account-child-outline" onPress={() => router.push('/verbinden')} />
@@ -134,7 +134,7 @@ export default function Today() {
       </Card>
 
       <View style={[s.mentor, tablet && { minHeight: 126 }]}>
-        <Image source={IMG.mentorHead} style={s.mentorImg} accessibilityLabel="Die Mentorin" />
+        <Image source={IMG.mentorHead} style={s.mentorImg} accessibilityLabel="Ylva" />
         <Text style={s.mentorText}>{mentorLine(due.length, doneN, kid)}</Text>
       </View>
       </Grid>

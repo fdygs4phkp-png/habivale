@@ -155,12 +155,12 @@ export default function Refuge() {
       </Grid>
       {!premium ? <P dim>Die Einrichtung gehört zu Premium.</P> : null}
 
-      <Card onPress={() => router.push('/hexenhaus')} label="Zum Hexenhaus der Mentorin" style={{ borderColor: C.gold }}>
+      <Card onPress={() => router.push('/hexenhaus')} label="Zu Ylvas Hexenhaus" style={{ borderColor: C.gold }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Icon name="weather-night" size={32} color={C.gold} />
           <View style={{ flex: 1 }}>
             <H2>Zum Hexenhaus</H2>
-            <P dim>{state.visits[today] === undefined && talesOpen(state) < TALES.length ? 'Heute wartet eine neue Geschichte auf dich.' : 'Besuch die Mentorin tief im Wald.'}</P>
+            <P dim>{state.visits[today] === undefined && talesOpen(state) < TALES.length ? 'Heute wartet eine neue Geschichte auf dich.' : 'Besuch Ylva tief im Wald.'}</P>
           </View>
           <Icon name="chevron-right" color={C.gold} />
         </View>
