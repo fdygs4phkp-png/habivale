@@ -28,7 +28,7 @@ function migrateMoney(m: AppState['money'] & { goal?: { name: string; icon: stri
 }
 
 export function emptyState(): AppState {
-  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: false, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {}, visits: {} };
+  return { version: 1, profileName: '', habits: [], done: {}, money: { split: { ...DEFAULT_SPLIT }, entries: [], goals: [], wishes: [] }, firsts: {}, journal: {}, goals: [], weeks: {}, premium: false, kidPreview: false, sMt: 0, deleted: {}, family: null, fMt: 0, inbox: [], lessons: {}, story: {}, hero: 'lyra', outfits: { lyra: 'lyra-start', kael: 'kael-start' }, celebrated: {}, visits: {} };
 }
 
 /** 0.16.0: der Wolf hat fünf Stufen (neu: „Großer Welpe“ an Stelle 1). Alte Schlüssel wolf:1–3 rücken eine Stelle auf;
@@ -75,6 +75,7 @@ function normalize(raw: unknown): AppState {
     fMt: r.fMt ?? 0,
     inbox: r.inbox || [],
     lessons: r.lessons || {},
+    story: r.story || {},
     hero: r.hero === 'kael' ? 'kael' : 'lyra',
     outfits: { lyra: r.outfits?.lyra || 'lyra-start', kael: r.outfits?.kael || 'kael-start' },
     // Beim ersten Start mit dieser Version: alles schon Erreichte gilt als verkündet (keine Flut von Meldungen)
@@ -104,6 +105,7 @@ type Store = {
   addWish: (name: string, cents: number) => void;
   answerWish: (id: string, answer: 'buy' | 'goal' | 'no') => void;
   markLesson: (id: string) => void;
+  markStory: (id: string) => void;
   setHero: (h: 'lyra' | 'kael') => void;
   wearOutfit: (hero: 'lyra' | 'kael', id: string) => void;
   celebrate: (key: string) => void;
@@ -262,6 +264,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (state.visits[day] !== undefined) return;
         update((s) => (s.visits[day] !== undefined ? s : { ...s, visits: { ...s.visits, [day]: Date.now() } }));
       },
+      markStory: (id) => update((s) => (s.story?.[id] !== undefined ? s : { ...s, story: { ...(s.story || {}), [id]: Date.now() } })),
       markLesson: (id) => update((s) => ({ ...s, lessons: { ...s.lessons, [id]: s.lessons[id] ?? Date.now() } })),
       resetAll: () => update(() => emptyState()),
       setEntry: (day, patch) =>

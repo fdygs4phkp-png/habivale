@@ -13,14 +13,14 @@ export const IMG = {
   keyArtMissing: [false, true, false, false, false],
   wolfSit: [
     require('../../assets/img/wolf/sit-1.webp'),
-    require('../../assets/img/wolf/sit-1.webp'), // Großer Welpe – eigenes Bild folgt
+    require('../../assets/img/wolf/sit-g.webp'), // Großer Welpe (24.11.2026, Warzen/Punkte wegretuschiert)
     require('../../assets/img/wolf/sit-2.webp'),
     require('../../assets/img/wolf/sit-3.webp'),
     require('../../assets/img/wolf/sit-4.webp'),
   ],
   wolfHead: [
     require('../../assets/img/wolf/head-1.webp'),
-    require('../../assets/img/wolf/head-1.webp'), // Großer Welpe – eigenes Bild folgt
+    require('../../assets/img/wolf/head-g.webp'), // Großer Welpe (24.11.2026, Warzen/Punkte wegretuschiert)
     require('../../assets/img/wolf/head-2.webp'),
     require('../../assets/img/wolf/head-3.webp'),
     require('../../assets/img/wolf/head-4.webp'),
@@ -143,7 +143,7 @@ export const MENTOR_POSE = {
 export const CHEER = require('../../assets/img/chars/cheer.webp');
 export const WOLF_HAPPY = [
   require('../../assets/img/wolf/happy-1.webp'),
-  require('../../assets/img/wolf/happy-1.webp'), // Großer Welpe – eigenes Bild folgt
+  require('../../assets/img/wolf/happy-g.webp'), // Großer Welpe (24.11.2026, Warzen/Punkte wegretuschiert)
   require('../../assets/img/wolf/happy-2.webp'),
   require('../../assets/img/wolf/happy-3.webp'),
   require('../../assets/img/wolf/happy-4.webp'),
@@ -204,8 +204,11 @@ export const REFUGE_IN = [
   require('../../assets/img/refuge/in-2.webp'),
   require('../../assets/img/refuge/in-3.webp'),
 ];
-/** Eigene Zimmer im großen Haus (Stufe 3, oben). Noch nicht gezeichnet (Prompts Teil 4). */
-export const ROOM_IMG: { lyra: number | null; kael: number | null } = { lyra: null, kael: null };
+/** Eigene Zimmer im großen Haus (Stufe 3, oben), Bilder der Nutzer vom 24.11.2026. */
+export const ROOM_IMG: { lyra: number | null; kael: number | null } = {
+  lyra: require('../../assets/img/refuge/room-lyra.webp'),
+  kael: require('../../assets/img/refuge/room-kael.webp'), // mit der Bratsche an der Wand
+};
 
 export const WITCH_IMG = {
   outside: require('../../assets/img/refuge/witch-aussen.webp'),
@@ -264,11 +267,11 @@ export const NAV_IMG: Record<string, number> = {
   sammlung: require('../../assets/img/nav/sammlung.webp'),
 };
 
-/** Die drei Gläser (Bilder der Nutzer, je fünf Füllstände 0–4). */
+/** Die drei Gläser (Bilder der Nutzer, sieben Füllstände 0–6, seit 0.18.0). */
 export const JAR_IMG: Record<'save' | 'spend' | 'share', number[]> = {
-  save: [require('../../assets/img/jars/jar-save-0.webp'), require('../../assets/img/jars/jar-save-1.webp'), require('../../assets/img/jars/jar-save-2.webp'), require('../../assets/img/jars/jar-save-3.webp'), require('../../assets/img/jars/jar-save-4.webp')],
-  spend: [require('../../assets/img/jars/jar-spend-0.webp'), require('../../assets/img/jars/jar-spend-1.webp'), require('../../assets/img/jars/jar-spend-2.webp'), require('../../assets/img/jars/jar-spend-3.webp'), require('../../assets/img/jars/jar-spend-4.webp')],
-  share: [require('../../assets/img/jars/jar-share-0.webp'), require('../../assets/img/jars/jar-share-1.webp'), require('../../assets/img/jars/jar-share-2.webp'), require('../../assets/img/jars/jar-share-3.webp'), require('../../assets/img/jars/jar-share-4.webp')],
+  save: [require('../../assets/img/jars/jar-save-7-0.webp'), require('../../assets/img/jars/jar-save-7-1.webp'), require('../../assets/img/jars/jar-save-7-2.webp'), require('../../assets/img/jars/jar-save-7-3.webp'), require('../../assets/img/jars/jar-save-7-4.webp'), require('../../assets/img/jars/jar-save-7-5.webp'), require('../../assets/img/jars/jar-save-7-6.webp')],
+  spend: [require('../../assets/img/jars/jar-spend-7-0.webp'), require('../../assets/img/jars/jar-spend-7-1.webp'), require('../../assets/img/jars/jar-spend-7-2.webp'), require('../../assets/img/jars/jar-spend-7-3.webp'), require('../../assets/img/jars/jar-spend-7-4.webp'), require('../../assets/img/jars/jar-spend-7-5.webp'), require('../../assets/img/jars/jar-spend-7-6.webp')],
+  share: [require('../../assets/img/jars/jar-share-7-0.webp'), require('../../assets/img/jars/jar-share-7-1.webp'), require('../../assets/img/jars/jar-share-7-2.webp'), require('../../assets/img/jars/jar-share-7-3.webp'), require('../../assets/img/jars/jar-share-7-4.webp'), require('../../assets/img/jars/jar-share-7-5.webp'), require('../../assets/img/jars/jar-share-7-6.webp')],
 };
 
 /** Tagebuch-Cover (vorerst aus A Mystery World der Lebensrad-App geliehen: blau-lila Low-Poly mit Lotus). */

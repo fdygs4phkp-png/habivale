@@ -1,4 +1,5 @@
 // Kurze Geld-Lektionen der Mentorin, nach Alter (Master-Prompt Abschnitt 20). Freiwillig, nie Pflicht.
+import { daysBetween } from './date.ts';
 import type { AgeStage } from './types.ts';
 
 export interface Lesson {
@@ -142,12 +143,20 @@ export function lessonsFor(stage: AgeStage): Lesson[] {
 
 /** Jeden Tag geht höchstens eine neue Lektion auf (Wunsch der Nutzerin), gelesene bleiben offen.
  *  Liefert die Ids, die man antippen kann, und ob heute schon eine neue gelesen wurde. */
-export function lessonsOpen(list: Lesson[], read: Record<string, number>, today: string, dayOf: (ts: number) => string): { open: Set<string>; readToday: boolean } {
+/** Alle zwei Tage geht eine neue Lektion auf (Wunsch der Nutzerin, 24.11.2026). */
+export const LESSON_EVERY = 2;
+
+/** Offene Lektionen: gelesene bleiben offen, die nächste ungelesene erst, wenn die letzte neue mindestens `LESSON_EVERY` Tage her ist.
+ *  `waitDays` = in wie vielen Tagen die nächste aufgeht (0 = jetzt). */
+export function lessonsOpen(list: Lesson[], read: Record<string, number>, today: string, dayOf: (ts: number) => string): { open: Set<string>; readToday: boolean; waitDays: number } {
   const open = new Set(list.filter((l) => read[l.id] !== undefined).map((l) => l.id));
-  const readToday = Object.values(read).some((ts) => dayOf(ts) === today);
-  if (!readToday) {
+  const since = Object.values(read).map((ts) => daysBetween(dayOf(ts), today));
+  const minSince = since.length ? Math.min(...since) : Infinity;
+  const readToday = minSince === 0;
+  const waitDays = Math.max(0, LESSON_EVERY - minSince);
+  if (waitDays === 0) {
     const next = list.find((l) => read[l.id] === undefined);
     if (next) open.add(next.id);
   }
-  return { open, readToday };
+  return { open, readToday, waitDays };
 }

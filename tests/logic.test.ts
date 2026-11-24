@@ -1,4 +1,5 @@
 import { lessonsFor, lessonsOpen } from '../src/logic/lessons.ts';
+import { storyOpen } from '../src/logic/story.ts';
 // Prüfungen der Logik ohne App: `npm test`
 import assert from 'node:assert/strict';
 import { addDays, dayKey, weekday } from '../src/logic/date.ts';
@@ -272,21 +273,36 @@ ok('Hexenhaus: eine Geschichte je Besuchstag, Rat passt zur Lage, Besuche werden
 
 console.log(n + ' Prüfungen bestanden');
 
-ok('Geld-Lektionen: jeden Tag eine neue, gelesene bleiben offen', () => {
+ok('Geld-Lektionen: alle zwei Tage eine neue, gelesene bleiben offen', () => {
   const list = lessonsFor('kind');
-  const day = (ts: number) => (ts < 1000 ? '2026-11-22' : '2026-11-23');
+  const day = (ts: number) => (ts < 100 ? '2026-11-21' : ts < 1000 ? '2026-11-22' : '2026-11-23');
   let r = lessonsOpen(list, {}, '2026-11-23', day);
-  assert.equal(r.open.size, 1);
+  assert.equal(r.open.size, 1); assert.equal(r.waitDays, 0);
   r = lessonsOpen(list, { [list[0].id]: 2000 }, '2026-11-23', day);
-  assert.equal(r.open.size, 1); assert.equal(r.readToday, true);
+  assert.equal(r.open.size, 1); assert.equal(r.readToday, true); assert.equal(r.waitDays, 2);
   r = lessonsOpen(list, { [list[0].id]: 500 }, '2026-11-23', day);
+  assert.equal(r.open.size, 1); assert.equal(r.waitDays, 1);
+  r = lessonsOpen(list, { [list[0].id]: 50 }, '2026-11-23', day);
   assert.equal(r.open.size, 2); assert.ok(r.open.has(list[1].id));
 });
 
-ok('Was davor geschah: jeden Tag ein Stück ab dem ersten Start', () => {
-  const st = { ...base(), startedAt: new Date(2026, 10, 20, 12).getTime() } as AppState;
-  assert.equal(BACKSTORY.filter((c) => ruleMet(st, c.rule, '2026-11-20')).length, 1);
-  assert.equal(BACKSTORY.filter((c) => ruleMet(st, c.rule, '2026-11-22')).length, 3);
-  assert.equal(BACKSTORY.filter((c) => ruleMet(st, c.rule, '2026-12-01')).length, 6);
+ok('Geschichte in Tagesteilen: ein neuer Teil je Tag, abwechselnd Geschichte und Rückblick', () => {
+  const day = (ts: number) => dayKey(new Date(ts));
+  const st = { ...base(), story: {} } as AppState;
+  let r = storyOpen(st, '2026-11-20', day);
+  assert.equal(r.next?.id, 's1-1');
+  st.story = { 's1-1': new Date(2026, 10, 20, 9).getTime() };
+  r = storyOpen(st, '2026-11-20', day);
+  assert.equal(r.next, null); assert.equal(r.readToday, true);
+  r = storyOpen(st, '2026-11-21', day);
+  assert.equal(r.next?.id, 'b1-1');
+  st.story['b1-1'] = new Date(2026, 10, 21, 9).getTime();
+  r = storyOpen(st, '2026-11-22', day);
+  assert.equal(r.next?.id, 's1-2');
+  st.story['s1-2'] = new Date(2026, 10, 22, 9).getTime();
+  // Kapitel 2 der Geschichte braucht 7 aktive Tage – also geht es mit dem Rückblick weiter
+  r = storyOpen(st, '2026-11-23', day);
+  assert.equal(r.next?.id, 'b1-2');
   assert.equal(ruleMet(st, STORY_CHAPTERS[0].rule, '2026-11-20'), true);
+  assert.ok(BACKSTORY.every((c) => c.parts.length >= 1));
 });

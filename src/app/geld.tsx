@@ -223,7 +223,7 @@ export default function Money() {
               ),
             )}
           </Grid>
-          <P dim>{lo.readToday ? 'Morgen erzählt Ylva dir die nächste Lektion.' : 'Jeden Tag erzählt Ylva dir eine neue Lektion.'}</P>
+          <P dim>{lo.waitDays >= 2 ? 'In zwei Tagen erzählt Ylva dir die nächste Lektion.' : lo.waitDays === 1 ? 'Morgen erzählt Ylva dir die nächste Lektion.' : 'Alle zwei Tage erzählt Ylva dir eine neue Lektion.'}</P>
         </>
       ) : (
         <Card>

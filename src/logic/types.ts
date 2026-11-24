@@ -89,6 +89,8 @@ export interface AppState {
   inbox: InboxItem[];
   /** Gelesene Geld-Lektionen der Mentorin → Zeitpunkt */
   lessons: Record<string, number>;
+  /** Gelesene Teile der Geschichte (`src/logic/story.ts`, z. B. 'b1-2', 's3-1') → Zeitpunkt */
+  story?: Record<string, number>;
   /** Wer im Vordergrund steht und was Lyra und Kael tragen (Einstellungs-Block, `sMt`) */
   hero: 'lyra' | 'kael';
   outfits: { lyra: string; kael: string };
