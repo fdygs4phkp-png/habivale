@@ -245,9 +245,10 @@ export const STORY_IMG = [
   require('../../assets/img/story/mb1-k5.webp'),
   require('../../assets/img/story/mb1-k6-1.webp'),
   require('../../assets/img/story/mb1-k7.webp'),
+  require('../../assets/img/refuge/out-autumn-1.webp'),
 ];
 /** Alle Kapitel 1–7 haben eigene Bilder (25.11.2026): Kopfbild 5 = der runde Stein, 6 = „Besiegt von einem Stiefel“, 7 = die alte Hütte am Bach. */
-export const STORY_IMG_MISSING = [false, false, false, false, false, false, false];
+export const STORY_IMG_MISSING = [false, false, false, false, false, false, false, true];
 /** Bilder mitten im Kapitel (Index wie STORY_CHAPTERS): erscheinen nach dem Absatz `after` (0-basiert). */
 export const STORY_INLINE: { img: number; after: number }[][] = [
   [{ img: require('../../assets/img/story/mb1-k1-1.webp'), after: 99 }],
@@ -257,6 +258,7 @@ export const STORY_INLINE: { img: number; after: number }[][] = [
   [{ img: require('../../assets/img/story/mb1-k5-1.webp'), after: 103 }, { img: require('../../assets/img/story/mb1-k5-2.webp'), after: 157 }],
   [{ img: require('../../assets/img/story/mb1-k6-2.webp'), after: 12 }, { img: require('../../assets/img/story/mb1-k6-3.webp'), after: 83 }, { img: require('../../assets/img/story/mb1-k6-4.webp'), after: 141 }],
   [{ img: require('../../assets/img/story/mb1-k7-1.webp'), after: 62 }, { img: require('../../assets/img/story/mb1-k7-2.webp'), after: 123 }, { img: require('../../assets/img/story/mb1-k7-3.webp'), after: 171 }, { img: require('../../assets/img/story/mb1-k7-4.webp'), after: 182 }],
+  [],
 ];
 
 /** Leisten-Symbole (goldene Bilder der Nutzer, Prompts Teil 2 Nr. 13). */
