@@ -123,6 +123,7 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - **0.20.1 (25.11.2026):** Kapitel 7: Bjarnes Sohn Arvid (so alt wie Kael) öffnet Kael den Schuppen („Ylva hat dich angekündigt“ – „Das macht sie immer so“), am fünften Abend stapeln Bjarne, Arvid und Kael zu dritt Holz.
 - **0.20.2 (25.11.2026):** Die drei Gläser im Märchentext (Kapitel 5 und 7) sehen jetzt aus wie die App-Gläser: Korken, goldenes Band, Schleife mit Anhänger (Sparen Wolfskopf, Ausgeben Feder, Teilen Herz an grüner Schleife), drin Münzen, violette Kristalle bzw. grüne Blätter.
 - **0.20.3 (25.11.2026):** Abenteuer oben (Welpe und großer Welpe): das freigegebene Gruppenbild „Gruppe Ylva, Kael 14, Lyra 12, Fenrir Welpe“ (`scene/gruppe-welpe`) statt `key-1` (Kinder zu groß, alte Fassung).
+- **0.20.4 (25.11.2026):** Kapitel 5: Ylvas drei Gläser und das Blatt mit den Häkchen stehen in der Küchenecke (Holzbrett, Nagel) statt am Kamin – so bleiben die Kaminbilder gültig. Kapitelbild 1 (`mb1-k1`) neu: das freigegebene Ankunftsbild mit dem neuen, größeren Bratschenkoffer (nur der Koffer aus dem neuen ChatGPT-Bild eingesetzt).
 - Noch offen im Familienkonto: Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
