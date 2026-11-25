@@ -247,8 +247,8 @@ ok('Phase 5: Jahreszeiten, Kranz nur in der Weihnachtszeit, Ausbaustufen mit Bes
   assert.equal(refugeStage({ ...st, done: {} }).n, 2);
   assert.ok(unlockedDecor(st, T).has('windowbench'));
   assert.ok(!unlockedDecor(st, T).has('wisteria'));
-  assert.equal(ruleMet(st, STORY_CHAPTERS[2].rule, T), true); // Ein Schornstein raucht
-  assert.equal(ruleMet(st, STORY_CHAPTERS[7].rule, T), false); // Das große Haus
+  assert.equal(ruleMet(st, { kind: 'refuge', n: 2 }, T), true);
+  assert.equal(ruleMet(st, { kind: 'days', n: 250 }, T), false);
 });
 
 ok('Hexenhaus: eine Geschichte je Besuchstag, Rat passt zur Lage, Besuche werden zusammengeführt', () => {
@@ -286,7 +286,7 @@ ok('Geld-Lektionen: alle zwei Tage eine neue, gelesene bleiben offen', () => {
   assert.equal(r.open.size, 2); assert.ok(r.open.has(list[1].id));
 });
 
-ok('Geschichte in Tagesteilen: ein neuer Teil je Tag, abwechselnd Geschichte und Rückblick', () => {
+ok('Geschichte: ein neues Kapitel je Tag, kein Rückblick mehr', () => {
   const day = (ts: number) => dayKey(new Date(ts));
   const st = { ...base(), story: {} } as AppState;
   let r = storyOpen(st, '2026-11-20', day);
@@ -295,14 +295,8 @@ ok('Geschichte in Tagesteilen: ein neuer Teil je Tag, abwechselnd Geschichte und
   r = storyOpen(st, '2026-11-20', day);
   assert.equal(r.next, null); assert.equal(r.readToday, true);
   r = storyOpen(st, '2026-11-21', day);
-  assert.equal(r.next?.id, 'b1-1');
-  st.story['b1-1'] = new Date(2026, 10, 21, 9).getTime();
-  r = storyOpen(st, '2026-11-22', day);
-  assert.equal(r.next?.id, 's1-2');
-  st.story['s1-2'] = new Date(2026, 10, 22, 9).getTime();
-  // Kapitel 2 der Geschichte braucht 7 aktive Tage – also geht es mit dem Rückblick weiter
-  r = storyOpen(st, '2026-11-23', day);
-  assert.equal(r.next?.id, 'b1-2');
+  assert.equal(r.next?.id, 's2-1');
+  assert.equal(BACKSTORY.length, 0);
+  assert.ok(STORY_CHAPTERS.length >= 5 && STORY_CHAPTERS.every((c) => c.parts.length === 1));
   assert.equal(ruleMet(st, STORY_CHAPTERS[0].rule, '2026-11-20'), true);
-  assert.ok(BACKSTORY.every((c) => c.parts.length >= 1));
 });

@@ -8,7 +8,7 @@ import { levelInfo, wolfStage, WOLF_STAGES } from '../../logic/progress.ts';
 import { keptWolf, xpOf } from '../../logic/trophies.ts';
 import { BACKSTORY, OUTFITS, RARITY_COLOR, RARITY_NAME, ruleMet, ruleText, STORY_CHAPTERS } from '../../logic/world.ts';
 import { useStore } from '../../state/store';
-import { BACKSTORY_IMG, BACKSTORY_IMG_MISSING, IMG, OUTFIT_IMG, STORY_IMG, STORY_IMG_MISSING } from '../../ui/images';
+import { BACKSTORY_IMG, BACKSTORY_IMG_MISSING, IMG, OUTFIT_IMG, STORY_IMG, STORY_IMG_MISSING, STORY_INLINE } from '../../ui/images';
 import { Bar, Button, Card, Grid, H2, Icon, P, PlaceholderNote, Screen, useLayout } from '../../ui/kit';
 import { C, F } from '../../ui/theme';
 
@@ -123,8 +123,7 @@ export default function Adventure() {
           ))}
         </View>
       </Card>
-      <StoryLane lane="b" title="Was davor geschah" intro="Wie sind Lyra und Kael überhaupt in den Zauberwald gekommen? Ylva erzählt es dir – jeden Tag ein Stück, im Wechsel mit der Geschichte." label="Rückblick" />
-      <StoryLane lane="s" title="Die Geschichte" intro="Lies jeden Tag ein Stück weiter. Neue Kapitel öffnen sich, wenn du dranbleibst." label="Kapitel" />
+      <StoryLane lane="s" title="Lyra, Kael und Fenrir – Das Geheimnis der Waldhüter" intro="Jeden Tag öffnet sich ein neues Kapitel." label="Kapitel" />
     </Screen>
   );
 }
@@ -155,7 +154,7 @@ function StoryLane({ lane, title, intro, label }: { lane: Lane; title: string; i
     // Was als Nächstes kommt: weiterer Teil (morgen) oder ein verschlossenes Kapitel
     if (lastCh && lastCh.opened.some((o) => !o)) return { text: lane === 'b' ? 'Morgen erzählt Ylva weiter.' : 'Morgen geht die Geschichte weiter.' };
     const c = lastCh ? lastCh.c + 1 : 0;
-    if (c >= list.length) return null;
+    if (c >= list.length) return lane === 's' ? { text: 'Die nächsten Kapitel sind bald da.' } : null;
     if (ruleMet(state, list[c].rule, today)) return { text: lane === 'b' ? 'Morgen erzählt Ylva weiter.' : 'Morgen geht die Geschichte weiter.' };
     return { text: `${label} ${c + 1}: Noch verschlossen – ${ruleText(list[c].rule)}.` };
   })();
@@ -181,7 +180,15 @@ function StoryLane({ lane, title, intro, label }: { lane: Lane; title: string; i
                 {x.parts.map((pt, p) => opened[p] ? (
                   <View key={p} style={{ gap: 8 }}>
                     {n > 1 ? <Text style={s.partHead}>{`Teil ${p + 1} von ${n}${isNew(partId(lane, c, p)) ? ' · Neu' : ''}`}</Text> : isNew(partId(lane, c, p)) ? <Text style={s.partHead}>Neu</Text> : null}
-                    {pt.map((para, i) => <P key={i}>{para}</P>)}
+                    {pt.map((para, i) => {
+                      const pics = lane === 's' && p === 0 ? (STORY_INLINE[c] || []).filter((q) => q.after === i) : [];
+                      return (
+                        <View key={i} style={{ gap: 10 }}>
+                          <P>{para}</P>
+                          {pics.map((q, k) => <Image key={k} source={q.img} style={s.storyPic} contentFit="cover" accessibilityLabel="Bild zur Geschichte" />)}
+                        </View>
+                      );
+                    })}
                   </View>
                 ) : null)}
               </View>
@@ -214,6 +221,7 @@ const s = StyleSheet.create({
   stages: { flexDirection: 'row', alignItems: 'flex-end', gap: 6 },
   stage: { flex: 1, alignItems: 'center', gap: 2 },
   stageName: { fontFamily: F.bold, fontSize: 13, color: C.text, textAlign: 'center' },
+  storyPic: { width: '100%', aspectRatio: 16 / 9, borderRadius: 12, marginVertical: 6 },
   partHead: { fontFamily: F.bold, fontSize: 13, color: C.gold, letterSpacing: 0.5 },
   locked: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 6, paddingVertical: 4 },
   stageDays: { fontFamily: F.text, fontSize: 12, color: C.dim, textAlign: 'center' },

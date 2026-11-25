@@ -1,5 +1,5 @@
 // Die Geschichte in Tagesteilen (Wunsch der Nutzerin, 24.11.2026): jedes Kapitel ist in Teile geteilt.
-// Jeden Tag geht höchstens ein neuer Teil auf – abwechselnd aus dem Rückblick („Was davor geschah“) und aus der Geschichte.
+// Jeden Tag geht höchstens ein neuer Teil auf. Seit 0.19.0 ist jedes Kapitel ein Teil (= ein Kapitel je Tag) und der Rückblick leer.
 // Gelesene Teile bleiben offen. Wer ein paar Tage nicht da war, verpasst nichts: es geht mit dem nächsten ungelesenen Teil weiter.
 
 import { BACKSTORY, ruleMet, STORY_CHAPTERS, type Chapter } from './world.ts';

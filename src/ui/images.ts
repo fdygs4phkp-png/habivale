@@ -234,29 +234,30 @@ export const DECOR_IMG: Record<string, number> = {
 /** Übergang: im Bücherregal steht eine Kerze (soll weg, Prompts Teil 4). */
 export const DECOR_REDO = new Set(['bookshelf']);
 
-/** Kapitelbilder der Geschichte (Index wie STORY_CHAPTERS). Fehlende Bilder (Prompts „Alle offenen Bild-Prompts 24.11.2026“, Teil F) = Übergang. */
-export const BACKSTORY_IMG = [
-  require('../../assets/img/scene/story-1-aufbruch.webp'),
-  require('../../assets/img/scene/story-1-aufbruch.webp'),
-  require('../../assets/img/scene/story-1-aufbruch.webp'),
-  require('../../assets/img/scene/story-1-aufbruch.webp'),
-  require('../../assets/img/scene/story-2-ankunft-hexenhaus.webp'),
-  require('../../assets/img/scene/story-3-welpe.webp'),
-];
-export const BACKSTORY_IMG_MISSING = [true, true, true, false, false, false];
+/** Kapitelbilder der Geschichte (Index wie STORY_CHAPTERS, Märchenbuch Band 1). Übergangsbilder = `STORY_IMG_MISSING`. */
+export const BACKSTORY_IMG: number[] = [];
+export const BACKSTORY_IMG_MISSING: boolean[] = [];
 export const STORY_IMG = [
+  require('../../assets/img/story/mb1-k1.webp'),
+  require('../../assets/img/story/mb1-k2.webp'),
+  require('../../assets/img/story/mb1-k3.webp'),
+  require('../../assets/img/story/mb1-k4.webp'),
+  require('../../assets/img/story/mb1-k5.webp'),
+  require('../../assets/img/scene/story-3-welpe.webp'),
   require('../../assets/img/scene/story-4-einzug.webp'),
-  require('../../assets/img/scene/story-4-einzug.webp'),
-  require('../../assets/img/refuge/out-summer-2.webp'),
-  require('../../assets/img/scene/key-1.webp'),
-  require('../../assets/img/refuge/out-xmas-2.webp'),
-  require('../../assets/img/scene/hauptbild-2-jungwolf.webp'),
-  require('../../assets/img/refuge/witch-innen.webp'),
-  require('../../assets/img/refuge/out-summer-3.webp'),
-  require('../../assets/img/scene/key-3.webp'),
-  require('../../assets/img/scene/key-4.webp'),
 ];
-export const STORY_IMG_MISSING = [false, true, false, true, true, false, true, false, false, true];
+/** Kapitel 5 zeigt vorerst das Suppenbild, Kapitel 6 das alte Welpenbild (eigene Bilder: Prompts K5a–c, K6a–d). */
+export const STORY_IMG_MISSING = [false, false, false, false, true, true, true];
+/** Bilder mitten im Kapitel (Index wie STORY_CHAPTERS): erscheinen nach dem Absatz `after` (0-basiert). */
+export const STORY_INLINE: { img: number; after: number }[][] = [
+  [{ img: require('../../assets/img/story/mb1-k1-1.webp'), after: 99 }],
+  [{ img: require('../../assets/img/story/mb1-k2-1.webp'), after: 85 }, { img: require('../../assets/img/story/mb1-k2-2.webp'), after: 88 }],
+  [{ img: require('../../assets/img/story/mb1-k3-1.webp'), after: 93 }, { img: require('../../assets/img/story/mb1-k3-2.webp'), after: 137 }, { img: require('../../assets/img/story/mb1-k3-3.webp'), after: 191 }],
+  [{ img: require('../../assets/img/story/mb1-k4-1.webp'), after: 94 }, { img: require('../../assets/img/story/mb1-k4-2.webp'), after: 122 }, { img: require('../../assets/img/story/mb1-k4-3.webp'), after: 150 }, { img: require('../../assets/img/story/mb1-k4-4.webp'), after: 177 }, { img: require('../../assets/img/story/mb1-k4-5.webp'), after: 212 }],
+  [],
+  [{ img: require('../../assets/img/story/mb1-k6-1.webp'), after: 57 }],
+  [],
+];
 
 /** Leisten-Symbole (goldene Bilder der Nutzer, Prompts Teil 2 Nr. 13). */
 export const NAV_IMG: Record<string, number> = {
