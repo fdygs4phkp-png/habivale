@@ -258,7 +258,7 @@ export const STORY_INLINE: { img: number; after: number }[][] = [
   [{ img: require('../../assets/img/story/mb1-k5-1.webp'), after: 103 }, { img: require('../../assets/img/story/mb1-k5-2.webp'), after: 157 }],
   [{ img: require('../../assets/img/story/mb1-k6-2.webp'), after: 12 }, { img: require('../../assets/img/story/mb1-k6-3.webp'), after: 83 }, { img: require('../../assets/img/story/mb1-k6-4.webp'), after: 141 }],
   [{ img: require('../../assets/img/story/mb1-k7-1.webp'), after: 62 }, { img: require('../../assets/img/story/mb1-k7-2.webp'), after: 123 }, { img: require('../../assets/img/story/mb1-k7-3.webp'), after: 171 }, { img: require('../../assets/img/story/mb1-k7-4.webp'), after: 182 }],
-  [{ img: require('../../assets/img/story/mb1-k8-1.webp'), after: 17 }, { img: require('../../assets/img/story/mb1-k8-2.webp'), after: 94 }],
+  [{ img: require('../../assets/img/story/mb1-k8-1.webp'), after: 17 }, { img: require('../../assets/img/story/mb1-k8-2.webp'), after: 94 }, { img: require('../../assets/img/story/mb1-k8-3.webp'), after: 122 }],
 ];
 
 /** Leisten-Symbole (goldene Bilder der Nutzer, Prompts Teil 2 Nr. 13). */

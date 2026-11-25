@@ -130,6 +130,7 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - **0.22.1 (25.11.2026):** Neue Figurenbilder aus den freigegebenen Charakterblättern (Lyra 12, Kael 14, Ylva): runde Avatare (`chars/*-avatar`, Goldring vom alten Avatar), Köpfe (`chars/*-head`) und vorerst die Vorderansicht samt dunklem Blatt-Hintergrund als ganze Figur (`chars/*-front`) – bis freigestellte Figuren kommen (Prompts A1/A2). Die Outfit-Bilder zeigen Lyra und Kael noch älter.
 - **0.22.2 (25.11.2026):** Freigestellte Figuren und Avatare von ChatGPT für Lyra 12 und Kael 14 (`chars/lyra|kael-front|avatar`, Köpfe aus den Avataren geschnitten); Ylvas Avatar bleibt der aus dem Charakterblatt; ihre ganze Figur (`mentor-front`) wieder das alte freigestellte Bild – alle Figuren liegen freigestellt in der App. Kapitel 8 Kopfbild „Die größte Pfütze“ (`mb1-k8`).
 - **0.22.3 (25.11.2026):** Kapitel 8: Bild „Ein Tropfen auf Kaels Nase“ nach Absatz 17 (`mb1-k8-1`), „Arvid und die Plane“ nach Absatz 94 (`mb1-k8-2`). Das K8a-Bild ist jetzt auch die Vorlage für die Hütte innen (repariert).
+- **0.22.4 (25.11.2026):** Kapitel 8: Bild „Eine kleine Regenwolke neben den Häkchen“ (Fenrir im Sockennest) nach Absatz 122 (`mb1-k8-3`). Kapitel 1–8 haben alle ihre Bilder.
 - Noch offen im Familienkonto: Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
