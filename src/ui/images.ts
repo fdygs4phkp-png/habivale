@@ -245,10 +245,10 @@ export const STORY_IMG = [
   require('../../assets/img/story/mb1-k5.webp'),
   require('../../assets/img/story/mb1-k6-1.webp'),
   require('../../assets/img/story/mb1-k7.webp'),
-  require('../../assets/img/refuge/out-autumn-1.webp'),
+  require('../../assets/img/story/mb1-k8.webp'),
 ];
 /** Alle Kapitel 1–7 haben eigene Bilder (25.11.2026): Kopfbild 5 = der runde Stein, 6 = „Besiegt von einem Stiefel“, 7 = die alte Hütte am Bach. */
-export const STORY_IMG_MISSING = [false, false, false, false, false, false, false, true];
+export const STORY_IMG_MISSING = [false, false, false, false, false, false, false, false];
 /** Bilder mitten im Kapitel (Index wie STORY_CHAPTERS): erscheinen nach dem Absatz `after` (0-basiert). */
 export const STORY_INLINE: { img: number; after: number }[][] = [
   [{ img: require('../../assets/img/story/mb1-k1-1.webp'), after: 99 }],
