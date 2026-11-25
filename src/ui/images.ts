@@ -4,8 +4,8 @@
 
 export const IMG = {
   keyArt: [
-    require('../../assets/img/scene/key-1.webp'), // Welpe
-    require('../../assets/img/scene/key-1.webp'), // Großer Welpe – eigenes Bild folgt
+    require('../../assets/img/scene/gruppe-welpe.webp'), // Welpe: freigegebenes Gruppenbild (Ylva, Kael 14, Lyra 12, Fenrir Welpe), statt key-1 mit zu großen Kindern
+    require('../../assets/img/scene/gruppe-welpe.webp'), // Großer Welpe – eigenes Bild folgt
     require('../../assets/img/scene/hauptbild-2-jungwolf.webp'),
     require('../../assets/img/scene/key-3.webp'),
     require('../../assets/img/scene/key-4.webp'),
