@@ -117,6 +117,10 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - **0.19.5 (25.11.2026):** Kapitel 7 „Ein neues Zuhause“ angehängt (Bild vorerst `story-4-einzug`, Übergang).
 - **0.19.6 (25.11.2026):** Kapitel 3: neues Bild „Zettel im Koffer“ mit kaputtem Bogen (`mb1-k3-2`). Eingang der Nutzerin jetzt nach Themen (`HABIVALE/Eingang/1 Fenrir … 9 Märchenbuch/Kapitel NN`, je mit `veraltet`).
 - **0.19.7 (25.11.2026):** Kapitel 6: Bild „Besiegt von einem Stiefel“ (Fenrir auf dem Rücken, Kael hält sich am Schreibtisch, alter Bratschenkoffer) mitten im Text nach Absatz 57 (`mb1-k6-1`). Der Koffer darin ist die Vorlage für alle Bratschenkoffer.
+- **0.19.8 (25.11.2026):** Kapitel 7: Ylva hat Bienen (drei Körbe hinter dem Kräutergarten). Kerzen werden nicht gekauft: Ylva bringt selbst gezogene Kerzen aus ihrem Wachs und ein Glas Honig, am nächsten Tag zieht Lyra mit ihr Kerzen, Kael putzt den Ofen (neuer Abschnitt vor dem ersten Samstag). Kapitel 7 hat keine Bilder im Text, deshalb verschieben sich keine `after`-Stellen.
+- **0.19.9 (25.11.2026):** Kapitelbilder 6 und 7 ohne die alten Bilder (`scene/story-3-welpe`, `story-4-einzug` zeigten Lyra und Kael zu groß): Kapitel 6 hat „Besiegt von einem Stiefel“ (`mb1-k6-1`) als Kopfbild statt im Text, Kapitel 7 vorerst die Hütte ohne Figuren (`refuge/out-autumn-1`, Übergang bis K7a). Die alten Bilder stehen noch in `SCENES`/Heldenbildern oben in `images.ts`.
+- **0.20.0 (25.11.2026):** Neue Figur Förster Bjarne (Ylvas Freund, Werkzeug leihen statt kaufen). Kapitel 7: Ylva erzählt nach den Kerzen von ihm, Kael leiht Hammer, Säge, Zange („Ylva hat dich angekündigt“), bringt die Säge geputzt zurück und stapelt mit Bjarne Holz. Kapitel 7 hat keine Bilder im Text.
+- **0.20.1 (25.11.2026):** Kapitel 7: Bjarnes Sohn Arvid (so alt wie Kael) öffnet Kael den Schuppen („Ylva hat dich angekündigt“ – „Das macht sie immer so“), am fünften Abend stapeln Bjarne, Arvid und Kael zu dritt Holz.
 - Noch offen im Familienkonto: Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle

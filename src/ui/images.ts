@@ -243,11 +243,12 @@ export const STORY_IMG = [
   require('../../assets/img/story/mb1-k3.webp'),
   require('../../assets/img/story/mb1-k4.webp'),
   require('../../assets/img/story/mb1-k5.webp'),
-  require('../../assets/img/scene/story-3-welpe.webp'),
-  require('../../assets/img/scene/story-4-einzug.webp'),
+  require('../../assets/img/story/mb1-k6-1.webp'),
+  require('../../assets/img/refuge/out-autumn-1.webp'),
 ];
-/** Kapitel 5 zeigt vorerst das Suppenbild, Kapitel 6 das alte Welpenbild (eigene Bilder: Prompts K5a–c, K6a–d). */
-export const STORY_IMG_MISSING = [false, false, false, false, true, true, true];
+/** Kapitel 5 zeigt vorerst das Suppenbild, Kapitel 6 das Fenrir-Bild „Besiegt von einem Stiefel“ als Kopfbild, Kapitel 7 die Hütte ohne Figuren aus dem Refugium
+ *  (die alten Bilder story-3-welpe/story-4-einzug zeigten Lyra und Kael zu groß, aus der früheren Fassung; eigene Bilder: Prompts K5a–c, K6a/c/d, K7a–e). */
+export const STORY_IMG_MISSING = [false, false, false, false, true, false, true];
 /** Bilder mitten im Kapitel (Index wie STORY_CHAPTERS): erscheinen nach dem Absatz `after` (0-basiert). */
 export const STORY_INLINE: { img: number; after: number }[][] = [
   [{ img: require('../../assets/img/story/mb1-k1-1.webp'), after: 99 }],
@@ -255,7 +256,7 @@ export const STORY_INLINE: { img: number; after: number }[][] = [
   [{ img: require('../../assets/img/story/mb1-k3-1.webp'), after: 93 }, { img: require('../../assets/img/story/mb1-k3-2.webp'), after: 137 }, { img: require('../../assets/img/story/mb1-k3-3.webp'), after: 191 }],
   [{ img: require('../../assets/img/story/mb1-k4-1.webp'), after: 94 }, { img: require('../../assets/img/story/mb1-k4-2.webp'), after: 122 }, { img: require('../../assets/img/story/mb1-k4-3.webp'), after: 150 }, { img: require('../../assets/img/story/mb1-k4-4.webp'), after: 177 }, { img: require('../../assets/img/story/mb1-k4-5.webp'), after: 212 }],
   [],
-  [{ img: require('../../assets/img/story/mb1-k6-1.webp'), after: 57 }],
+  [],
   [],
 ];
 
