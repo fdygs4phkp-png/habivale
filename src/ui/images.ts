@@ -244,20 +244,19 @@ export const STORY_IMG = [
   require('../../assets/img/story/mb1-k4.webp'),
   require('../../assets/img/story/mb1-k5.webp'),
   require('../../assets/img/story/mb1-k6-1.webp'),
-  require('../../assets/img/refuge/out-autumn-1.webp'),
+  require('../../assets/img/story/mb1-k7.webp'),
 ];
-/** Kapitel 5 zeigt vorerst das Suppenbild, Kapitel 6 das Fenrir-Bild „Besiegt von einem Stiefel“ als Kopfbild, Kapitel 7 die Hütte ohne Figuren aus dem Refugium
- *  (die alten Bilder story-3-welpe/story-4-einzug zeigten Lyra und Kael zu groß, aus der früheren Fassung; eigene Bilder: Prompts K5a–c, K6a/c/d, K7a–e). */
-export const STORY_IMG_MISSING = [false, false, false, false, true, false, true];
+/** Alle Kapitel 1–7 haben eigene Bilder (25.11.2026): Kopfbild 5 = der runde Stein, 6 = „Besiegt von einem Stiefel“, 7 = die alte Hütte am Bach. */
+export const STORY_IMG_MISSING = [false, false, false, false, false, false, false];
 /** Bilder mitten im Kapitel (Index wie STORY_CHAPTERS): erscheinen nach dem Absatz `after` (0-basiert). */
 export const STORY_INLINE: { img: number; after: number }[][] = [
   [{ img: require('../../assets/img/story/mb1-k1-1.webp'), after: 99 }],
   [{ img: require('../../assets/img/story/mb1-k2-1.webp'), after: 85 }, { img: require('../../assets/img/story/mb1-k2-2.webp'), after: 88 }],
   [{ img: require('../../assets/img/story/mb1-k3-1.webp'), after: 93 }, { img: require('../../assets/img/story/mb1-k3-2.webp'), after: 137 }, { img: require('../../assets/img/story/mb1-k3-3.webp'), after: 191 }],
   [{ img: require('../../assets/img/story/mb1-k4-1.webp'), after: 94 }, { img: require('../../assets/img/story/mb1-k4-2.webp'), after: 122 }, { img: require('../../assets/img/story/mb1-k4-3.webp'), after: 150 }, { img: require('../../assets/img/story/mb1-k4-4.webp'), after: 177 }, { img: require('../../assets/img/story/mb1-k4-5.webp'), after: 212 }],
-  [],
-  [],
-  [],
+  [{ img: require('../../assets/img/story/mb1-k5-1.webp'), after: 103 }, { img: require('../../assets/img/story/mb1-k5-2.webp'), after: 157 }],
+  [{ img: require('../../assets/img/story/mb1-k6-2.webp'), after: 12 }, { img: require('../../assets/img/story/mb1-k6-3.webp'), after: 83 }, { img: require('../../assets/img/story/mb1-k6-4.webp'), after: 141 }],
+  [{ img: require('../../assets/img/story/mb1-k7-1.webp'), after: 62 }, { img: require('../../assets/img/story/mb1-k7-2.webp'), after: 123 }, { img: require('../../assets/img/story/mb1-k7-3.webp'), after: 171 }, { img: require('../../assets/img/story/mb1-k7-4.webp'), after: 182 }],
 ];
 
 /** Leisten-Symbole (goldene Bilder der Nutzer, Prompts Teil 2 Nr. 13). */
