@@ -43,6 +43,42 @@ function InviteCard({ name, code, expires }: { name: string; code: string; expir
 
 type Act = 'suggest' | 'allowance' | 'praise';
 
+type BonusKind = 'none' | 'p10' | 'p20' | 'e1';
+const BONUS_KINDS: { k: BonusKind; t: string }[] = [
+  { k: 'none', t: 'Ohne' },
+  { k: 'p10', t: '+10 %' },
+  { k: 'p20', t: '+20 %' },
+  { k: 'e1', t: '+1 €' },
+];
+function bonusCents(cents: number, k: BonusKind): number {
+  if (k === 'e1') return 100;
+  if (k === 'p10' || k === 'p20') return Math.max(1, Math.round((cents * (k === 'p10' ? 10 : 20)) / 100));
+  return 0;
+}
+
+/** Für Eltern: warum drei Gläser, ein Job und ein Spar-Bonus. */
+function JarsHowTo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Card>
+      <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" aria-expanded={open} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <Icon name="cash-multiple" color={C.gold} />
+        <Text style={[s.name, { flex: 1 }]}>Taschengeld mit drei Gläsern – so funktioniert es</Text>
+        <Icon name={open ? 'chevron-up' : 'chevron-down'} color={C.dim} />
+      </Pressable>
+      {open ? (
+        <View style={{ gap: 10 }}>
+          <P><Text style={s.strong}>1. Ein kleiner Job.</Text> Gebt eurem Kind eine feste Aufgabe für die Woche, zum Beispiel den Müll rausbringen oder die Spülmaschine ausräumen. Dafür gibt es einen festen Betrag, etwa 5 €. So lernt es: Geld ist der Lohn für Arbeit. Was alle in der Familie ohnehin tun (Zimmer aufräumen, beim Tischdecken helfen), bleibt unbezahlt.</P>
+          <P><Text style={s.strong}>2. Erst aufteilen, dann ausgeben.</Text> Sobald das Geld da ist, wird es verteilt: 50 % ins Sparglas, 40 % ins Ausgeben-Glas, 10 % ins Teilen-Glas. Habivale macht das automatisch – die Aufteilung kann euer Kind auf seiner Taschengeld-Seite ändern.</P>
+          <P><Text style={s.strong}>3. Euer Spar-Bonus.</Text> Legt jede Woche etwas dazu – zum Beispiel 10 % oder 1 € –, und zwar nur ins Sparglas. Wie ein kleiner Zins zeigt das: Wer spart, dessen Geld wächst. Viele Familien machen das so; wichtig ist, die Regel vorher festzulegen.</P>
+          <P><Text style={s.strong}>Was euer Kind dabei lernt:</Text> Sparen lohnt sich und macht große Wünsche möglich. Ausgeben darf Freude machen – ohne schlechtes Gewissen, weil der Rest sicher ist. Und wer etwas hat, kann mit anderen teilen. Geteilte Freude ist doppelte Freude.</P>
+          <P dim>In Habivale ist kein echtes Geld: Die App hält nur fest, was in den Gläsern liegt.</P>
+        </View>
+      ) : null}
+    </Card>
+  );
+}
+
 function ChildCard({ v, onInvite, onRemove, onAct }: { v: ChildView; onInvite: () => void; onRemove: () => void; onAct: (a: Act) => void }) {
   const snap = v.snapshot;
   const stage = ageStage(v.profile.birthYear);
@@ -149,6 +185,7 @@ export default function Family() {
   const [hIcon, setHIcon] = useState(HABIT_ICONS[0]);
   const [hDays, setHDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [amount, setAmount] = useState('');
+  const [bonusKind, setBonusKind] = useState<BonusKind>('p10');
   const [note, setNote] = useState('');
   const [sticker, setSticker] = useState('star');
   const [text, setText] = useState(PRAISE_TEXTS[0]);
@@ -158,6 +195,7 @@ export default function Family() {
     setHIcon(HABIT_ICONS[0]);
     setHDays([0, 1, 2, 3, 4, 5, 6]);
     setAmount('');
+    setBonusKind('p10');
     setNote('von ' + me);
     setSticker('star');
     setText(PRAISE_TEXTS[0]);
@@ -169,7 +207,10 @@ export default function Family() {
     const cents = parseEuro(amount);
     void run(async () => {
       if (act.a === 'suggest') await a.sendToChild(act.v, { type: 'suggest', from: me, habit: { name: hName.trim().slice(0, 40), icon: hIcon, days: hDays } });
-      else if (act.a === 'allowance') await a.sendToChild(act.v, { type: 'allowance', from: me, cents: cents!, note: note.trim().slice(0, 60) });
+      else if (act.a === 'allowance') {
+        const bonus = bonusCents(cents!, bonusKind);
+        await a.sendToChild(act.v, { type: 'allowance', from: me, cents: cents!, note: note.trim().slice(0, 60), ...(bonus ? { bonus } : {}) });
+      }
       else await a.sendToChild(act.v, { type: 'praise', from: me, sticker, text });
       setSent(`Gesendet! ${act.v.profile.name} sieht es beim nächsten Öffnen von Habivale.`);
       setAct(null);
@@ -233,6 +274,7 @@ export default function Family() {
       ) : (
         <>
           {invite ? <InviteCard {...invite} /> : null}
+          <JarsHowTo />
 
           <Grid cols={tablet ? 2 : 1}>
             {views.map((v) => (
@@ -319,7 +361,14 @@ export default function Family() {
               {['1', '2', '5', '10'].map((x) => <Chip key={x} title={x + ' €'} on={amount === x} onPress={() => setAmount(x)} />)}
             </View>
             <Field label="Betrag in €" value={amount} onChangeText={setAmount} keyboardType="decimal-pad" placeholder="z. B. 2,50" />
-            <Field label="Notiz" value={note} onChangeText={setNote} maxLength={60} />
+            <Field label="Wofür? (zum Beispiel der Job der Woche)" value={note} onChangeText={setNote} maxLength={60} placeholder="z. B. für Müll rausbringen" />
+            <P dim>Spar-Bonus von euch – kommt zusätzlich ganz ins Sparglas:</P>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {BONUS_KINDS.map((b) => <Chip key={b.k} title={b.t} on={bonusKind === b.k} onPress={() => setBonusKind(b.k)} />)}
+            </View>
+            {parseEuro(amount) && bonusCents(parseEuro(amount)!, bonusKind) ? (
+              <P dim>Dazu {formatEuro(bonusCents(parseEuro(amount)!, bonusKind))} Spar-Bonus. So sieht {act.v.profile.name}: Wer spart, dessen Geld wächst.</P>
+            ) : null}
             <Button title="Eintragen" disabled={!parseEuro(amount) || busy} onPress={send} />
           </>
         ) : act ? (
@@ -343,6 +392,7 @@ export default function Family() {
 }
 
 const s = StyleSheet.create({
+  strong: { fontFamily: F.bold, color: C.text },
   x: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   code: { fontFamily: F.bold, fontSize: 30, color: C.gold, letterSpacing: 4, marginTop: 8 },
   avatar: { width: 56, height: 56, borderRadius: 28, borderWidth: 2, borderColor: C.goldDim },

@@ -92,6 +92,7 @@ export default function Today() {
               <View style={{ flex: 1 }}>
                 <Text style={s.inboxFrom}>Taschengeld von {it.from}</Text>
                 <Text style={s.inboxText}>{fmtEuro(it.cents || 0)} – schon auf deine drei Gläser verteilt.</Text>
+                {it.bonus ? <Text style={s.inboxText}>Dazu {fmtEuro(it.bonus)} Spar-Bonus – direkt in dein Sparglas. Wer spart, dessen Geld wächst!</Text> : null}
               </View>
             </View>
           ) : (

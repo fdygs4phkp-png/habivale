@@ -193,7 +193,13 @@ export function AccountProvider({ children }: { children: React.ReactNode }) {
           const note = String(msg.note || 'von ' + from).slice(0, 60);
           next = { ...next, money: { ...next.money, entries: [...next.money.entries, { id: eid, kind: 'allowance', cents: msg.cents, day: dayKey(new Date(at)), note, parts: splitCents(msg.cents, next.money.split), at }] } };
         }
-        item = { id, at, from, kind: 'allowance', cents: msg.cents, text: String(msg.note || '') };
+        // Spar-Bonus der Eltern: kommt ganz ins Sparglas („wer spart, dessen Geld wächst“)
+        const bonus = Number.isInteger(msg.bonus) && msg.bonus! > 0 && msg.bonus! <= 100000 ? msg.bonus! : 0;
+        const bid = 'inb-' + r.id;
+        if (bonus && !next.money.entries.some((e) => e.id === bid) && next.deleted['m:' + bid] === undefined) {
+          next = { ...next, money: { ...next.money, entries: [...next.money.entries, { id: bid, kind: 'allowance', cents: bonus, day: dayKey(new Date(at)), note: 'Spar-Bonus von ' + from, parts: { save: bonus, spend: 0, share: 0 }, at: at + 1 }] } };
+        }
+        item = { id, at, from, kind: 'allowance', cents: msg.cents, text: String(msg.note || ''), ...(bonus ? { bonus } : {}) };
       }
       if (item) next = { ...next, inbox: [...next.inbox, item] };
     }

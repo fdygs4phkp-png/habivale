@@ -111,13 +111,15 @@ export interface InboxItem {
   sticker?: string;
   text?: string;
   cents?: number;
+  /** Spar-Bonus der Eltern zum Taschengeld (geht ganz ins Sparglas) */
+  bonus?: number;
 }
 
 /** Was Eltern dem Kind schicken (verschlüsselt im Eingang). */
 export type ParentMessage =
   | { type: 'suggest'; from: string; habit: { name: string; icon: string; days: number[] } }
   | { type: 'praise'; from: string; sticker: string; text: string }
-  | { type: 'allowance'; from: string; cents: number; note: string }
+  | { type: 'allowance'; from: string; cents: number; note: string; bonus?: number }
   /** Premium gilt für die ganze Familie: die Eltern schicken ihren Stand an die Kindergeräte */
   | { type: 'premium'; from: string; on: boolean };
 
