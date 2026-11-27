@@ -76,7 +76,7 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - **0.11.0:** alle Bilder vom 22./23.11. eingebaut: Gegenstände (`ITEM_IMG`), Trophäen Serie 2 (keine geliehenen mehr) + 3 neue Trophäen, Mentorin-Gesten
   und Jubel/Wolf-freut-sich in den Ereignissen, Wolfsgesichter im Kinder-Tagebuch (`MOOD_IMG`), Sparziel-Bilder (`GOAL_IMG`), Gewohnheits-Bilder
   (`HABIT_IMG`, nach Symbolname), App-Symbol (Wolf vor Sichelmond), Outfits als **Übergang** (`assets/img/outfits/`, werden ersetzt), Geschichte auf
-  „Abenteuer“ (Welpe ohne Mutter → Verantwortung, dranbleiben). Raster schneiden: `HABIVALE/Habivale-Skripte/raster.py`.
+  „Abenteuer“ (Welpe mit goldenen Augen, von den Wölfen gebracht → Verantwortung, dranbleiben). Raster schneiden: `HABIVALE/Habivale-Skripte/raster.py`.
 - **Phase 5, Teil 1 (0.12.0): Refugium und Hexenhaus.** `src/logic/refuge.ts`: Ausbaustufen nach aktiven Tagen (1 alte Hütte, 2 Häuschen ab 21,
   3 großes Haus ab 90), erreichte Stufe als 'ref:N' in `firsts` (nie kleiner, `keptRefuge`), Mentorin verkündet sie (`eventFor`, Art 'refuge').
   Jahreszeit nach Datum (`seasonOf`: Frühling 3–5, Sommer 6–8, Herbst 9–11, Winter 12–2), **Weihnachtszeit 1.12.–6.1.** (`sceneOf` → 'xmas'): nur dann
@@ -131,6 +131,7 @@ Die Nutzer sind keine Entwickler: einfach und auf Deutsch erklären. Nichts hoch
 - **0.22.2 (25.11.2026):** Freigestellte Figuren und Avatare von ChatGPT für Lyra 12 und Kael 14 (`chars/lyra|kael-front|avatar`, Köpfe aus den Avataren geschnitten); Ylvas Avatar bleibt der aus dem Charakterblatt; ihre ganze Figur (`mentor-front`) wieder das alte freigestellte Bild – alle Figuren liegen freigestellt in der App. Kapitel 8 Kopfbild „Die größte Pfütze“ (`mb1-k8`).
 - **0.22.3 (25.11.2026):** Kapitel 8: Bild „Ein Tropfen auf Kaels Nase“ nach Absatz 17 (`mb1-k8-1`), „Arvid und die Plane“ nach Absatz 94 (`mb1-k8-2`). Das K8a-Bild ist jetzt auch die Vorlage für die Hütte innen (repariert).
 - **0.22.4 (25.11.2026):** Kapitel 8: Bild „Eine kleine Regenwolke neben den Häkchen“ (Fenrir im Sockennest) nach Absatz 122 (`mb1-k8-3`). Kapitel 1–8 haben alle ihre Bilder.
+- **0.22.5 (26.11.2026):** Texte im Märchenbuch (Wünsche der Nutzerin): Kapitel 4 – Kaels „Erinnerst du dich an den alten Fährmann?“ ersetzt (der Fährmann wohnt nebenan). Kapitel 5 – Ylva verdient ihr Geld mit Kerzen und Honig (nicht Kräuter/Salben), gibt es für Mehl, Lampenöl, ein Band aus (keine Kerzen); in den Gläsern nur Münzen (keine Kristalle, keine Blätter); Kaels Gähnen ohne Mandeln. Kapitel 6 – goldene Augen sind ein Zeichen: Wird ein Welpe mit goldenen Augen geboren, wissen die Wölfe, dass jemand kommt, der ihn braucht, und bringen ihn zu einem Waldhüter. Kapitel 7 – Ylvas Teilen-Glas nur mit Münzen.
 - Noch offen im Familienkonto: Familien-Abo mit Kinderprofilen, erweitertes Taschengeld.
 
 ## Befehle
