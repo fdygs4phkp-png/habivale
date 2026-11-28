@@ -1,2 +1,2 @@
 // Bei jeder Änderung erhöhen (steht unten auf der Heute-Seite).
-export const APP_VERSION = '0.23.3';
+export const APP_VERSION = '0.23.4';
